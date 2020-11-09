@@ -1,8 +1,12 @@
 #pragma once
 
+#include <QGraphicsRectItem>
+
 #include <QGraphicsView>
 #include <QTimer>
+#include <QPixMap>
 #include "config.h"
+
 
 class Game : public QGraphicsView {
 
@@ -15,12 +19,15 @@ private:
 	static Game* uniqueInstance;		// Singleton
 	Game(QGraphicsView* parent = 0);	// Singleton
 
+	void init();
+
 	QGraphicsScene* _scene;
 	QTimer _engine;
-	game_state _state;
+	game_state _state = READY;
 
 public:
 
 	static Game* instance();
+
 
 };
