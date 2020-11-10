@@ -6,6 +6,8 @@
 #include <QTimer>
 #include <QPixMap>
 #include "config.h"
+#include "Map.h"
+#include "Station.h"
 
 
 class Game : public QGraphicsView {
@@ -25,9 +27,13 @@ private:
 	QTimer _engine;
 	game_state _state = READY;
 
+	std::list<Station*> _stationsList;
+
 public:
 
 	static Game* instance();
 
+	Station* spawnStation();
+	
 
 };
