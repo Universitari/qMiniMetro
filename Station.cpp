@@ -21,13 +21,28 @@ void Station::paint(QPainter* painter,
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget) {
 
-	painter->setPen(Qt::NoPen);
-	painter->setBrush(QBrush(QColor(0, 0, 0)));
-	painter->drawRect(_position.x(), _position.y(), 30, 30);
+	painter->setPen(QPen(QBrush(QColor(0, 0, 0)), 5));
+	painter->setBrush(QBrush(QColor(255, 255, 255)));
+	painter->setRenderHint(QPainter::Antialiasing);
+
+	if (_shape == SQUARE) {
+		painter->drawRect(_position.x(), _position.y(), STATION_SIZE, STATION_SIZE);
+	}
+	else if (_shape == TRIANGLE) {
+		QPolygon triangle;
+		triangle	<< QPoint(_position.x() + STATION_SIZE/2, _position.y())
+					<< QPoint(_position.x(), _position.y() + STATION_SIZE)
+					<< QPoint(_position.x() + STATION_SIZE, _position.y() + STATION_SIZE);
+		painter->drawPolygon(triangle);
+	}
+	else if (_shape == CIRCLE) {
+		painter->drawEllipse(_position.x(), _position.y(), STATION_SIZE, STATION_SIZE);
+	}
+
 }
 
 QRectF Station::boundingRect() const
 {
 	qreal penWidth = 1;
-	return QRectF();
+	return QRectF(0, 0, 30, 30);
 }

@@ -22,11 +22,11 @@ public:
 	Station(QPoint pos);
 	Station(const Station& s);
 
+	// Metodi virtuali reimplementati
 	void paint(QPainter* painter,
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 	QRectF boundingRect() const;
-
 	std::string name() { return("stazione"); };
 	void animate() { }
 	void advance() { }
@@ -35,5 +35,6 @@ public:
 
 	// Getters
 	QPoint position() { return _position; }
+	int shape() { return _shape; }
 
 };
