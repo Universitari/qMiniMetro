@@ -18,8 +18,6 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	_scene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	this->reset();
-
-	Map::instance()->load(":/Graphics/LondonMap.png", _scene);
 	
 	scale(GAME_SCALE, GAME_SCALE);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -38,6 +36,7 @@ void Game::init() {
 		// set window dimensions
 		setFixedWidth(GAME_SCALE * _scene->width());
 		setFixedHeight(GAME_SCALE * _scene->height());
+		Map::instance()->load(":/Graphics/LondonMap.png", _scene);
 	}
 }
 
