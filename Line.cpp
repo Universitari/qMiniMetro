@@ -59,4 +59,4 @@ void Line::mouseReleaseEvent(QGraphicsSceneMouseEvent* event){
     QPoint endPoint = event->scenePos().toPoint();
     _line.setPoints(_startPoint, endPoint);
     QGraphicsItem::mouseReleaseEvent(event);
-}
+} 

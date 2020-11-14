@@ -16,6 +16,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	_scene = new QGraphicsScene;
 	setScene(_scene);
 	_scene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	setInteractive(true);
 
 	this->reset();
 	
@@ -109,4 +110,18 @@ void Game::keyPressEvent(QKeyEvent* e)
 		printf("Game started\n");
 	}
 
+}
+
+void Game::mousePressEvent(QGraphicsSceneMouseEvent* e){
+
+	printf("click\n");
+
+	for (auto& s : _stationsList) {
+
+		if (pointerOnStation(s, e->scenePos().toPoint())) {
+			printf("stazione cliccata\n");
+			break;
+		}
+		else printf("stazione non cliccata\n");
+	}
 }

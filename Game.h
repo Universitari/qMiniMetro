@@ -5,10 +5,9 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QPixMap>
-#include "config.h"
 #include "Map.h"
-#include "Station.h"
 #include "Line.h"
+#include "utils.h"
 
 
 class Game : public QGraphicsView {
@@ -48,7 +47,8 @@ public slots:
 
 	void start();
 
+	// Event handling
 	void keyPressEvent(QKeyEvent* e);
-	
+	virtual void mousePressEvent(QGraphicsSceneMouseEvent* e);
 
 };

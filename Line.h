@@ -35,7 +35,7 @@ public:
 
 	// Event handling
 
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };
