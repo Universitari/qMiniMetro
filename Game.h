@@ -26,10 +26,11 @@ private:
 	QGraphicsScene* _scene;
 	QTimer _engine;
 	game_state _state;
+	bool _mousePressed = false;
 
 	std::list<Station*> _stationsList;
 
-	std::list<Line*> _lines;
+	std::list<Line*> _linesList;
 
 public:
 
@@ -49,6 +50,7 @@ public slots:
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent* e);
-
+	void mousePressEvent(QMouseEvent* e);
+	void mouseMoveEvent(QMouseEvent* e);
+	void mouseReleaseEvent(QMouseEvent* e);
 };

@@ -11,7 +11,6 @@ class Line : public Entity {
 
 private:
 
-	QPoint _startPoint;
 	QLine _line;
 	bool _pressed = false;
 	int _name;
@@ -19,7 +18,7 @@ private:
 
 public:
 
-	Line();
+	Line(QPoint stationPoint);
 
 	// Metodi virtuali reimplementati
 	void paint(QPainter* painter,
@@ -33,9 +32,14 @@ public:
 	void solveCollisions() {};
 	void hit(Object* what) {};
 
-	// Event handling
+	// Setters
+	void setEndPoint(QPoint endP) { _line.setP2(endP); }
 
-	void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	// Getters
+	QPoint startPoint() { return _line.p1(); }
+
+	// Event handling
+	// void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	// void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+	// void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };

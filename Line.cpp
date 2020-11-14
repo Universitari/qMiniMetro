@@ -2,8 +2,10 @@
 
 int Line::_linesNumber = 0;
 
-Line::Line(){
+Line::Line(QPoint startP){
 
+    _line.setP1(startP);
+    _line.setP2(startP);
     _name = _linesNumber++;
 
 }
@@ -36,7 +38,7 @@ QRectF Line::boundingRect() const{
     return QRectF(QPointF(0, 0), QPointF(1920, 1080));
 }
 
-void Line::mousePressEvent(QGraphicsSceneMouseEvent* event){
+/*void Line::mousePressEvent(QGraphicsSceneMouseEvent* event){
 
     _startPoint = event->scenePos().toPoint();
     _pressed = true;
@@ -47,8 +49,8 @@ void Line::mousePressEvent(QGraphicsSceneMouseEvent* event){
 void Line::mouseMoveEvent(QGraphicsSceneMouseEvent* event){
 
     if (_pressed) {
-        QPoint endPoint = event->scenePos().toPoint();
-        _line.setPoints(_startPoint, endPoint);
+        _endPoint = event->scenePos().toPoint();
+        _line.setPoints(_startPoint, _endPoint);
     }
     QGraphicsItem::mousePressEvent(event);
 }
@@ -59,4 +61,4 @@ void Line::mouseReleaseEvent(QGraphicsSceneMouseEvent* event){
     QPoint endPoint = event->scenePos().toPoint();
     _line.setPoints(_startPoint, endPoint);
     QGraphicsItem::mouseReleaseEvent(event);
-} 
+}*/

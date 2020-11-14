@@ -88,40 +88,85 @@ void Game::start() {
 		printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
 	}
 
-	_lines.push_back(new Line);
-	_scene->addItem(_lines.back());
+	// _lines.push_back(new Line);
+	// _scene->addItem(_lines.back());
 
 	_engine.start();
+	printf("Game started\n");
 }
 
-void Game::keyPressEvent(QKeyEvent* e)
-{
-	// reset game
+void Game::keyPressEvent(QKeyEvent* e){
+
+	// resets game
 	if (e->key() == Qt::Key_R || _state == GAME_OVER) {
 
 		reset();
 		init();
 	}
 
-	// start new game
+	// starts new game
 	if (e->key() == Qt::Key_S) {
 
 		start();
-		printf("Game started\n");
 	}
-
 }
 
-void Game::mousePressEvent(QGraphicsSceneMouseEvent* e){
+void Game::mousePressEvent(QMouseEvent* e){
 
-	printf("click\n");
+	printf("Cursor in pos = %d, %d\n", e->pos().x(), e->pos().y());
+	Line* newLine;
 
 	for (auto& s : _stationsList) {
 
-		if (pointerOnStation(s, e->scenePos().toPoint())) {
-			printf("stazione cliccata\n");
+		if (pointerOnStation(s, e->pos())) {
+			
+			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
+							   s->position().y() + STATION_SIZE / 2);
+			newLine = new Line(centerPoint);
+			_mousePressed = true;
+			_linesList.push_back(newLine);
+			_scene->addItem(_linesList.back());
+			
 			break;
 		}
-		else printf("stazione non cliccata\n");
 	}
 }
+
+void Game::mouseMoveEvent(QMouseEvent* e){
+	
+	if (_mousePressed) {
+		QPoint currentPoint(e->pos().x() / GAME_SCALE,
+							e->pos().y() / GAME_SCALE);
+		_linesList.back()->setEndPoint(currentPoint);
+	}
+}
+
+void Game::mouseReleaseEvent(QMouseEvent* e){ 
+
+	if (_mousePressed) {
+		printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
+
+		bool foundStation = false;
+
+		for (auto& s : _stationsList) {
+
+			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
+							   s->position().y() + STATION_SIZE / 2);
+
+			if (pointerOnStation(s, e->pos()) && centerPoint != _linesList.back()->startPoint()) {
+				_linesList.back()->setEndPoint(centerPoint);
+				foundStation = true;
+
+				break;
+			}
+		}
+
+		if (!foundStation) {
+			_scene->removeItem(_linesList.back());
+			delete _linesList.back();
+			_linesList.pop_back();
+		}
+
+		_mousePressed = false;
+	}
+} 
