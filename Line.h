@@ -38,8 +38,4 @@ public:
 	// Getters
 	QPoint startPoint() { return _line.p1(); }
 
-	// Event handling
-	// void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	// void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-	// void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };

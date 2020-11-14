@@ -37,28 +37,3 @@ QRectF Line::boundingRect() const{
 
     return QRectF(QPointF(0, 0), QPointF(1920, 1080));
 }
-
-/*void Line::mousePressEvent(QGraphicsSceneMouseEvent* event){
-
-    _startPoint = event->scenePos().toPoint();
-    _pressed = true;
-    printf("disegno la linea %d\n", _name);
-
-}
-
-void Line::mouseMoveEvent(QGraphicsSceneMouseEvent* event){
-
-    if (_pressed) {
-        _endPoint = event->scenePos().toPoint();
-        _line.setPoints(_startPoint, _endPoint);
-    }
-    QGraphicsItem::mousePressEvent(event);
-}
-
-void Line::mouseReleaseEvent(QGraphicsSceneMouseEvent* event){
-
-    _pressed = false;
-    QPoint endPoint = event->scenePos().toPoint();
-    _line.setPoints(_startPoint, endPoint);
-    QGraphicsItem::mouseReleaseEvent(event);
-}*/
