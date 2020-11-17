@@ -66,9 +66,9 @@ Station* Game::spawnStation() {
 
 void Game::reset(){
 
-	_state = READY;
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
+	_state = READY;
 
 	this->init();
 }
@@ -80,19 +80,18 @@ void Game::advance() {
 
 void Game::start() {
 
-	_state = RUNNING;
+	if (_state == READY) {
 
-	for (int i = 0; i < 10; i++) {
-		_stationsList.push_back(spawnStation());
-		_scene->addItem(_stationsList.back());
-		printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
+		for (int i = 0; i < 10; i++) {
+			_stationsList.push_back(spawnStation());
+			_scene->addItem(_stationsList.back());
+			printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
+		}
+
+		_engine.start();
+		_state = RUNNING;
+		printf("Game started\n");
 	}
-
-	// _lines.push_back(new Line);
-	// _scene->addItem(_lines.back());
-
-	_engine.start();
-	printf("Game started\n");
 }
 
 void Game::keyPressEvent(QKeyEvent* e){
@@ -122,6 +121,7 @@ void Game::mousePressEvent(QMouseEvent* e){
 			
 			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
 							   s->position().y() + STATION_SIZE / 2);
+
 			newLine = new Line(centerPoint);
 			_mousePressed = true;
 			_linesList.push_back(newLine);
@@ -137,36 +137,38 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 	if (_mousePressed) {
 		QPoint currentPoint(e->pos().x() / GAME_SCALE,
 							e->pos().y() / GAME_SCALE);
-		_linesList.back()->setEndPoint(currentPoint);
+		_linesList.back()->setCurrentPoint(currentPoint);
+
+		for (auto& s : _stationsList) {
+
+			if (pointerOnStation(s, e->pos())) {
+
+				QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
+								   s->position().y() + STATION_SIZE / 2);
+
+				if (_linesList.back()->validPoint(centerPoint)) {
+					_linesList.back()->setNextPoint(centerPoint);
+
+					if (_linesList.back()->circularLine())
+						_mousePressed = false;
+				}
+			}
+		}
 	}
 }
 
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
 
 	if (_mousePressed) {
+
 		printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
+		_linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
+		_mousePressed = false;
 
-		bool foundStation = false;
-
-		for (auto& s : _stationsList) {
-
-			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
-							   s->position().y() + STATION_SIZE / 2);
-
-			if (pointerOnStation(s, e->pos()) && centerPoint != _linesList.back()->startPoint()) {
-				_linesList.back()->setEndPoint(centerPoint);
-				foundStation = true;
-
-				break;
-			}
-		}
-
-		if (!foundStation) {
+		if (_linesList.back()->size() < 2) {
 			_scene->removeItem(_linesList.back());
 			delete _linesList.back();
 			_linesList.pop_back();
 		}
-
-		_mousePressed = false;
 	}
-} 
+}

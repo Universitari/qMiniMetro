@@ -6,3 +6,4 @@ const int GAME_PROGRESSION = 3;
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
 const int STATION_SIZE = 30;
+const int MAX_STATIONS = 200;
