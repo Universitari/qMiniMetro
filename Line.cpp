@@ -13,24 +13,31 @@ Line::Line(QPoint startP){
 
     switch (_name) {
         case(CIRCLE):
+            // Yellow
             _color = QColor(255, 206, 0);
             break;
         case(CENTRAL):
+            // Red
             _color = QColor(220, 36, 31);
             break;
         case(PICCADILLY):
+            // Dark blue
             _color = QColor(0, 25, 168);
             break;
         case(VICTORIA):
+            // Blue
             _color = QColor(0, 160, 255);
             break;
         case(DISTRICT):
+            // Green
             _color = QColor(0, 114, 41);
             break;
         case(HAMMERSMITH):
+            // Pink
             _color = QColor(215, 153, 175);
             break;
         case(BAKERLOO):
+            // Brown
             _color = QColor(137, 78, 36);
             break;
     }
@@ -93,4 +100,33 @@ bool Line::validPoint(QPoint p){
             return false;
     }
     return true;
+}
+
+float Line::angularCoeff(QPoint p1, QPoint p2) {
+
+    float x1 = p1.x();
+    float y1 = p1.y();
+    float x2 = p2.x();
+    float y2 = p2.y();
+
+    float m = (y2 - y1) / abs(x2 - x1);
+ 
+    printf("P1: %.2f, %.2f\nP2: %.2f, %.2f\nangular coefficient: %f\n",
+            x1, y1, x2, y2, m);
+   
+    return m;
+}
+
+QPoint Line::TcapPoint(){
+
+    float m = angularCoeff(_linePoints[_pointsCounter-2], _linePoints[_pointsCounter - 1]);
+    float angle = atan(m);
+    int length = 30;
+    int x = cos(angle) * length;
+    int y = sin(angle) * length;
+
+    if (_linePoints[_pointsCounter - 2].x() > lastPoint().x())
+        x = -x;
+
+    return QPoint(lastPoint().x() + x, lastPoint().y() + y);
 }

@@ -41,8 +41,8 @@ void Game::init() {
 	}
 }
 
-Station* Game::spawnStation() {
-	QPoint spawnPoint(400, 400);
+Station* Game::spawnStation(int x, int y) {
+	QPoint spawnPoint(x, y);
 	bool found = true;
 
 	if (!_stationsList.empty())
@@ -65,6 +65,9 @@ Station* Game::spawnStation() {
 }
 
 void Game::reset(){
+
+	_stationsList.clear();
+	_linesList.clear();
 
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
@@ -162,7 +165,8 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	if (_mousePressed) {
 
 		printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-		_linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
+		// _linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
+		_linesList.back()->setCurrentPoint(_linesList.back()->TcapPoint());
 		_mousePressed = false;
 
 		if (_linesList.back()->size() < 2) {

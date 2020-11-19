@@ -18,6 +18,7 @@ private:
 	bool _circularLine;
 	QColor _color;
 	Name _name;
+	QGraphicsLineItem _Tcap;
 
 public:
 
@@ -49,5 +50,7 @@ public:
 	// Utility
 	bool validPoint(QPoint p);
 	unsigned int size() { return _pointsCounter; }
+	float angularCoeff(QPoint p1, QPoint p2);
+	QPoint TcapPoint();
 
 };

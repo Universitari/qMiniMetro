@@ -36,7 +36,7 @@ public:
 
 	static Game* instance();
 
-	Station* spawnStation();
+	Station* spawnStation(int x = 400, int y = 400);
 
 public slots:
 
