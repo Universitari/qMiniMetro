@@ -6,10 +6,12 @@ Line::Line(QPoint startP){
 
     _linePoints[0] = startP;
     _linePoints[1] = startP;
-    _linesNumber++;
-    _pointsCounter = 1;
+    _linePoints[2] = startP;
+    _pointsCounter = 2;
     _circularLine = false;
-    _name = Name(_linesNumber-1);
+    _name = Name(_linesNumber);
+    _linesNumber++;
+    setZValue(1);
 
     switch (_name) {
         case(CIRCLE):
@@ -73,6 +75,11 @@ void Line::paint(QPainter* painter,
     //painter->drawLine(_line);
     painter->drawPolyline(_linePoints, _pointsCounter+1);
 
+    pen.setCapStyle(Qt::SquareCap);
+    painter->setPen(pen);
+    painter->drawLine(_TcapTail);
+    painter->drawLine(_TcapHead);
+
 }
 
 QRectF Line::boundingRect() const{
@@ -117,16 +124,56 @@ float Line::angularCoeff(QPoint p1, QPoint p2) {
     return m;
 }
 
-QPoint Line::TcapPoint(){
+QPoint Line::TcapPoint(QPoint p1, QPoint p2, QPoint edgePoint){
 
-    float m = angularCoeff(_linePoints[_pointsCounter-2], _linePoints[_pointsCounter - 1]);
+    float m = angularCoeff(p1, p2);
     float angle = atan(m);
-    int length = 30;
+    int length = 40;
     int x = cos(angle) * length;
     int y = sin(angle) * length;
-
-    if (_linePoints[_pointsCounter - 2].x() > lastPoint().x())
+ 
+    if (p1.x() > p2.x())
         x = -x;
 
-    return QPoint(lastPoint().x() + x, lastPoint().y() + y);
+    if(edgePoint == _linePoints[0])
+        return QPoint(edgePoint.x() - x, edgePoint.y() - y);
+    else
+        return QPoint(edgePoint.x() + x, edgePoint.y() + y);
+}
+
+void Line::updateTcapPoint(){
+
+    _linePoints[0] = TcapPoint(_linePoints[1], _linePoints[2], _linePoints[0]);
+    _linePoints[_pointsCounter] = TcapPoint(_linePoints[_pointsCounter-2], _linePoints[_pointsCounter-1], _linePoints[_pointsCounter]);
+    
+    _TcapTail = setTcap(_linePoints[_pointsCounter - 1], _linePoints[_pointsCounter]);
+    _TcapHead = setTcap(_linePoints[1], _linePoints[0]);
+}
+
+QLine Line::setTcap(QPoint p1, QPoint p2){
+
+    QLine l;
+
+    float m = angularCoeff(p1, p2);
+
+    float angle = atan(m) + 3.14159 / 2;
+    int length = 15;
+    int x = p2.x() + cos(angle) * length;
+    int y = p2.y() + sin(angle) * length;
+
+    if (p1.x() > p2.x())
+        x = p2.x() - (cos(angle) * length);
+
+    l.setP1(QPoint(x, y));
+
+    angle = atan(m) - 3.14159 / 2;
+    x = p2.x() + cos(angle) * length;
+    y = p2.y() + sin(angle) * length;
+
+    if ( p1.x() > p2.x())
+        x = p2.x() - (cos(angle) * length);
+
+    l.setP2(QPoint(x, y));
+
+    return l;
 }

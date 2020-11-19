@@ -6,6 +6,7 @@ Station::Station(QPoint pos) {
 
 	_position = pos;
 	_shape = Shape(rand() % GAME_PROGRESSION);
+	setZValue(2);
 }
 
 Station::Station(const Station& s) {

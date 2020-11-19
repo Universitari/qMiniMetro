@@ -152,8 +152,12 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 				if (_linesList.back()->validPoint(centerPoint)) {
 					_linesList.back()->setNextPoint(centerPoint);
 
-					if (_linesList.back()->circularLine())
+					if (_linesList.back()->circularLine()) {
+						
+						_linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
+						_linesList.back()->updateTcapPoint();
 						_mousePressed = false;
+					}
 				}
 			}
 		}
@@ -165,11 +169,11 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	if (_mousePressed) {
 
 		printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-		// _linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
-		_linesList.back()->setCurrentPoint(_linesList.back()->TcapPoint());
+		_linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
+		_linesList.back()->updateTcapPoint();
 		_mousePressed = false;
 
-		if (_linesList.back()->size() < 2) {
+		if (_linesList.back()->size() < 3) {
 			_scene->removeItem(_linesList.back());
 			delete _linesList.back();
 			_linesList.pop_back();
