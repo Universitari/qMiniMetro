@@ -6,8 +6,9 @@
 #include <QTimer>
 #include <QPixMap>
 #include "Map.h"
-#include "Line.h"
 #include "utils.h"
+#include "Station.h"
+#include "Line.h"
 
 
 class Game : public QGraphicsView {
@@ -27,10 +28,11 @@ private:
 	QTimer _engine;
 	game_state _state;
 	bool _mousePressed = false;
+	int _activeLine = -1;
 
 	std::list<Station*> _stationsList;
 
-	std::list<Line*> _linesList;
+	std::vector<Line*> _linesList;
 
 public:
 

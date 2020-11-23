@@ -41,30 +41,7 @@ void Game::init() {
 	}
 }
 
-Station* Game::spawnStation(int x, int y) {
-	QPoint spawnPoint(x, y);
-	bool found = true;
-
-	if (!_stationsList.empty())
-		while (found) {
-
-			for (auto& s : _stationsList) {
-
-				if (s->position() == spawnPoint) {
-
-					spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE));
-					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 4*STATION_SIZE));
-					break;
-				}
-				else found = false;
-			}
-		}
-
-	Station* newStation = new Station(spawnPoint);
-	return newStation;
-}
-
-void Game::reset(){
+void Game::reset() {
 
 	_stationsList.clear();
 	_linesList.clear();
@@ -97,6 +74,29 @@ void Game::start() {
 	}
 }
 
+Station* Game::spawnStation(int x, int y) {
+	QPoint spawnPoint(x, y);
+	bool found = true;
+
+	if (!_stationsList.empty())
+		while (found) {
+
+			for (auto& s : _stationsList) {
+
+				if (s->position() == spawnPoint) {
+
+					spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE));
+					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 4*STATION_SIZE));
+					break;
+				}
+				else found = false;
+			}
+		}
+
+	Station* newStation = new Station(spawnPoint);
+	return newStation;
+}
+
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
@@ -115,20 +115,36 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 void Game::mousePressEvent(QMouseEvent* e){
 
-	printf("Cursor in pos = %d, %d\n", e->pos().x(), e->pos().y());
-	Line* newLine;
+	// printf("Cursor in pos = %d, %d\n", e->pos().x(), e->pos().y());
+
+	if (!_linesList.empty()) {
+		int i = 0;
+		for (auto& l : _linesList) {
+
+			if (l->pointerOnCap(e->pos())) {
+				printf("stai premendo sul tcap\n");
+				_mousePressed = true;
+				_activeLine = i;
+			}
+			i++;
+		}
+	}
 
 	for (auto& s : _stationsList) {
 
-		if (pointerOnStation(s, e->pos())) {
+		if (s->pointerOnStation(e->pos())) {
 			
 			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
 							   s->position().y() + STATION_SIZE / 2);
 
+			Line* newLine;
 			newLine = new Line(centerPoint);
 			_mousePressed = true;
 			_linesList.push_back(newLine);
-			_scene->addItem(_linesList.back());
+			_activeLine = _linesList.size() - 1;
+			_scene->addItem(_linesList.at(_activeLine));
+
+
 			
 			break;
 		}
@@ -140,22 +156,22 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 	if (_mousePressed) {
 		QPoint currentPoint(e->pos().x() / GAME_SCALE,
 							e->pos().y() / GAME_SCALE);
-		_linesList.back()->setCurrentPoint(currentPoint);
+		_linesList.at(_activeLine)->setCurrentPoint(currentPoint);
 
 		for (auto& s : _stationsList) {
 
-			if (pointerOnStation(s, e->pos())) {
+			if (s->pointerOnStation(e->pos())) {
 
 				QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
 								   s->position().y() + STATION_SIZE / 2);
 
-				if (_linesList.back()->validPoint(centerPoint)) {
-					_linesList.back()->setNextPoint(centerPoint);
+				if (_linesList.at(_activeLine)->validPoint(centerPoint)) {
+					_linesList.at(_activeLine)->setNextPoint(centerPoint);
 
-					if (_linesList.back()->circularLine()) {
+					if (_linesList.at(_activeLine)->circularLine()) {
 						
-						_linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
-						_linesList.back()->updateTcapPoint();
+						_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
+						_linesList.at(_activeLine)->updateTcapPoint();
 						_mousePressed = false;
 					}
 				}
@@ -168,14 +184,14 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 
 	if (_mousePressed) {
 
-		printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-		_linesList.back()->setCurrentPoint(_linesList.back()->lastPoint());
-		_linesList.back()->updateTcapPoint();
+		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
+		_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
+		_linesList.at(_activeLine)->updateTcapPoint();
 		_mousePressed = false;
 
-		if (_linesList.back()->size() < 3) {
-			_scene->removeItem(_linesList.back());
-			delete _linesList.back();
+		if (_linesList.at(_activeLine)->size() < 3) {
+			_scene->removeItem(_linesList.at(_activeLine));
+			delete _linesList.at(_activeLine);
 			_linesList.pop_back();
 		}
 	}

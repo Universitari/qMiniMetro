@@ -1,5 +1,6 @@
 #pragma once
 
-#include "Station.h"
+#include <QPoint>
+#include <Vector>
 
-bool pointerOnStation(Station* s, QPoint pointerPos);
+float angularCoeff(QPoint p1, QPoint p2);

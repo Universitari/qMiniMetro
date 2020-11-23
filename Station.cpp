@@ -52,3 +52,14 @@ QRectF Station::boundingRect() const{
 	qreal penWidth = 1;
 	return QRectF(0, 0, 30, 30);
 }
+
+bool Station::pointerOnStation(QPoint pointerPos) {
+
+	if (pointerPos.x() >= position().x() * GAME_SCALE &&
+		pointerPos.x() <= (position().x() + STATION_SIZE) * GAME_SCALE &&
+		pointerPos.y() >= position().y() * GAME_SCALE &&
+		pointerPos.y() <= (position().y() + STATION_SIZE) * GAME_SCALE)
+		return true;
+	else
+		return false;
+}

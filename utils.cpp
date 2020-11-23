@@ -1,12 +1,16 @@
 #include "utils.h"
 
-bool pointerOnStation(Station* s, QPoint pointerPos) {
+float angularCoeff(QPoint p1, QPoint p2) {
 
-	if (pointerPos.x() >= s->position().x() * GAME_SCALE &&
-		pointerPos.x() <= (s->position().x() + STATION_SIZE) * GAME_SCALE &&
-		pointerPos.y() >= s->position().y() * GAME_SCALE &&
-		pointerPos.y() <= (s->position().y() + STATION_SIZE) * GAME_SCALE)
-			return true;
-	else 
-		return false;
+	float x1 = p1.x();
+	float y1 = p1.y();
+	float x2 = p2.x();
+	float y2 = p2.y();
+
+	float m = (y2 - y1) / abs(x2 - x1);
+
+	//printf("P1: %.2f, %.2f\nP2: %.2f, %.2f\nangular coefficient: %f\n",
+	//	x1, y1, x2, y2, m);
+
+	return m;
 }

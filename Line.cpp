@@ -92,12 +92,12 @@ void Line::setNextPoint(QPoint nextP) {
     _linePoints[_pointsCounter] = nextP;
     _pointsCounter++;
     _linePoints[_pointsCounter] = nextP;
-    printf("inseriti %d punti\n", _pointsCounter);
+    printf("inseriti %d punti\n", _pointsCounter - 1);
 }
 
 bool Line::validPoint(QPoint p){
 
-    if (p == _linePoints[0] && !_circularLine && _pointsCounter > 2) {
+    if (p == _linePoints[0] && !_circularLine && _pointsCounter > 3) {
         _circularLine = true;
         return true;
     }
@@ -107,21 +107,6 @@ bool Line::validPoint(QPoint p){
             return false;
     }
     return true;
-}
-
-float Line::angularCoeff(QPoint p1, QPoint p2) {
-
-    float x1 = p1.x();
-    float y1 = p1.y();
-    float x2 = p2.x();
-    float y2 = p2.y();
-
-    float m = (y2 - y1) / abs(x2 - x1);
- 
-    printf("P1: %.2f, %.2f\nP2: %.2f, %.2f\nangular coefficient: %f\n",
-            x1, y1, x2, y2, m);
-   
-    return m;
 }
 
 QPoint Line::TcapPoint(QPoint p1, QPoint p2, QPoint edgePoint){
@@ -176,4 +161,45 @@ QLine Line::setTcap(QPoint p1, QPoint p2){
     l.setP2(QPoint(x, y));
 
     return l;
+}
+
+bool Line::pointerOnCap(QPoint pointerPos){
+
+    float m = angularCoeff(_TcapHead.p1(), _TcapHead.p2());
+    float angle = atan(m);
+    int length = 20;
+
+    angle += 3.14159 / 2;
+    int x = cos(angle) * length/2;
+    int y = sin(angle) * length/2;
+
+    QPolygon Tcap(4);
+
+    Tcap.setPoint(0, _TcapHead.p1().x() + x, _TcapHead.p1().y() - y);
+    Tcap.setPoint(1, _TcapHead.p1().x() - x, _TcapHead.p1().y() + y);
+    Tcap.setPoint(2, _TcapHead.p2().x() - x, _TcapHead.p2().y() + y);
+    Tcap.setPoint(3, _TcapHead.p2().x() + x, _TcapHead.p2().y() - y);
+
+    pointerPos.setX(pointerPos.x() / GAME_SCALE);
+    pointerPos.setY(pointerPos.y() / GAME_SCALE);
+    
+    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill))
+        return true;
+
+    m = angularCoeff(_TcapTail.p1(), _TcapTail.p2());
+    angle = atan(m);
+    angle += 3.14159 / 2;
+
+    x = cos(angle) * length / 2;
+    y = sin(angle) * length / 2;
+
+    Tcap.setPoint(0, _TcapTail.p1().x() + x, _TcapTail.p1().y() - y);
+    Tcap.setPoint(1, _TcapTail.p1().x() - x, _TcapTail.p1().y() + y);
+    Tcap.setPoint(2, _TcapTail.p2().x() - x, _TcapTail.p2().y() + y);
+    Tcap.setPoint(3, _TcapTail.p2().x() + x, _TcapTail.p2().y() - y);
+
+    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill))
+        return true;
+
+        return false;
 }

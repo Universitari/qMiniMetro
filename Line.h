@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QLine>
 #include "Entity.h"
+#include "utils.h"
 
 class Line : public Entity {
 
@@ -20,7 +21,6 @@ private:
 	Name _name;
 	QLine _TcapHead;
 	QLine _TcapTail;
-	
 
 public:
 
@@ -52,9 +52,9 @@ public:
 	// Utility
 	bool validPoint(QPoint p);
 	unsigned int size() { return _pointsCounter; }
-	float angularCoeff(QPoint p1, QPoint p2);
 	QPoint TcapPoint(QPoint p1, QPoint p2, QPoint edgePoint);
 	void updateTcapPoint();
 	QLine setTcap(QPoint p1, QPoint p2);
+	bool pointerOnCap(QPoint pointerPos);
 
 };

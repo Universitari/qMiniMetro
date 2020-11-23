@@ -37,4 +37,7 @@ public:
 	QPoint position() { return _position; }
 	int shape() { return _shape; }
 
+	// Utility
+	bool pointerOnStation(QPoint pointerPos);
+
 };
