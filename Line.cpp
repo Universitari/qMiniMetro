@@ -10,9 +10,10 @@ Line::Line(QPoint startP){
     _pointsCounter = 2;
     _circularLine = false;
     _name = Name(_linesNumber);
+    _state = INITIAL;
     _linesNumber++;
     setZValue(1);
-
+    
     switch (_name) {
         case(CIRCLE):
             // Yellow
@@ -77,8 +78,10 @@ void Line::paint(QPainter* painter,
 
     pen.setCapStyle(Qt::SquareCap);
     painter->setPen(pen);
-    painter->drawLine(_TcapTail);
-    painter->drawLine(_TcapHead);
+    if(_state != MOD_TAIL)
+        painter->drawLine(_TcapTail);
+    if(_state != MOD_HEAD)
+        painter->drawLine(_TcapHead);
 
 }
 
@@ -89,23 +92,49 @@ QRectF Line::boundingRect() const{
 
 void Line::setNextPoint(QPoint nextP) {
 
-    _linePoints[_pointsCounter] = nextP;
-    _pointsCounter++;
-    _linePoints[_pointsCounter] = nextP;
+    if (_state == MOD_TAIL || _state == INITIAL) {
+
+        _linePoints[_pointsCounter] = nextP;
+        _pointsCounter++;
+        _linePoints[_pointsCounter] = nextP;
+    }
+    else if (_state == MOD_HEAD) {
+        
+        for (int i = _pointsCounter; i > 0; i--) {
+            _linePoints[i + 1] = _linePoints[i];
+        }
+        _linePoints[0] = nextP;
+        _linePoints[1] = nextP;
+        _pointsCounter++;
+    }
     printf("inseriti %d punti\n", _pointsCounter - 1);
 }
 
+void Line::setCurrentPoint(QPoint currP) { 
+    
+    if (_state == MOD_TAIL || _state == INITIAL)
+        _linePoints[_pointsCounter] = currP;
+    else 
+        _linePoints[0] = currP;
+}
+
+
 bool Line::validPoint(QPoint p){
 
-    if (p == _linePoints[0] && !_circularLine && _pointsCounter > 3) {
-        _circularLine = true;
-        return true;
+    if (!_circularLine && _pointsCounter > 3) {
+        if ((p == startPoint() && (_state == MOD_TAIL || _state == INITIAL)) ||
+            (p == lastPoint() && _state == MOD_HEAD)){
+
+            _circularLine = true;
+            return true;
+        }
     }
 
     for (int i = 0; i < _pointsCounter; i++) {
         if (p == _linePoints[i])
             return false;
     }
+
     return true;
 }
 
@@ -128,11 +157,19 @@ QPoint Line::TcapPoint(QPoint p1, QPoint p2, QPoint edgePoint){
 
 void Line::updateTcapPoint(){
 
-    _linePoints[0] = TcapPoint(_linePoints[1], _linePoints[2], _linePoints[0]);
-    _linePoints[_pointsCounter] = TcapPoint(_linePoints[_pointsCounter-2], _linePoints[_pointsCounter-1], _linePoints[_pointsCounter]);
-    
-    _TcapTail = setTcap(_linePoints[_pointsCounter - 1], _linePoints[_pointsCounter]);
-    _TcapHead = setTcap(_linePoints[1], _linePoints[0]);
+    if (_state == MOD_HEAD || _state == INITIAL) {
+        setCurrentPoint(startPoint());
+        _linePoints[0] = TcapPoint(_linePoints[1], _linePoints[2], _linePoints[0]);
+        _TcapHead = setTcap(_linePoints[1], _linePoints[0]);
+    }
+
+    if (_state == MOD_TAIL || _state == INITIAL) {
+        setCurrentPoint(lastPoint());
+        _linePoints[_pointsCounter] = TcapPoint(_linePoints[_pointsCounter - 2], _linePoints[_pointsCounter - 1], _linePoints[_pointsCounter]);
+        _TcapTail = setTcap(_linePoints[_pointsCounter - 1], _linePoints[_pointsCounter]);
+    }
+
+    _state = INITIAL;
 }
 
 QLine Line::setTcap(QPoint p1, QPoint p2){
@@ -141,7 +178,7 @@ QLine Line::setTcap(QPoint p1, QPoint p2){
 
     float m = angularCoeff(p1, p2);
 
-    float angle = atan(m) + 3.14159 / 2;
+    float angle = atan(m) + PI / 2;
     int length = 15;
     int x = p2.x() + cos(angle) * length;
     int y = p2.y() + sin(angle) * length;
@@ -151,7 +188,7 @@ QLine Line::setTcap(QPoint p1, QPoint p2){
 
     l.setP1(QPoint(x, y));
 
-    angle = atan(m) - 3.14159 / 2;
+    angle = atan(m) - PI / 2;
     x = p2.x() + cos(angle) * length;
     y = p2.y() + sin(angle) * length;
 
@@ -169,9 +206,9 @@ bool Line::pointerOnCap(QPoint pointerPos){
     float angle = atan(m);
     int length = 20;
 
-    angle += 3.14159 / 2;
-    int x = cos(angle) * length/2;
-    int y = sin(angle) * length/2;
+    angle += PI / 2;
+    int x = cos(angle) * length;
+    int y = sin(angle) * length;
 
     QPolygon Tcap(4);
 
@@ -183,23 +220,29 @@ bool Line::pointerOnCap(QPoint pointerPos){
     pointerPos.setX(pointerPos.x() / GAME_SCALE);
     pointerPos.setY(pointerPos.y() / GAME_SCALE);
     
-    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill))
+    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
+        printf("stai premendo sul tcap di testa\n");
+        _state = MOD_HEAD;
         return true;
+    }
 
     m = angularCoeff(_TcapTail.p1(), _TcapTail.p2());
     angle = atan(m);
-    angle += 3.14159 / 2;
+    angle += PI / 2;
 
-    x = cos(angle) * length / 2;
-    y = sin(angle) * length / 2;
+    x = cos(angle) * length;
+    y = sin(angle) * length;
 
     Tcap.setPoint(0, _TcapTail.p1().x() + x, _TcapTail.p1().y() - y);
     Tcap.setPoint(1, _TcapTail.p1().x() - x, _TcapTail.p1().y() + y);
     Tcap.setPoint(2, _TcapTail.p2().x() - x, _TcapTail.p2().y() + y);
     Tcap.setPoint(3, _TcapTail.p2().x() + x, _TcapTail.p2().y() - y);
 
-    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill))
+    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
+        printf("stai premendo sul tcap di coda\n");
+        _state = MOD_TAIL;
         return true;
-
-        return false;
+    }
+        
+    return false;
 }

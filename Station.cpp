@@ -2,10 +2,11 @@
 
 const unsigned int Station::_maxPass = 10;
 
-Station::Station(QPoint pos) {
+Station::Station(QPoint pos, int index) {
 
 	_position = pos;
 	_shape = Shape(rand() % GAME_PROGRESSION);
+	_index = index;
 	setZValue(2);
 }
 

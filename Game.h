@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"
+#include <iostream>
 
 
 class Game : public QGraphicsView {
@@ -28,11 +29,16 @@ private:
 	QTimer _engine;
 	game_state _state;
 	bool _mousePressed = false;
+	int _stationsNumber = -1;
 	int _activeLine = -1;
+	int _activeStation = -1;
 
-	std::list<Station*> _stationsList;
-
+	std::vector<Station*> _stationsList;
 	std::vector<Line*> _linesList;
+
+	std::vector<std::list<int>> _graph;
+
+	// typename std::vector<Line*>::iterator _lineIterator = _linesList.begin();
 
 public:
 

@@ -10,6 +10,7 @@
 class Line : public Entity {
 
 	enum Name{CIRCLE, CENTRAL, PICCADILLY, VICTORIA, DISTRICT, HAMMERSMITH, BAKERLOO};
+	enum State{INITIAL, MOD_TAIL, MOD_HEAD};
 
 private:
 
@@ -21,6 +22,7 @@ private:
 	Name _name;
 	QLine _TcapHead;
 	QLine _TcapTail;
+	State _state;
 
 public:
 
@@ -41,13 +43,14 @@ public:
 
 	// Setters
 	void setNextPoint(QPoint nextP);
-	void setCurrentPoint(QPoint currP) { _linePoints[_pointsCounter] = currP; }
+	void setCurrentPoint(QPoint currP);
 	void setCircularLine(bool flag) { _circularLine = flag; }
 
 	// Getters
-	QPoint startPoint() { return _linePoints[0]; }
+	QPoint startPoint() { return _linePoints[1]; }
 	QPoint lastPoint() { return _linePoints[_pointsCounter - 1]; }
 	bool circularLine() { return _circularLine; }
+	State state() { return _state; }
 
 	// Utility
 	bool validPoint(QPoint p);

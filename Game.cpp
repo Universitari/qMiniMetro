@@ -45,6 +45,10 @@ void Game::reset() {
 
 	_stationsList.clear();
 	_linesList.clear();
+	_graph.clear();
+	_stationsNumber = -1;
+	_activeStation = -1;
+	_activeLine = -1;
 
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
@@ -93,7 +97,9 @@ Station* Game::spawnStation(int x, int y) {
 			}
 		}
 
-	Station* newStation = new Station(spawnPoint);
+	_stationsNumber++;
+	Station* newStation = new Station(spawnPoint, _stationsNumber);
+	_graph.emplace_back();
 	return newStation;
 }
 
@@ -111,6 +117,16 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 		start();
 	}
+
+	if (e->key() == Qt::Key_P) {
+
+		for (int i = 0; i < _graph.size(); i++) {
+			std::cout << "Station " << i << " connected to station ";
+			for (auto& i : _graph.at(i))
+				std::cout << i << ", ";
+			std::cout << std::endl;
+		}
+	}
 }
 
 void Game::mousePressEvent(QMouseEvent* e){
@@ -121,8 +137,7 @@ void Game::mousePressEvent(QMouseEvent* e){
 		int i = 0;
 		for (auto& l : _linesList) {
 
-			if (l->pointerOnCap(e->pos())) {
-				printf("stai premendo sul tcap\n");
+			if (l->pointerOnCap(e->pos()) && !l->circularLine()) {
 				_mousePressed = true;
 				_activeLine = i;
 			}
@@ -143,9 +158,8 @@ void Game::mousePressEvent(QMouseEvent* e){
 			_linesList.push_back(newLine);
 			_activeLine = _linesList.size() - 1;
 			_scene->addItem(_linesList.at(_activeLine));
+			_activeStation = s->index();
 
-
-			
 			break;
 		}
 	}
@@ -167,10 +181,13 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 
 				if (_linesList.at(_activeLine)->validPoint(centerPoint)) {
 					_linesList.at(_activeLine)->setNextPoint(centerPoint);
+					_graph.at(_activeStation).push_back(s->index());
+					_graph.at(s->index()).push_back(_activeStation);
+					_activeStation = s->index();
 
 					if (_linesList.at(_activeLine)->circularLine()) {
 						
-						_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
+						//_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
 						_linesList.at(_activeLine)->updateTcapPoint();
 						_mousePressed = false;
 					}
@@ -183,9 +200,9 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
 
 	if (_mousePressed) {
-
+	
 		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-		_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
+		//_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
 		_linesList.at(_activeLine)->updateTcapPoint();
 		_mousePressed = false;
 

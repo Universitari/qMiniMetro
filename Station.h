@@ -16,10 +16,11 @@ private:
 	static const unsigned int _maxPass;
 	unsigned int _currentPass = 0;
 	Shape _shape;
+	int _index = -1;
 
 public:
 
-	Station(QPoint pos);
+	Station(QPoint pos, int index);
 	Station(const Station& s);
 
 	// Metodi virtuali reimplementati
@@ -36,6 +37,7 @@ public:
 	// Getters
 	QPoint position() { return _position; }
 	int shape() { return _shape; }
+	int index() { return _index; }
 
 	// Utility
 	bool pointerOnStation(QPoint pointerPos);
