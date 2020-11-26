@@ -4,6 +4,7 @@
 #include <QPoint>
 #include <QPainter>
 #include <QLine>
+#include <QGraphicsSceneMouseEvent>
 #include "Entity.h"
 #include "utils.h"
 

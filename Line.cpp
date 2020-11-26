@@ -87,7 +87,7 @@ void Line::paint(QPainter* painter,
 
 QRectF Line::boundingRect() const{
 
-    return QRectF(QPointF(0, 0), QPointF(1920, 1080));
+    return QRectF(QPoint(0, 0), QPoint(1920, 1080));
 }
 
 void Line::setNextPoint(QPoint nextP) {
@@ -246,3 +246,4 @@ bool Line::pointerOnCap(QPoint pointerPos){
         
     return false;
 }
+

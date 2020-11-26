@@ -103,6 +103,47 @@ Station* Game::spawnStation(int x, int y) {
 	return newStation;
 }
 
+void Game::addLine(QPoint stationPos, int index) {
+
+	printf("sono dentro addLine\n");
+
+		QPoint centerPoint(stationPos.x() + STATION_SIZE / 2,
+						   stationPos.y() + STATION_SIZE / 2);
+		
+		Line* newLine;
+		newLine = new Line(centerPoint);
+		_mousePressed = true;
+		_linesList.push_back(newLine);
+		_activeLine = _linesList.size() - 1;
+		_scene->addItem(_linesList.at(_activeLine));
+		_activeStation = index;
+
+}
+
+void Game::addStationToLine(QPoint stationPos, int index){
+
+		//QPoint currentPoint(e->pos().x() / GAME_SCALE,
+		//	e->pos().y() / GAME_SCALE);
+		//_linesList.at(_activeLine)->setCurrentPoint(currentPoint);
+
+		QPoint centerPoint(stationPos.x() + STATION_SIZE / 2,
+						   stationPos.y() + STATION_SIZE / 2);
+
+		if (_linesList.at(_activeLine)->validPoint(centerPoint)) {
+			_linesList.at(_activeLine)->setNextPoint(centerPoint);
+			_graph.at(_activeStation).push_back(index);
+			_graph.at(index).push_back(_activeStation);
+			_activeStation = index;
+
+			if (_linesList.at(_activeLine)->circularLine()) {
+
+				//_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
+				_linesList.at(_activeLine)->updateTcapPoint();
+				_mousePressed = false;
+			}
+		}
+}
+
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
@@ -129,7 +170,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 	}
 }
 
-void Game::mousePressEvent(QMouseEvent* e){
+/*void Game::mousePressEvent(QMouseEvent* e){
 
 	// printf("Cursor in pos = %d, %d\n", e->pos().x(), e->pos().y());
 
@@ -145,57 +186,12 @@ void Game::mousePressEvent(QMouseEvent* e){
 		}
 	}
 
-	for (auto& s : _stationsList) {
+}*/
 
-		if (s->pointerOnStation(e->pos())) {
-			
-			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
-							   s->position().y() + STATION_SIZE / 2);
-
-			Line* newLine;
-			newLine = new Line(centerPoint);
-			_mousePressed = true;
-			_linesList.push_back(newLine);
-			_activeLine = _linesList.size() - 1;
-			_scene->addItem(_linesList.at(_activeLine));
-			_activeStation = s->index();
-
-			break;
-		}
-	}
-}
-
-void Game::mouseMoveEvent(QMouseEvent* e){
+/*void Game::mouseMoveEvent(QMouseEvent* e){
 	
-	if (_mousePressed) {
-		QPoint currentPoint(e->pos().x() / GAME_SCALE,
-							e->pos().y() / GAME_SCALE);
-		_linesList.at(_activeLine)->setCurrentPoint(currentPoint);
-
-		for (auto& s : _stationsList) {
-
-			if (s->pointerOnStation(e->pos())) {
-
-				QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
-								   s->position().y() + STATION_SIZE / 2);
-
-				if (_linesList.at(_activeLine)->validPoint(centerPoint)) {
-					_linesList.at(_activeLine)->setNextPoint(centerPoint);
-					_graph.at(_activeStation).push_back(s->index());
-					_graph.at(s->index()).push_back(_activeStation);
-					_activeStation = s->index();
-
-					if (_linesList.at(_activeLine)->circularLine()) {
-						
-						//_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
-						_linesList.at(_activeLine)->updateTcapPoint();
-						_mousePressed = false;
-					}
-				}
-			}
-		}
-	}
-}
+	
+}*/
 
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
 

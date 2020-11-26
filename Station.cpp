@@ -1,4 +1,5 @@
 #include "Station.h"
+#include "Game.h"
 
 const unsigned int Station::_maxPass = 10;
 
@@ -8,6 +9,7 @@ Station::Station(QPoint pos, int index) {
 	_shape = Shape(rand() % GAME_PROGRESSION);
 	_index = index;
 	setZValue(2);
+	setAcceptHoverEvents(true);
 }
 
 Station::Station(const Station& s) {
@@ -51,7 +53,7 @@ void Station::paint(QPainter* painter,
 QRectF Station::boundingRect() const{
 
 	qreal penWidth = 1;
-	return QRectF(0, 0, 30, 30);
+	return QRectF(_position, QPoint(_position.x() + 30, _position.y() + 30));
 }
 
 bool Station::pointerOnStation(QPoint pointerPos) {
@@ -63,4 +65,24 @@ bool Station::pointerOnStation(QPoint pointerPos) {
 		return true;
 	else
 		return false;
+}
+
+void Station::mousePressEvent(QGraphicsSceneMouseEvent* e) {
+
+	printf("sono dentro pressEvent\n");
+	Game::instance()->addLine(_position, _index);
+
+	QGraphicsItem::mousePressEvent(e);
+
+}
+
+void Station::mouseMoveEvent(QGraphicsSceneMouseEvent* e) {
+
+	printf("hover\n");
+
+	if (Game::instance()->mousePressed())
+		Game::instance()->addStationToLine(_position, _index);
+
+	QGraphicsItem::mouseMoveEvent(e);
+	
 }
