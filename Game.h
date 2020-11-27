@@ -36,7 +36,7 @@ private:
 
 	std::vector<Station*> _stationsList;
 	std::vector<Line*> _linesList;
-	Button* _deleteButtons[MAX_LINES];
+	std::vector<Button*> _deleteButtons;
 
 	std::vector<std::list<int>> _graph;
 

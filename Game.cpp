@@ -43,12 +43,17 @@ void Game::init() {
 
 void Game::reset() {
 
+	// to do controlliamo se abbiamo effettivamente distrutto 'sti cosi
 	_stationsList.clear();
 	_linesList.clear();
 	_graph.clear();
+	_deleteButtons.clear();
+
 	_stationsNumber = -1;
 	_activeStation = -1;
 	_activeLine = -1;
+
+	
 
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
@@ -73,8 +78,8 @@ void Game::start() {
 		}
 
 		for (int i = 0; i < MAX_LINES; i++){
-			_deleteButtons[i] = new Button(i);
-			_scene->addItem(_deleteButtons[i]);
+			_deleteButtons.push_back(new Button(i));
+			_scene->addItem(_deleteButtons.back());
 		}
 
 		_engine.start();
