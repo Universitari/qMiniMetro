@@ -66,10 +66,15 @@ void Game::start() {
 
 	if (_state == READY) {
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 30; i++) {
 			_stationsList.push_back(spawnStation());
 			_scene->addItem(_stationsList.back());
 			printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
+		}
+
+		for (int i = 0; i < MAX_LINES; i++){
+			_deleteButtons[i] = new Button(i);
+			_scene->addItem(_deleteButtons[i]);
 		}
 
 		_engine.start();
@@ -80,22 +85,27 @@ void Game::start() {
 
 Station* Game::spawnStation(int x, int y) {
 	QPoint spawnPoint(x, y);
-	bool found = true;
+	bool found = false;
 
 	if (!_stationsList.empty())
-		while (found) {
+		do {
 
 			for (auto& s : _stationsList) {
-
-				if (s->position() == spawnPoint) {
+				
+				// previous condition: s->position() == spawnPoint
+				if (distance(spawnPoint, s->position()) < STATION_SIZE*4) {
 
 					spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE));
 					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 4*STATION_SIZE));
+					printf("cambiate coordinate\n");
+					found = true;
 					break;
 				}
-				else found = false;
+				else
+					found = false;
+
 			}
-		}
+		} while (found);
 
 	_stationsNumber++;
 	Station* newStation = new Station(spawnPoint, _stationsNumber);
@@ -145,22 +155,25 @@ void Game::mousePressEvent(QMouseEvent* e){
 		}
 	}
 
-	for (auto& s : _stationsList) {
+	if (_linesList.size() < MAX_LINES) {
+		
+		for (auto& s : _stationsList) {
 
-		if (s->pointerOnStation(e->pos())) {
-			
-			QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
-							   s->position().y() + STATION_SIZE / 2);
+			if (s->pointerOnStation(e->pos())) {
 
-			Line* newLine;
-			newLine = new Line(centerPoint);
-			_mousePressed = true;
-			_linesList.push_back(newLine);
-			_activeLine = _linesList.size() - 1;
-			_scene->addItem(_linesList.at(_activeLine));
-			_activeStation = s->index();
+				QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
+								   s->position().y() + STATION_SIZE / 2);
 
-			break;
+				Line* newLine;
+				newLine = new Line(centerPoint);
+				_mousePressed = true;
+				_linesList.push_back(newLine);
+				_activeLine = _linesList.size() - 1;
+				_scene->addItem(_linesList.at(_activeLine));
+				_activeStation = s->index();
+
+				break;
+			}
 		}
 	}
 }

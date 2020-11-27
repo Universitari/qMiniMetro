@@ -23,6 +23,7 @@ private:
 	QLine _TcapHead;
 	QLine _TcapTail;
 	State _state;
+	QPolygon* _TcapHitbox;
 
 public:
 

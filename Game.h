@@ -5,11 +5,12 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QPixMap>
+#include <iostream>
 #include "Map.h"
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"
-#include <iostream>
+#include "Button.h"
 
 
 class Game : public QGraphicsView {
@@ -35,6 +36,7 @@ private:
 
 	std::vector<Station*> _stationsList;
 	std::vector<Line*> _linesList;
+	Button* _deleteButtons[MAX_LINES];
 
 	std::vector<std::list<int>> _graph;
 

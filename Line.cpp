@@ -78,10 +78,12 @@ void Line::paint(QPainter* painter,
 
     pen.setCapStyle(Qt::SquareCap);
     painter->setPen(pen);
+    
     if(_state != MOD_TAIL)
         painter->drawLine(_TcapTail);
     if(_state != MOD_HEAD)
         painter->drawLine(_TcapHead);
+
 
 }
 
@@ -203,25 +205,29 @@ QLine Line::setTcap(QPoint p1, QPoint p2){
 bool Line::pointerOnCap(QPoint pointerPos){
 
     float m = angularCoeff(_TcapHead.p1(), _TcapHead.p2());
+    //printf("angular coeff: %f\n", m);
     float angle = atan(m);
-    int length = 20;
+    int length = 10;
 
     angle += PI / 2;
     int x = cos(angle) * length;
     int y = sin(angle) * length;
 
-    QPolygon Tcap(4);
+    if (_TcapHead.p1().x() > _TcapHead.p2().x())
+        x = -x;
 
-    Tcap.setPoint(0, _TcapHead.p1().x() + x, _TcapHead.p1().y() - y);
-    Tcap.setPoint(1, _TcapHead.p1().x() - x, _TcapHead.p1().y() + y);
-    Tcap.setPoint(2, _TcapHead.p2().x() - x, _TcapHead.p2().y() + y);
-    Tcap.setPoint(3, _TcapHead.p2().x() + x, _TcapHead.p2().y() - y);
+    _TcapHitbox = new QPolygon(4);
+
+    _TcapHitbox->setPoint(0, _TcapHead.p1().x() - x, _TcapHead.p1().y() - y);
+    _TcapHitbox->setPoint(1, _TcapHead.p1().x() + x, _TcapHead.p1().y() + y);
+    _TcapHitbox->setPoint(2, _TcapHead.p2().x() + x, _TcapHead.p2().y() + y);
+    _TcapHitbox->setPoint(3, _TcapHead.p2().x() - x, _TcapHead.p2().y() - y);
 
     pointerPos.setX(pointerPos.x() / GAME_SCALE);
     pointerPos.setY(pointerPos.y() / GAME_SCALE);
     
-    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
-        printf("stai premendo sul tcap di testa\n");
+    if (_TcapHitbox->containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
+        //printf("stai premendo sul tcap di testa\n");
         _state = MOD_HEAD;
         return true;
     }
@@ -233,13 +239,16 @@ bool Line::pointerOnCap(QPoint pointerPos){
     x = cos(angle) * length;
     y = sin(angle) * length;
 
-    Tcap.setPoint(0, _TcapTail.p1().x() + x, _TcapTail.p1().y() - y);
-    Tcap.setPoint(1, _TcapTail.p1().x() - x, _TcapTail.p1().y() + y);
-    Tcap.setPoint(2, _TcapTail.p2().x() - x, _TcapTail.p2().y() + y);
-    Tcap.setPoint(3, _TcapTail.p2().x() + x, _TcapTail.p2().y() - y);
+    if (_TcapTail.p1().x() > _TcapTail.p2().x())
+        x = -x;
 
-    if (Tcap.containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
-        printf("stai premendo sul tcap di coda\n");
+    _TcapHitbox->setPoint(0, _TcapTail.p1().x() - x, _TcapTail.p1().y() - y);
+    _TcapHitbox->setPoint(1, _TcapTail.p1().x() + x, _TcapTail.p1().y() + y);
+    _TcapHitbox->setPoint(2, _TcapTail.p2().x() + x, _TcapTail.p2().y() + y);
+    _TcapHitbox->setPoint(3, _TcapTail.p2().x() - x, _TcapTail.p2().y() - y);
+
+    if (_TcapHitbox->containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
+        //printf("stai premendo sul tcap di coda\n");
         _state = MOD_TAIL;
         return true;
     }

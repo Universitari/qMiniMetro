@@ -14,3 +14,7 @@ float angularCoeff(QPoint p1, QPoint p2) {
 
 	return m;
 }
+
+float distance(QPoint p1, QPoint p2){
+	return sqrt(pow((p1.x() - p2.x()), 2) + pow((p1.y() - p2.y()), 2));
+}
