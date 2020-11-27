@@ -46,13 +46,6 @@ public:
 
 	Station* spawnStation(int x = 400, int y = 400);
 
-	// Getters
-	bool mousePressed() { return _mousePressed; }
-
-	// Utility
-	void addLine(QPoint stationPos, int index);
-	void addStationToLine(QPoint stationPos, int index);
-
 public slots:
 
 	// advance to the next frame
@@ -65,7 +58,7 @@ public slots:
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);
-	//void mousePressEvent(QMouseEvent* e);
-	//void mouseMoveEvent(QMouseEvent* e);
+	void mousePressEvent(QMouseEvent* e);
+	void mouseMoveEvent(QMouseEvent* e);
 	void mouseReleaseEvent(QMouseEvent* e);
 };

@@ -42,8 +42,4 @@ public:
 	// Utility
 	bool pointerOnStation(QPoint pointerPos);
 
-	// Event Handling
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent* e);
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
-
 };
