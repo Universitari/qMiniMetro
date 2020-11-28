@@ -11,7 +11,7 @@ private:
 
 	QPoint _position;
 	Type _type;
-	int _index;
+	int _index = -1;
 	QColor _color;
 
 public:

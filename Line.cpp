@@ -1,17 +1,14 @@
 #include "Line.h"
 
-int Line::_linesNumber = 0;
-
-Line::Line(QPoint startP){
+Line::Line(QPoint startP, int index){
 
     _linePoints[0] = startP;
     _linePoints[1] = startP;
     _linePoints[2] = startP;
     _pointsCounter = 2;
     _circularLine = false;
-    _name = Name(_linesNumber);
+    _name = Name(index);
     _state = INITIAL;
-    _linesNumber++;
     setZValue(1);
     
     switch (_name) {
@@ -48,7 +45,8 @@ Line::Line(QPoint startP){
 
 Line::~Line(){
 
-    _linesNumber--;
+    printf("cancellata linea %d\n", int(_name));
+    delete _TcapHitbox;
 }
 
 void Line::paint(QPainter* painter,
@@ -66,7 +64,6 @@ void Line::paint(QPainter* painter,
     // painter->drawRect(boundingRect().adjusted(5, 5, -5, -5));
 
 
-    //if (_line.isNull()) return;
     if (_pointsCounter == 0) return;
     pen.setWidth(10);
     pen.setColor(_color);

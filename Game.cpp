@@ -43,17 +43,23 @@ void Game::init() {
 
 void Game::reset() {
 
-	// to do controlliamo se abbiamo effettivamente distrutto 'sti cosi
+	for (auto& s : _stationsList)
+		delete s;
 	_stationsList.clear();
+
+	for (auto& l : _linesList)
+		delete l;
 	_linesList.clear();
+
 	_graph.clear();
+
+	for (auto& b : _deleteButtons)
+		delete b;
 	_deleteButtons.clear();
 
 	_stationsNumber = -1;
 	_activeStation = -1;
 	_activeLine = -1;
-
-	
 
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
@@ -71,7 +77,7 @@ void Game::start() {
 
 	if (_state == READY) {
 
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 5; i++) {
 			_stationsList.push_back(spawnStation());
 			_scene->addItem(_stationsList.back());
 			printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
@@ -80,6 +86,12 @@ void Game::start() {
 		for (int i = 0; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
 			_scene->addItem(_deleteButtons.back());
+		}
+
+		for (int i = 0; i < MAX_LINES; i++) {
+			Line* tmp = 0;
+			_linesList.push_back(tmp);
+			_linesList.shrink_to_fit();
 		}
 
 		_engine.start();
@@ -97,11 +109,10 @@ Station* Game::spawnStation(int x, int y) {
 
 			for (auto& s : _stationsList) {
 				
-				// previous condition: s->position() == spawnPoint
 				if (distance(spawnPoint, s->position()) < STATION_SIZE*4) {
 
 					spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE));
-					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 4*STATION_SIZE));
+					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 8*STATION_SIZE));
 					printf("cambiate coordinate\n");
 					found = true;
 					break;
@@ -116,6 +127,16 @@ Station* Game::spawnStation(int x, int y) {
 	Station* newStation = new Station(spawnPoint, _stationsNumber);
 	_graph.emplace_back();
 	return newStation;
+}
+
+void Game::deleteLine(int lineIndex){
+
+	// it crashed more than once, dunno why
+	if (_linesList.at(lineIndex) != 0) {
+		_scene->removeItem(_linesList.at(lineIndex));
+		delete _linesList.at(lineIndex);
+		_linesList.at(lineIndex) = 0;
+	}
 }
 
 void Game::keyPressEvent(QKeyEvent* e){
@@ -148,39 +169,50 @@ void Game::mousePressEvent(QMouseEvent* e){
 
 	// printf("Cursor in pos = %d, %d\n", e->pos().x(), e->pos().y());
 
-	if (!_linesList.empty()) {
+	// Add new line
+	if (!_mousePressed) {
+
 		int i = 0;
 		for (auto& l : _linesList) {
+			if (!l) {
+				_activeLine = i;
+				break;
+			}
+			i++;
+		}
+		//printf("active line: %d\n", _activeLine);
 
+		if (_activeLine != -1)
+			for (auto& s : _stationsList) {
+
+				if (s->pointerOnStation(e->pos())) {
+
+					QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
+						s->position().y() + STATION_SIZE / 2);
+
+					_linesList.at(_activeLine) = new Line(centerPoint, _activeLine);
+					_mousePressed = true;
+					_scene->addItem(_linesList.at(_activeLine));
+					_activeStation = s->index();
+
+					break;
+				}
+			}
+	}
+
+	// Edit Line
+	int i = 0;
+	for (auto& l : _linesList) {
+
+		if(l != 0)
 			if (l->pointerOnCap(e->pos()) && !l->circularLine()) {
 				_mousePressed = true;
 				_activeLine = i;
 			}
-			i++;
-		}
+		i++;
 	}
 
-	if (_linesList.size() < MAX_LINES) {
-		
-		for (auto& s : _stationsList) {
-
-			if (s->pointerOnStation(e->pos())) {
-
-				QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
-								   s->position().y() + STATION_SIZE / 2);
-
-				Line* newLine;
-				newLine = new Line(centerPoint);
-				_mousePressed = true;
-				_linesList.push_back(newLine);
-				_activeLine = _linesList.size() - 1;
-				_scene->addItem(_linesList.at(_activeLine));
-				_activeStation = s->index();
-
-				break;
-			}
-		}
-	}
+	QGraphicsView::mousePressEvent(e);
 }
 
 void Game::mouseMoveEvent(QMouseEvent* e){
@@ -205,7 +237,6 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 
 					if (_linesList.at(_activeLine)->circularLine()) {
 						
-						//_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
 						_linesList.at(_activeLine)->updateTcapPoint();
 						_mousePressed = false;
 					}
@@ -213,6 +244,8 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 			}
 		}
 	}
+
+	QGraphicsView::mouseMoveEvent(e);
 }
 
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
@@ -220,14 +253,17 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	if (_mousePressed) {
 	
 		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-		//_linesList.at(_activeLine)->setCurrentPoint(_linesList.at(_activeLine)->lastPoint());
 		_linesList.at(_activeLine)->updateTcapPoint();
 		_mousePressed = false;
 
 		if (_linesList.at(_activeLine)->size() < 3) {
 			_scene->removeItem(_linesList.at(_activeLine));
 			delete _linesList.at(_activeLine);
-			_linesList.pop_back();
+			_linesList.at(_activeLine) = 0;
 		}
 	}
+
+	_activeLine = -1;
+
+	QGraphicsView::mouseReleaseEvent(e);
 }

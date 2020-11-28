@@ -16,7 +16,6 @@ private:
 
 	QPoint _linePoints[MAX_STATIONS];
 	int _pointsCounter;
-	static int _linesNumber;
 	bool _circularLine;
 	QColor _color;
 	Name _name;
@@ -27,7 +26,7 @@ private:
 
 public:
 
-	Line(QPoint stationPoint);
+	Line(QPoint stationPoint, int index);
 	~Line();
 
 	// Metodi virtuali reimplementati

@@ -63,8 +63,10 @@ void Button::paint(QPainter* painter,
 		painter->setPen(pen);
 		painter->setRenderHint(QPainter::Antialiasing);
 
-		painter->drawEllipse(_position, BUTTON_SIZE / 2, BUTTON_SIZE / 2);
-		
+        if(Game::instance()->lineExists(_index))
+            painter->drawEllipse(_position, BUTTON_SIZE_BIG / 2, BUTTON_SIZE_BIG / 2);
+        else
+            painter->drawEllipse(_position, BUTTON_SIZE / 2, BUTTON_SIZE / 2);
 	}
 
 }
@@ -72,13 +74,14 @@ void Button::paint(QPainter* painter,
 QRectF Button::boundingRect() const{
 
 	//da cambiare
-	return QRectF(_position.x() - BUTTON_SIZE/2, _position.y() - BUTTON_SIZE / 2,
-                    BUTTON_SIZE, BUTTON_SIZE);
+	return QRectF(_position.x() - BUTTON_SIZE_BIG /2, _position.y() - BUTTON_SIZE_BIG / 2,
+                  BUTTON_SIZE_BIG, BUTTON_SIZE_BIG);
 }
 
 void Button::mousePressEvent(QGraphicsSceneMouseEvent* e) {
 
-    // to do
-    // Game::instance()->cancellalinea(_index);
+    // printf("stai cliccando sul tasto %d\n", _index);
+    Game::instance()->deleteLine(_index);
+    QGraphicsItem::mousePressEvent(e);
 
 }

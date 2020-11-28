@@ -48,19 +48,24 @@ public:
 
 	Station* spawnStation(int x = 400, int y = 400);
 
-public slots:
+	void deleteLine(int lineIndex);
 
-	// advance to the next frame
-	void advance();
-
-	// resets the game
-	void reset();
-
-	void start();
+	bool lineExists(int index) { return _linesList.at(index); }
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);
 	void mousePressEvent(QMouseEvent* e);
 	void mouseMoveEvent(QMouseEvent* e);
 	void mouseReleaseEvent(QMouseEvent* e);
+
+public slots:
+
+	// advance to the next frame
+	void advance();
+	// resets the game
+	void reset();
+	// starts the game
+	void start();
+
+
 };
