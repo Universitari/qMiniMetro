@@ -36,7 +36,7 @@ void Game::init() {
 
 		// set window dimensions
 		setFixedWidth(GAME_SCALE * _scene->width());
-		setFixedHeight(GAME_SCALE * _scene->height());
+		setFixedHeight(GAME_SCALE * _scene->height() + 2);
 		Map::instance()->load(":/Graphics/LondonMap.png", _scene);
 	}
 }
@@ -77,7 +77,7 @@ void Game::start() {
 
 	if (_state == READY) {
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 20; i++) {
 			_stationsList.push_back(spawnStation());
 			_scene->addItem(_stationsList.back());
 			printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
@@ -113,7 +113,7 @@ Station* Game::spawnStation(int x, int y) {
 
 					spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE));
 					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 8*STATION_SIZE));
-					printf("cambiate coordinate\n");
+					// printf("cambiate coordinate\n");
 					found = true;
 					break;
 				}
@@ -131,10 +131,10 @@ Station* Game::spawnStation(int x, int y) {
 
 void Game::deleteLine(int lineIndex){
 
-	// it crashed more than once, dunno why
+	// it crashed with the delete action
 	if (_linesList.at(lineIndex) != 0) {
 		_scene->removeItem(_linesList.at(lineIndex));
-		delete _linesList.at(lineIndex);
+		// delete _linesList.at(lineIndex);
 		_linesList.at(lineIndex) = 0;
 	}
 }
