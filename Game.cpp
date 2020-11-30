@@ -94,6 +94,9 @@ void Game::start() {
 			_linesList.shrink_to_fit();
 		}
 
+		treno = new Train(0, QPoint(400, 400));
+		_scene->addItem(treno);
+
 		_engine.start();
 		_state = RUNNING;
 		printf("Game started\n");

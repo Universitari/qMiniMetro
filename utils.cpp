@@ -18,3 +18,39 @@ float angularCoeff(QPoint p1, QPoint p2) {
 float distance(QPoint p1, QPoint p2){
 	return sqrt(pow((p1.x() - p2.x()), 2) + pow((p1.y() - p2.y()), 2));
 }
+
+QColor setColor(int index){
+
+    switch (index) {
+    case(0):
+        // Yellow
+        return QColor(255, 206, 0);
+    case(1):
+        // Red
+        return QColor(220, 36, 31);
+    case(2):
+        // Dark blue
+        return QColor(0, 25, 168);
+    case(3):
+        // Blue
+        return QColor(0, 160, 255);
+    case(4):
+        // Green
+        return QColor(0, 114, 41);
+    case(5):
+        // Pink
+        return QColor(215, 153, 175);
+    case(6):
+        // Brown
+        return QColor(137, 78, 36);
+    default:
+        // Black
+        return QColor(0, 0, 0);
+    }
+}
+
+void rotate(QPainter* p, const QRect& r, qreal angle) {
+    p->translate(r.center());
+    p->rotate(angle);
+    p->translate(-r.center());
+}

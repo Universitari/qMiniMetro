@@ -1,6 +1,6 @@
 #include "Line.h"
 
-Line::Line(QPoint startP, int index){
+Line::Line(QPoint startP, int index) {
 
     _linePoints[0] = startP;
     _linePoints[1] = startP;
@@ -10,37 +10,8 @@ Line::Line(QPoint startP, int index){
     _name = Name(index);
     _state = INITIAL;
     setZValue(1);
-    
-    switch (_name) {
-        case(CIRCLE):
-            // Yellow
-            _color = QColor(255, 206, 0);
-            break;
-        case(CENTRAL):
-            // Red
-            _color = QColor(220, 36, 31);
-            break;
-        case(PICCADILLY):
-            // Dark blue
-            _color = QColor(0, 25, 168);
-            break;
-        case(VICTORIA):
-            // Blue
-            _color = QColor(0, 160, 255);
-            break;
-        case(DISTRICT):
-            // Green
-            _color = QColor(0, 114, 41);
-            break;
-        case(HAMMERSMITH):
-            // Pink
-            _color = QColor(215, 153, 175);
-            break;
-        case(BAKERLOO):
-            // Brown
-            _color = QColor(137, 78, 36);
-            break;
-    }
+
+    _color = setColor(_name);
 }
 
 Line::~Line(){
@@ -54,7 +25,6 @@ void Line::paint(QPainter* painter,
 	QWidget* widget) {
 
     QPen pen;
-
     painter->setRenderHint(QPainter::Antialiasing);
 
     // Show bounding rect

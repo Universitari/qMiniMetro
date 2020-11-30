@@ -15,36 +15,7 @@ Button::Button(int index) {
 		break;
 	}
 
-    switch (_index) {
-    case(0):
-        // Yellow
-        _color = QColor(255, 206, 0);
-        break;
-    case(1):
-        // Red
-        _color = QColor(220, 36, 31);
-        break;
-    case(2):
-        // Dark blue
-        _color = QColor(0, 25, 168);
-        break;
-    case(3):
-        // Blue
-        _color = QColor(0, 160, 255);
-        break;
-    case(4):
-        // Green
-        _color = QColor(0, 114, 41);
-        break;
-    case(5):
-        // Pink
-        _color = QColor(215, 153, 175);
-        break;
-    case(6):
-        // Brown
-        _color = QColor(137, 78, 36);
-        break;
-    }
+	_color = setColor(_index);
 	
 	setZValue(2);
 

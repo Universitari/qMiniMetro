@@ -11,6 +11,7 @@
 #include "Station.h"
 #include "Line.h"
 #include "Button.h"
+#include "Train.h"
 
 
 class Game : public QGraphicsView {
@@ -37,6 +38,7 @@ private:
 	std::vector<Station*> _stationsList;
 	std::vector<Line*> _linesList;
 	std::vector<Button*> _deleteButtons;
+	Train *treno;
 
 	std::vector<std::list<int>> _graph;
 

@@ -59,5 +59,6 @@ public:
 	void updateTcapPoint();
 	QLine setTcap(QPoint p1, QPoint p2);
 	bool pointerOnCap(QPoint pointerPos);
+	//float getAngle();
 
 };
