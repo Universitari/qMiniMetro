@@ -93,7 +93,7 @@ void Line::setNextPoint(QPoint nextP) {
     else {
 
         std::list<QPoint>::iterator iter = _stations.begin();
-        while (iter != _stations.end()) {
+        while (iter != std::prev(_stations.end())) {
 
             if (iter == _stations.begin()) {
                 _path.moveTo(*iter);
@@ -102,8 +102,8 @@ void Line::setNextPoint(QPoint nextP) {
 
             if (std::next(iter) != std::prev(_stations.end())) {
 
-                _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -50));
-                _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -50));
+                _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -35));
+                _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
                 printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
             }
             else {
