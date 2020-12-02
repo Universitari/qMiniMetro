@@ -2,10 +2,6 @@
 
 Line::Line(QPoint startP, int index) {
 
-    _linePoints[0] = startP;
-    _linePoints[1] = startP;
-    _linePoints[2] = startP;
-    _pointsCounter = 2;
     _circularLine = false;
     _name = Name(index);
     _state = INITIAL;
@@ -36,30 +32,35 @@ void Line::paint(QPainter* painter,
     painter->setPen(pen);
     // painter->drawRect(boundingRect().adjusted(5, 5, -5, -5));
 
-
-    if (_pointsCounter == 0) return;
+    if (_stations.size() == 0) return;
     pen.setWidth(10);
     pen.setColor(_color);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);
     painter->setPen(pen);
-    //painter->drawLine(_line);
-    //painter->drawPolyline(_linePoints, _pointsCounter+1);
+
     painter->drawPath(_path);
     painter->drawPath(_mousePath);
 
     pen.setCapStyle(Qt::SquareCap);
     painter->setPen(pen);
 
-    if (_state != MOD_TAIL) {
+    if (_circularLine) {
         painter->drawLine(_neckTcapTail);
         painter->drawLine(_TcapTail);
     }
-    if (_state != MOD_HEAD) {
-        painter->drawLine(_neckTcapHead);
-        painter->drawLine(_TcapHead);
-    }
+    else {
 
+        if (_state != MOD_TAIL) {
+            painter->drawLine(_neckTcapTail);
+            painter->drawLine(_TcapTail);
+        }
+
+        if (_state != MOD_HEAD) {
+            painter->drawLine(_neckTcapHead);
+            painter->drawLine(_TcapHead);
+        }
+    }
 }
 
 QRectF Line::boundingRect() const{
@@ -71,36 +72,49 @@ void Line::setNextPoint(QPoint nextP) {
 
     if (_state == MOD_TAIL || _state == INITIAL) {
 
-        _path.moveTo(lastPoint());
-        _path.lineTo(nextP);
+        //_path.moveTo(lastPoint());
+        //_path.lineTo(nextP);
         _stations.push_back(nextP);
     }
     else if (_state == MOD_HEAD) {
 
-        _path.moveTo(startPoint());
-        _path.lineTo(nextP);
+        //_path.moveTo(firstPoint());
+        //_path.lineTo(nextP);
         _stations.push_front(nextP);
     
     }
 
-    /*
-    if (_state == MOD_TAIL || _state == INITIAL) {
+    _path.clear();
 
-        _linePoints[_pointsCounter] = nextP;
-        _pointsCounter++;
-        _linePoints[_pointsCounter] = nextP;
+    if (size() == 2) {
+        _path.moveTo(firstPoint());
+        _path.lineTo(nextP);
     }
-    else if (_state == MOD_HEAD) {
-        
-        for (int i = _pointsCounter; i > 0; i--) {
-            _linePoints[i + 1] = _linePoints[i];
+    else {
+
+        std::list<QPoint>::iterator iter = _stations.begin();
+        while (iter != _stations.end()) {
+
+            if (iter == _stations.begin()) {
+                _path.moveTo(*iter);
+                printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
+            }
+
+            if (std::next(iter) != std::prev(_stations.end())) {
+
+                _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -50));
+                _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -50));
+                printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
+            }
+            else {
+                _path.lineTo(*std::next(iter));
+                printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
+            }
+
+            iter = std::next(iter);
         }
-        _linePoints[0] = nextP;
-        _linePoints[1] = nextP;
-        _pointsCounter++;
-    }-
-    printf("inseriti %d punti\n", _pointsCounter - 1);
-    */
+    }
+
     printf("inseriti %d punti\n", _stations.size());
 }
 
@@ -117,30 +131,19 @@ void Line::setCurrentPoint(QPoint currP) {
         _mousePath.lineTo(currP);
     }
 
-    /*
-    if (_state == MOD_TAIL || _state == INITIAL)
-        _linePoints[_pointsCounter] = currP;
-    else 
-        _linePoints[0] = currP;
-    */
 }
 
 
 bool Line::validPoint(QPoint p){
 
     if (!_circularLine && _stations.size() > 2) {
-        if ((p == startPoint() && (_state == MOD_TAIL || _state == INITIAL)) ||
+        if ((p == firstPoint() && (_state == MOD_TAIL || _state == INITIAL)) ||
             (p == lastPoint() && _state == MOD_HEAD)){
 
             _circularLine = true;
             return true;
         }
     }
-
-    /*for (int i = 0; i < _pointsCounter; i++) {
-        if (p == _linePoints[i])
-            return false;
-    }*/
 
     for (auto& s : _stations) {
         if (p == s)
@@ -150,23 +153,15 @@ bool Line::validPoint(QPoint p){
     return true;
 }
 
-QPoint Line::TcapPoint(QPoint p1, QPoint p2){
+QPoint Line::nextPointOnLine(QPoint p1, QPoint p2, int length){
 
     float m = angularCoeff(p1, p2);
     float angle = atan(m);
-    int length = 40;
     int x = cos(angle) * length;
     int y = sin(angle) * length;
  
     if (p1.x() > p2.x())
         x = -x;
-
-    /*
-    if(edgePoint == startPoint())
-        return QPoint(edgePoint.x() - x, edgePoint.y() - y);
-    else
-        return QPoint(edgePoint.x() + x, edgePoint.y() + y);
-    */
 
     return QPoint(p1.x() - x, p1.y() - y);
 }
@@ -174,29 +169,21 @@ QPoint Line::TcapPoint(QPoint p1, QPoint p2){
 void Line::updateTcapPoint(){
 
     std::list<QPoint>::iterator iter = std::next(_stations.begin());
+    QPoint point = nextPointOnLine(firstPoint(), *iter, 40);
 
     if (_state == MOD_HEAD || _state == INITIAL) {
-        //setCurrentPoint(startPoint());
-        //_linePoints[0] = TcapPoint(_linePoints[1], _linePoints[2], _linePoints[0]);
-        //_TcapHead = setTcap(_linePoints[1], _linePoints[0]);
-        
-        //_path.moveTo(startPoint());
-        //_path.lineTo(TcapPoint(startPoint(), *iter));
-        _neckTcapHead = QLine(startPoint(), TcapPoint(startPoint(), *iter));
-        _TcapHead = setTcap(startPoint(), TcapPoint(startPoint(), *iter));
+
+        _neckTcapHead = QLine(firstPoint(), point);
+        _TcapHead = setTcap(firstPoint(), point);
     }
     
     iter = std::prev(std::prev(_stations.end()));
+    point = nextPointOnLine(lastPoint(), *iter, 40);
 
     if (_state == MOD_TAIL || _state == INITIAL) {
-        //setCurrentPoint(lastPoint());
-        //_linePoints[_pointsCounter] = TcapPoint(_linePoints[_pointsCounter - 2], _linePoints[_pointsCounter - 1], _linePoints[_pointsCounter]);
-        //_TcapTail = setTcap(_linePoints[_pointsCounter - 1], _linePoints[_pointsCounter]);
-        
-        //_path.moveTo(lastPoint());
-        //_path.lineTo(TcapPoint(lastPoint(), *iter));
-        _neckTcapTail = QLine(lastPoint(), TcapPoint(lastPoint(), *iter));
-        _TcapTail = setTcap(lastPoint(), TcapPoint(lastPoint(), *iter));
+
+        _neckTcapTail = QLine(lastPoint(), point);
+        _TcapTail = setTcap(lastPoint(), point);
     }
 
     _mousePath.clear();

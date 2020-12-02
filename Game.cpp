@@ -234,6 +234,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 
 				if (_linesList.at(_activeLine)->validPoint(centerPoint)) {
 					_linesList.at(_activeLine)->setNextPoint(centerPoint);
+
 					_graph.at(_activeStation).push_back(s->index());
 					_graph.at(s->index()).push_back(_activeStation);
 					_activeStation = s->index();
