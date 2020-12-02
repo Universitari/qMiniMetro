@@ -19,10 +19,14 @@ private:
 	bool _circularLine;
 	QColor _color;
 	Name _name;
-	QLine _TcapHead;
-	QLine _TcapTail;
+	QLine _TcapHead, _neckTcapHead;
+	QLine _TcapTail, _neckTcapTail;
 	State _state;
 	QPolygon* _TcapHitbox;
+
+	std::list<QPoint> _stations;
+	QPainterPath _mousePath;
+	QPainterPath _path;
 
 public:
 
@@ -47,15 +51,18 @@ public:
 	void setCircularLine(bool flag) { _circularLine = flag; }
 
 	// Getters
-	QPoint startPoint() { return _linePoints[1]; }
-	QPoint lastPoint() { return _linePoints[_pointsCounter - 1]; }
+	//QPoint startPoint() { return _linePoints[1]; }
+	QPoint startPoint() { return _stations.front(); }
+	//QPoint lastPoint() { return _linePoints[_pointsCounter - 1]; }
+	QPoint lastPoint() { return _stations.back(); }
 	bool circularLine() { return _circularLine; }
 	State state() { return _state; }
 
 	// Utility
 	bool validPoint(QPoint p);
-	unsigned int size() { return _pointsCounter; }
-	QPoint TcapPoint(QPoint p1, QPoint p2, QPoint edgePoint);
+	// unsigned int size() { return _pointsCounter; }
+	unsigned int size() { return _stations.size(); }
+	QPoint TcapPoint(QPoint p1, QPoint p2);
 	void updateTcapPoint();
 	QLine setTcap(QPoint p1, QPoint p2);
 	bool pointerOnCap(QPoint pointerPos);

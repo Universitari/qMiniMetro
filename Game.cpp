@@ -94,8 +94,8 @@ void Game::start() {
 			_linesList.shrink_to_fit();
 		}
 
-		treno = new Train(0, QPoint(400, 400));
-		_scene->addItem(treno);
+		//treno = new Train(0, QPoint(400, 400));
+		//_scene->addItem(treno);
 
 		_engine.start();
 		_state = RUNNING;
@@ -191,7 +191,7 @@ void Game::mousePressEvent(QMouseEvent* e){
 				if (s->pointerOnStation(e->pos())) {
 
 					QPoint centerPoint(s->position().x() + STATION_SIZE / 2,
-						s->position().y() + STATION_SIZE / 2);
+									   s->position().y() + STATION_SIZE / 2);
 
 					_linesList.at(_activeLine) = new Line(centerPoint, _activeLine);
 					_mousePressed = true;
@@ -259,7 +259,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 		_linesList.at(_activeLine)->updateTcapPoint();
 		_mousePressed = false;
 
-		if (_linesList.at(_activeLine)->size() < 3) {
+		if (_linesList.at(_activeLine)->size() < 2) {
 			_scene->removeItem(_linesList.at(_activeLine));
 			delete _linesList.at(_activeLine);
 			_linesList.at(_activeLine) = 0;
