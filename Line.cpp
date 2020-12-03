@@ -70,49 +70,30 @@ QRectF Line::boundingRect() const{
 
 void Line::setNextPoint(QPoint nextP) {
 
-    if (_state == MOD_TAIL || _state == INITIAL) {
-
-        //_path.moveTo(lastPoint());
-        //_path.lineTo(nextP);
+    if (_state == MOD_TAIL || _state == INITIAL)
         _stations.push_back(nextP);
-    }
-    else if (_state == MOD_HEAD) {
 
-        //_path.moveTo(firstPoint());
-        //_path.lineTo(nextP);
+    else if (_state == MOD_HEAD)
         _stations.push_front(nextP);
-    
-    }
 
     _path.clear();
 
-    if (size() == 2) {
-        _path.moveTo(firstPoint());
-        _path.lineTo(nextP);
-    }
-    else {
+    std::list<QPoint>::iterator iter = _stations.begin();
 
-        std::list<QPoint>::iterator iter = _stations.begin();
-        while (iter != std::prev(_stations.end())) {
+    while (iter != std::prev(_stations.end())) {
 
-            if (iter == _stations.begin()) {
-                _path.moveTo(*iter);
-                printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
-            }
+        if (iter == _stations.begin()) 
+            _path.moveTo(*iter);
 
-            if (std::next(iter) != std::prev(_stations.end())) {
+        if (std::next(iter) != std::prev(_stations.end())) {
 
-                _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -35));
-                _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
-                printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
-            }
-            else {
-                _path.lineTo(*std::next(iter));
-                printf("Posizione di path: %d, %d\n", _path.currentPosition().x(), _path.currentPosition().y());
-            }
-
-            iter = std::next(iter);
+            _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -35));
+            _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
         }
+        else 
+            _path.lineTo(*std::next(iter));
+
+        iter = std::next(iter);
     }
 
     printf("inseriti %d punti\n", _stations.size());
