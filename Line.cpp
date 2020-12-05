@@ -101,7 +101,7 @@ void Line::setNextPoint(QPoint nextP) {
 
 void Line::setCurrentPoint(QPoint currP) { 
     
-    if (_state == MOD_TAIL || _state == INITIAL) {
+    /*if (_state == MOD_TAIL || _state == INITIAL) {
         _mousePath.clear();
         _mousePath.moveTo(_stations.back());
         _mousePath.lineTo(currP);
@@ -109,6 +109,19 @@ void Line::setCurrentPoint(QPoint currP) {
     else {
         _mousePath.clear();
         _mousePath.moveTo(_stations.front());
+        _mousePath.lineTo(currP);
+    }*/
+
+    if (_state == MOD_TAIL || _state == INITIAL) {
+        _mousePath.clear();
+        _mousePath.moveTo(_stations.back());
+        _mousePath.lineTo(middlePoint(_stations.back(), currP, sector(_stations.back(), currP)));
+        _mousePath.lineTo(currP);
+    }
+    else {
+        _mousePath.clear();
+        _mousePath.moveTo(_stations.front());
+        _mousePath.lineTo(middlePoint(_stations.front(), currP, sector(_stations.front(), currP)));
         _mousePath.lineTo(currP);
     }
 
@@ -252,4 +265,66 @@ bool Line::pointerOnCap(QPoint pointerPos){
     }
         
     return false;
+}
+
+int Line::sector(QPoint s, QPoint p) {
+
+    if (p.x() > s.x() && p.y() > s.y())
+        return 1;
+
+/*
+    if (p.x() >= s.x() && p.y() >= s.y())
+        return 1;
+    else if (p.x() < s.x() && p.y() > s.y())
+        return 2;
+
+
+    if (abs(p.x()) > s.x()) {
+        if (p.y() > s.y() && p.y() < p.x() - s.x() - s.y())
+            return 1;
+        else return 2;
+    }
+    else return 2;
+
+*/
+
+    return -1;
+    
+}
+
+QPoint Line::middlePoint(QPoint s, QPoint p, int sector){
+
+    QLineF line1(s, p);
+    QLineF line2;
+    QLineF line3;
+
+    switch (sector) {
+        case(1): {
+            if (line1.dx() > line1.dy()) {
+
+                line2.setP1(QPoint(p.x() - (p.y() - s.y()), s.y()));
+                line2.setP2(p);
+
+                line3.setP1(QPoint(s.x() + (p.y() - s.y()), p.y()));
+                line3.setP2(p);
+
+                if (line2.length() < line3.length())
+                    return QPoint(p.x() - (p.y() - s.y()), s.y());
+                else return QPoint(s.x() + (p.y() - s.y()), p.y());
+            }
+            else {
+
+                line2.setP1(QPoint(s.x(), p.y() - (p.x() - s.x())));
+                line2.setP2(p);
+
+                line3.setP1(QPoint(p.x(), s.y() + (p.x() - s.x())));
+                line3.setP2(p);
+
+                if (line2.length() < line3.length())
+                    return QPoint(s.x(), p.y() - (p.x() - s.x()));
+                else return QPoint(p.x(), s.y() + (p.x() - s.x()));
+            }
+        }
+    }
+    
 }

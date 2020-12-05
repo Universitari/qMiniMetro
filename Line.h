@@ -28,6 +28,8 @@ private:
 	State _state;
 	std::list<QPoint> _stations;
 
+	//QLine _currLine;
+
 
 public:
 
@@ -65,5 +67,8 @@ public:
 	void updateTcapPoint();
 	QLine setTcap(QPoint p1, QPoint p2);
 	bool pointerOnCap(QPoint pointerPos);
+
+	int sector(QPoint s, QPoint pointerPos);
+	QPoint middlePoint(QPoint s, QPoint p, int sector);
 
 };
