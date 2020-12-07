@@ -77,23 +77,32 @@ void Line::setNextPoint(QPoint nextP) {
         _stations.push_front(nextP);
 
     _path.clear();
-
+    
     std::list<QPoint>::iterator iter = _stations.begin();
+    _path.moveTo(*iter);
 
     while (iter != std::prev(_stations.end())) {
 
-        if (iter == _stations.begin()) 
+    /*
+        if (iter == _stations.begin())
             _path.moveTo(*iter);
+
 
         if (std::next(iter) != std::prev(_stations.end())) {
 
             _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -35));
             _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
+            
         }
         else 
             _path.lineTo(*std::next(iter));
+    */
 
-        iter = std::next(iter);
+      _path.lineTo(nextPointOnLine(middlePoint(*iter, *std::next(iter)), *iter, -15));
+      _path.quadTo(middlePoint(*iter, *std::next(iter)), nextPointOnLine(middlePoint(*iter, *std::next(iter)), *std::next(iter), -15));
+      _path.lineTo(*std::next(iter));
+
+      iter = std::next(iter);
     }
 
     printf("inseriti %d punti\n", _stations.size());
@@ -115,16 +124,17 @@ void Line::setCurrentPoint(QPoint currP) {
     if (_state == MOD_TAIL || _state == INITIAL) {
         _mousePath.clear();
         _mousePath.moveTo(_stations.back());
-        _mousePath.lineTo(middlePoint(_stations.back(), currP, sector(_stations.back(), currP)));
+        _mousePath.lineTo(nextPointOnLine(middlePoint(_stations.back(), currP), _stations.back(), -15));
+        _mousePath.quadTo(middlePoint(_stations.back(), currP), nextPointOnLine(middlePoint(_stations.back(), currP), currP, -15));
         _mousePath.lineTo(currP);
     }
     else {
         _mousePath.clear();
         _mousePath.moveTo(_stations.front());
-        _mousePath.lineTo(middlePoint(_stations.front(), currP, sector(_stations.front(), currP)));
+        _mousePath.lineTo(nextPointOnLine(middlePoint(_stations.front(), currP), _stations.front(), -15));
+        _mousePath.quadTo(middlePoint(_stations.front(), currP), nextPointOnLine(middlePoint(_stations.front(), currP), currP, -15));
         _mousePath.lineTo(currP);
     }
-
 }
 
 
@@ -163,7 +173,7 @@ QPoint Line::nextPointOnLine(QPoint p1, QPoint p2, int length){
 void Line::updateTcapPoint(){
 
     std::list<QPoint>::iterator iter = std::next(_stations.begin());
-    QPoint point = nextPointOnLine(firstPoint(), *iter, 40);
+    QPoint point = nextPointOnLine(firstPoint(), middlePoint(firstPoint(), *iter), 40);
 
     if (_state == MOD_HEAD || _state == INITIAL) {
 
@@ -172,7 +182,7 @@ void Line::updateTcapPoint(){
     }
     
     iter = std::prev(std::prev(_stations.end()));
-    point = nextPointOnLine(lastPoint(), *iter, 40);
+    point = nextPointOnLine(lastPoint(), middlePoint(*iter, lastPoint()), 40);
 
     if (_state == MOD_TAIL || _state == INITIAL) {
 
@@ -269,62 +279,133 @@ bool Line::pointerOnCap(QPoint pointerPos){
 
 int Line::sector(QPoint s, QPoint p) {
 
-    if (p.x() > s.x() && p.y() > s.y())
-        return 1;
-
-/*
     if (p.x() >= s.x() && p.y() >= s.y())
         return 1;
-    else if (p.x() < s.x() && p.y() > s.y())
+    else if (p.x() < s.x() && p.y() >= s.y())
         return 2;
-
-
-    if (abs(p.x()) > s.x()) {
-        if (p.y() > s.y() && p.y() < p.x() - s.x() - s.y())
-            return 1;
-        else return 2;
-    }
-    else return 2;
-
-*/
-
-    return -1;
-    
+    else if (p.x() <= s.x() && p.y() < s.y())
+        return 3;
+    else if (p.x() > s.x() && p.y() <= s.y())
+        return 4;
 }
 
-QPoint Line::middlePoint(QPoint s, QPoint p, int sector){
+QPoint Line::middlePoint(QPoint s, QPoint p){
 
     QLineF line1(s, p);
     QLineF line2;
-    QLineF line3;
 
-    switch (sector) {
-        case(1): {
-            if (line1.dx() > line1.dy()) {
+    int quadrant = sector(s, p);
 
-                line2.setP1(QPoint(p.x() - (p.y() - s.y()), s.y()));
-                line2.setP2(p);
+    switch (quadrant) {
+    case(1): {
 
-                line3.setP1(QPoint(s.x() + (p.y() - s.y()), p.y()));
-                line3.setP2(p);
+        if (line1.dx() > line1.dy()) {
 
-                if (line2.length() < line3.length())
-                    return QPoint(p.x() - (p.y() - s.y()), s.y());
-                else return QPoint(s.x() + (p.y() - s.y()), p.y());
-            }
-            else {
+            line2.setP1(QPoint(p.x() - (p.y() - s.y()), s.y()));
+            line2.setP2(p);
 
-                line2.setP1(QPoint(s.x(), p.y() - (p.x() - s.x())));
-                line2.setP2(p);
+            line1.setP1(QPoint(s.x() + (p.y() - s.y()), p.y()));
+            line1.setP2(p);
 
-                line3.setP1(QPoint(p.x(), s.y() + (p.x() - s.x())));
-                line3.setP2(p);
+            if (line2.length() < line1.length())
+                return QPoint(p.x() - (p.y() - s.y()), s.y());
+            else return QPoint(s.x() + (p.y() - s.y()), p.y());
+        }
+        else {
 
-                if (line2.length() < line3.length())
-                    return QPoint(s.x(), p.y() - (p.x() - s.x()));
-                else return QPoint(p.x(), s.y() + (p.x() - s.x()));
-            }
+            line2.setP1(QPoint(s.x(), p.y() - (p.x() - s.x())));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(p.x(), s.y() + (p.x() - s.x())));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(s.x(), p.y() - (p.x() - s.x()));
+            else return QPoint(p.x(), s.y() + (p.x() - s.x()));
         }
     }
-    
+
+    case(2): {
+
+        if (abs(line1.dx()) > abs(line1.dy())) {
+
+            line2.setP1(QPoint(p.x() + (p.y() - s.y()), s.y()));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(s.x() - (p.y() - s.y()), p.y()));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(p.x() + (p.y() - s.y()), s.y());
+            else return QPoint(s.x() - (p.y() - s.y()), p.y());
+        }
+        else {
+
+            line2.setP1(QPoint(s.x(), p.y() - (s.x() - p.x())));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(p.x(), s.y() + (s.x() - p.x())));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(s.x(), p.y() - (s.x() - p.x()));
+            else return QPoint(p.x(), s.y() + (s.x() - p.x()));
+        }
+    }
+
+    case(3): {
+
+        if (abs(line1.dx()) > abs(line1.dy())) {
+
+            line2.setP1(QPoint(p.x() - (p.y() - s.y()), s.y()));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(s.x() + (p.y() - s.y()), p.y()));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(p.x() - (p.y() - s.y()), s.y());
+            else return QPoint(s.x() + (p.y() - s.y()), p.y());
+        }
+        else {
+
+            line2.setP1(QPoint(s.x(), p.y() + (s.x() - p.x())));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(p.x(), s.y() - (s.x() - p.x())));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(s.x(), p.y() + (s.x() - p.x()));
+            else return QPoint(p.x(), s.y() - (s.x() - p.x()));
+        }
+    }
+    case(4): {
+
+        if (abs(line1.dx()) > abs(line1.dy())) {
+
+            line2.setP1(QPoint(p.x() + (p.y() - s.y()), s.y()));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(s.x() - (p.y() - s.y()), p.y()));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(p.x() + (p.y() - s.y()), s.y());
+            else return QPoint(s.x() - (p.y() - s.y()), p.y());
+        }
+        else {
+
+            line2.setP1(QPoint(s.x(), p.y() + (p.x() - s.x())));
+            line2.setP2(p);
+
+            line1.setP1(QPoint(p.x(), s.y() + (s.x() - p.x())));
+            line1.setP2(p);
+
+            if (line2.length() < line1.length())
+                return QPoint(s.x(), p.y() + (p.x() - s.x()));
+            else return QPoint(p.x(), s.y() + (s.x() - p.x()));
+        }
+    }
+    }
 }

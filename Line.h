@@ -28,9 +28,6 @@ private:
 	State _state;
 	std::list<QPoint> _stations;
 
-	//QLine _currLine;
-
-
 public:
 
 	Line(QPoint stationPoint, int index);
@@ -69,6 +66,17 @@ public:
 	bool pointerOnCap(QPoint pointerPos);
 
 	int sector(QPoint s, QPoint pointerPos);
-	QPoint middlePoint(QPoint s, QPoint p, int sector);
+	QPoint middlePoint(QPoint s, QPoint p);
 
 };
+/*            _path.lineTo(nextPointOnLine(middlePoint(pathPos, *std::next(iter)), pathPos, -10));
+                pathPos.setX(_path.currentPosition().x());
+                pathPos.setY(_path.currentPosition().y());
+            _path.quadTo(middlePoint(*iter, *std::next(iter)), nextPointOnLine(middlePoint(*iter, *std::next(iter)), *std::next(std::next(iter)), -10));
+                pathPos.setX(_path.currentPosition().x());
+                pathPos.setY(_path.currentPosition().y());
+            _path.lineTo(nextPointOnLine(pathPos, *std::next(iter), -35));
+                pathPos.setX(_path.currentPosition().x());
+                pathPos.setY(_path.currentPosition().y());
+            _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
+*/
