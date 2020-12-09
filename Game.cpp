@@ -77,6 +77,12 @@ void Game::start() {
 
 	if (_state == READY) {
 
+		_stationsList.push_back(spawnStation(200, 200));
+		_scene->addItem(_stationsList.back());
+		_stationsList.push_back(spawnStation(200, 600));
+		_scene->addItem(_stationsList.back());
+		_stationsList.push_back(spawnStation(200, 400));
+		_scene->addItem(_stationsList.back());
 		for (int i = 0; i < 20; i++) {
 			_stationsList.push_back(spawnStation());
 			_scene->addItem(_stationsList.back());
@@ -165,6 +171,13 @@ void Game::keyPressEvent(QKeyEvent* e){
 				std::cout << i << ", ";
 			std::cout << std::endl;
 		}
+	}
+	if (e->key() == Qt::Key_D && _state == RUNNING) {
+		bool visible = true;
+		if (_stationsList.at(0)->isVisible())
+			visible = false;
+		for (auto& s : _stationsList)
+			s->setVisible(visible);
 	}
 }
 

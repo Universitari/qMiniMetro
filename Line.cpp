@@ -81,28 +81,28 @@ void Line::setNextPoint(QPoint nextP) {
     std::list<QPoint>::iterator iter = _stations.begin();
     _path.moveTo(*iter);
 
+    QPoint p;
+
     while (iter != std::prev(_stations.end())) {
-
-    /*
-        if (iter == _stations.begin())
-            _path.moveTo(*iter);
-
-
-        if (std::next(iter) != std::prev(_stations.end())) {
-
-            _path.lineTo(nextPointOnLine(*std::next(iter), *iter, -35));
-            _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
-            
-        }
-        else 
+    
+        if ((*iter).x() == (*std::next(iter)).x() || (*iter).y() == (*std::next(iter)).y())
             _path.lineTo(*std::next(iter));
-    */
+        else if(angularCoeff(*iter, *std::next(iter)) == 1 || angularCoeff(*iter, *std::next(iter)) == -1)
+            _path.lineTo(*std::next(iter));
+        else {
+            _path.lineTo(nextPointOnLine(middlePoint(*iter, *std::next(iter)), *iter, MIDPOINT_CURVE));
+            _path.quadTo(middlePoint(*iter, *std::next(iter)), nextPointOnLine(middlePoint(*iter, *std::next(iter)), *std::next(iter), MIDPOINT_CURVE));
+            if (std::next(std::next(iter)) != _stations.end()) {
+                p = nextPointOnLine(*std::next(iter), middlePoint(*iter, *std::next(iter)), STATION_CURVE);
+                _path.lineTo(p);
 
-      _path.lineTo(nextPointOnLine(middlePoint(*iter, *std::next(iter)), *iter, -15));
-      _path.quadTo(middlePoint(*iter, *std::next(iter)), nextPointOnLine(middlePoint(*iter, *std::next(iter)), *std::next(iter), -15));
-      _path.lineTo(*std::next(iter));
+                p = nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), STATION_CURVE);
+                _path.quadTo(*std::next(iter), p);
+            }
+            else _path.lineTo(*std::next(iter));
+        }
 
-      iter = std::next(iter);
+        iter = std::next(iter);
     }
 
     printf("inseriti %d punti\n", _stations.size());
@@ -120,20 +120,29 @@ void Line::setCurrentPoint(QPoint currP) {
         _mousePath.moveTo(_stations.front());
         _mousePath.lineTo(currP);
     }*/
-
     if (_state == MOD_TAIL || _state == INITIAL) {
         _mousePath.clear();
         _mousePath.moveTo(_stations.back());
-        _mousePath.lineTo(nextPointOnLine(middlePoint(_stations.back(), currP), _stations.back(), -15));
-        _mousePath.quadTo(middlePoint(_stations.back(), currP), nextPointOnLine(middlePoint(_stations.back(), currP), currP, -15));
-        _mousePath.lineTo(currP);
+
+        if(middlePoint(_stations.back(), currP) == currP)
+            _mousePath.lineTo(currP);
+        else {
+            _mousePath.lineTo(nextPointOnLine(middlePoint(_stations.back(), currP), _stations.back(), MIDPOINT_CURVE));
+            _mousePath.quadTo(middlePoint(_stations.back(), currP), nextPointOnLine(middlePoint(_stations.back(), currP), currP, MIDPOINT_CURVE));
+            _mousePath.lineTo(currP);
+        }
     }
     else {
         _mousePath.clear();
         _mousePath.moveTo(_stations.front());
-        _mousePath.lineTo(nextPointOnLine(middlePoint(_stations.front(), currP), _stations.front(), -15));
-        _mousePath.quadTo(middlePoint(_stations.front(), currP), nextPointOnLine(middlePoint(_stations.front(), currP), currP, -15));
-        _mousePath.lineTo(currP);
+
+        if (middlePoint(_stations.front(), currP) == currP)
+            _mousePath.lineTo(currP);
+        else {
+            _mousePath.lineTo(nextPointOnLine(middlePoint(_stations.front(), currP), _stations.front(), -15));
+            _mousePath.quadTo(middlePoint(_stations.front(), currP), nextPointOnLine(middlePoint(_stations.front(), currP), currP, -15));
+            _mousePath.lineTo(currP);
+        }
     }
 }
 
@@ -173,7 +182,15 @@ QPoint Line::nextPointOnLine(QPoint p1, QPoint p2, int length){
 void Line::updateTcapPoint(){
 
     std::list<QPoint>::iterator iter = std::next(_stations.begin());
-    QPoint point = nextPointOnLine(firstPoint(), middlePoint(firstPoint(), *iter), 40);
+
+    QPoint point;
+
+    if (sector(lastPoint(), *iter) == -1) // orizzontale o verticale
+        point = nextPointOnLine(firstPoint(), *iter, TCAP_DISTANCE);
+    else if (sector(lastPoint(), *iter) == -2) // diagonale
+        point = nextPointOnLine(firstPoint(), *iter, TCAP_DISTANCE);
+    else // non è orizzontale, verticale o diagonale
+        point = nextPointOnLine(firstPoint(), middlePoint(firstPoint(), *iter), TCAP_DISTANCE);
 
     if (_state == MOD_HEAD || _state == INITIAL) {
 
@@ -182,7 +199,13 @@ void Line::updateTcapPoint(){
     }
     
     iter = std::prev(std::prev(_stations.end()));
-    point = nextPointOnLine(lastPoint(), middlePoint(*iter, lastPoint()), 40);
+
+    if (sector(lastPoint(), *iter) == -1) // orizzontale o verticale
+        point = nextPointOnLine(lastPoint(), *iter, TCAP_DISTANCE);
+    else if (sector(lastPoint(), *iter) == -2) // diagonale
+        point = nextPointOnLine(lastPoint(), *iter, TCAP_DISTANCE);
+    else // non è orizzontale, verticale o diagonale
+        point = nextPointOnLine(lastPoint(), middlePoint(*iter, lastPoint()), TCAP_DISTANCE);
 
     if (_state == MOD_TAIL || _state == INITIAL) {
 
@@ -269,7 +292,6 @@ bool Line::pointerOnCap(QPoint pointerPos){
     _TcapHitbox->setPoint(3, _TcapTail.p2().x() - x, _TcapTail.p2().y() - y);
 
     if (_TcapHitbox->containsPoint(pointerPos, Qt::OddEvenFill) && !_circularLine) {
-        //printf("stai premendo sul tcap di coda\n");
         _state = MOD_TAIL;
         return true;
     }
@@ -279,14 +301,19 @@ bool Line::pointerOnCap(QPoint pointerPos){
 
 int Line::sector(QPoint s, QPoint p) {
 
-    if (p.x() >= s.x() && p.y() >= s.y())
+    if (p.x() == s.x() || p.y() == s.y())
+        return -1;
+    else if (angularCoeff(s, p) == 1 || angularCoeff(s, p) == -1)
+        return -2;
+    else if (p.x() > s.x() && p.y() > s.y())
         return 1;
-    else if (p.x() < s.x() && p.y() >= s.y())
+    else if (p.x() < s.x() && p.y() > s.y())
         return 2;
-    else if (p.x() <= s.x() && p.y() < s.y())
+    else if (p.x() < s.x() && p.y() < s.y())
         return 3;
-    else if (p.x() > s.x() && p.y() <= s.y())
+    else if (p.x() > s.x() && p.y() < s.y())
         return 4;
+    
 }
 
 QPoint Line::middlePoint(QPoint s, QPoint p){
@@ -407,5 +434,7 @@ QPoint Line::middlePoint(QPoint s, QPoint p){
             else return QPoint(p.x(), s.y() + (s.x() - p.x()));
         }
     }
+    case(-1): return p;
+    case(-2): return p;
     }
 }
