@@ -45,7 +45,7 @@ void Train::advance(){
 	QLineF _line = QLineF(_trainRect->center(), _path.pointAtPercent(t));
 	_trainRect->translate(_line.dx(), _line.dy());
 	//float m = _path.slopeAtPercent(t);
-	_rotationAngle = _path.angleAtPercent(t);
+	_rotationAngle = 90 - _path.angleAtPercent(t);
 	_increment += TRAIN_SPEED;
 
 }

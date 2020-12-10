@@ -57,6 +57,10 @@ void Game::reset() {
 		delete b;
 	_deleteButtons.clear();
 
+	for (auto& t : _trainsList)
+		delete t;
+	_trainsList.clear();
+
 	_stationsNumber = -1;
 	_activeStation = -1;
 	_activeLine = -1;
