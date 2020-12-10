@@ -1,13 +1,15 @@
 #include "Train.h"
 
-Train::Train(int index, QPoint _centerPoint){
+Train::Train(int index, QPoint _centerPoint, QPainterPath linePath){
 
 	_maxPass = 6;
 	_lineIndex = index;
 	_color = setColor(_lineIndex);
-	_rotationAngle = 0;
-	_trainRect = new QRect(_centerPoint.x() - TRAIN_WIDTH / 2 + STATION_SIZE/2, 
-						   _centerPoint.y() - TRAIN_HEIGHT / 2 + STATION_SIZE / 2,
+	_path = linePath;
+	_rotationAngle = 90;
+	_increment = 0;
+	_trainRect = new QRect(_centerPoint.x() - TRAIN_WIDTH / 2, 
+						   _centerPoint.y() - TRAIN_HEIGHT / 2,
 						   TRAIN_WIDTH, TRAIN_HEIGHT);
 	setZValue(2);
 
@@ -34,4 +36,16 @@ void Train::paint(QPainter* painter,
 QRectF Train::boundingRect() const{
 
 	return QRectF(*_trainRect);
+}
+
+void Train::advance(){
+
+
+	float t = _path.percentAtLength(_increment);
+	QLineF _line = QLineF(_trainRect->center(), _path.pointAtPercent(t));
+	_trainRect->translate(_line.dx(), _line.dy());
+	//float m = _path.slopeAtPercent(t);
+	_rotationAngle = _path.angleAtPercent(t);
+	_increment += TRAIN_SPEED;
+
 }

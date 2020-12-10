@@ -70,7 +70,10 @@ void Game::reset() {
 
 void Game::advance() {
 
+	for (auto& t : _trainsList)
+		t->advance();
 	_scene->update();
+	
 }
 
 void Game::start() {
@@ -271,13 +274,20 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	
 		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
 		_linesList.at(_activeLine)->updateTcapPoint();
-		_mousePressed = false;
-
+				
 		if (_linesList.at(_activeLine)->size() < 2) {
 			_scene->removeItem(_linesList.at(_activeLine));
-			delete _linesList.at(_activeLine);
+			//delete _linesList.at(_activeLine);
 			_linesList.at(_activeLine) = 0;
 		}
+		_mousePressed = false;
+		
+		if (_linesList.at(_activeLine) != 0) {
+			_trainsList.emplace_back();
+			_trainsList.back() = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+			_scene->addItem(_trainsList.back());
+		}
+		
 	}
 
 	_activeLine = -1;

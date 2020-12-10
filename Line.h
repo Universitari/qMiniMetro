@@ -9,8 +9,8 @@
 
 class Line : public Entity {
 
-	enum Name{CIRCLE, CENTRAL, PICCADILLY, VICTORIA, DISTRICT, HAMMERSMITH, BAKERLOO};
-	enum State{INITIAL, MOD_TAIL, MOD_HEAD};
+	enum Name { CIRCLE, CENTRAL, PICCADILLY, VICTORIA, DISTRICT, HAMMERSMITH, BAKERLOO };
+	enum State { INITIAL, MOD_TAIL, MOD_HEAD };
 
 private:
 
@@ -55,6 +55,7 @@ public:
 	QPoint lastPoint() { return _stations.back(); }
 	bool circularLine() { return _circularLine; }
 	State state() { return _state; }
+	QPainterPath path() { return _path; }
 
 	// Utility
 	bool validPoint(QPoint p);
@@ -69,14 +70,3 @@ public:
 	QPoint middlePoint(QPoint s, QPoint p);
 
 };
-/*            _path.lineTo(nextPointOnLine(middlePoint(pathPos, *std::next(iter)), pathPos, -10));
-                pathPos.setX(_path.currentPosition().x());
-                pathPos.setY(_path.currentPosition().y());
-            _path.quadTo(middlePoint(*iter, *std::next(iter)), nextPointOnLine(middlePoint(*iter, *std::next(iter)), *std::next(std::next(iter)), -10));
-                pathPos.setX(_path.currentPosition().x());
-                pathPos.setY(_path.currentPosition().y());
-            _path.lineTo(nextPointOnLine(pathPos, *std::next(iter), -35));
-                pathPos.setX(_path.currentPosition().x());
-                pathPos.setY(_path.currentPosition().y());
-            _path.quadTo(*std::next(iter), nextPointOnLine(*std::next(iter), *std::next(std::next(iter)), -35));
-*/

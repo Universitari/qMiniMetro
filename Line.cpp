@@ -185,9 +185,9 @@ void Line::updateTcapPoint(){
 
     QPoint point;
 
-    if (sector(lastPoint(), *iter) == -1) // orizzontale o verticale
+    if (sector(firstPoint(), *iter) == -1) // orizzontale o verticale
         point = nextPointOnLine(firstPoint(), *iter, TCAP_DISTANCE);
-    else if (sector(lastPoint(), *iter) == -2) // diagonale
+    else if (sector(firstPoint(), *iter) == -2) // diagonale
         point = nextPointOnLine(firstPoint(), *iter, TCAP_DISTANCE);
     else // non è orizzontale, verticale o diagonale
         point = nextPointOnLine(firstPoint(), middlePoint(firstPoint(), *iter), TCAP_DISTANCE);

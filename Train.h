@@ -14,10 +14,13 @@ private:
 	int _lineIndex;
 	QColor _color;
 	int _rotationAngle;
+	QPainterPath _path;
+	float _increment;
+
 
 public:
 
-	Train(int index, QPoint _centerPoint);
+	Train(int index, QPoint _centerPoint, QPainterPath linePath);
 
 	// Metodi virtuali reimplementati
 	void paint(QPainter* painter,
@@ -27,8 +30,10 @@ public:
 
 	virtual std::string name() { return "treno"; };
 	virtual void animate() {};
-	virtual void advance() {};
+	virtual void advance();
 	virtual void solveCollisions() {};
 	virtual void hit(Object* what) {};
 
+	// Setters
+	void setPath(QPainterPath linePath) { _path = linePath; }
 };

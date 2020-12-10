@@ -38,7 +38,7 @@ private:
 	std::vector<Station*> _stationsList;
 	std::vector<Line*> _linesList;
 	std::vector<Button*> _deleteButtons;
-	Train *treno;
+	std::vector<Train*> _trainsList;
 
 	std::vector<std::list<int>> _graph;
 
