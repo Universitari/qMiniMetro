@@ -277,13 +277,16 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	if (_mousePressed) {
 	
 		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-		_linesList.at(_activeLine)->updateTcapPoint();
 				
 		if (_linesList.at(_activeLine)->size() < 2) {
 			_scene->removeItem(_linesList.at(_activeLine));
 			//delete _linesList.at(_activeLine);
 			_linesList.at(_activeLine) = 0;
 		}
+
+		if(_linesList.at(_activeLine))
+			_linesList.at(_activeLine)->updateTcapPoint();
+
 		_mousePressed = false;
 		
 		if (_linesList.at(_activeLine) != 0) {
