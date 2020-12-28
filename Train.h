@@ -6,6 +6,8 @@
 
 class Train : public Entity {
 
+	enum Direction{FORWARD, BACKWARD, CIRCULAR};
+
 private:
 
 	QPoint _position;
@@ -16,7 +18,7 @@ private:
 	int _rotationAngle;
 	QPainterPath _path;
 	float _increment;
-
+	Direction _direction;
 
 public:
 
@@ -36,4 +38,11 @@ public:
 
 	// Setters
 	void setPath(QPainterPath linePath) { _path = linePath; }
+	void setDirection(int dir) { _direction = Direction(dir); }
+
+	// Getter
+	int lineIndex() { return _lineIndex; }
+
+	// Utility
+
 };

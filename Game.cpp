@@ -76,6 +76,7 @@ void Game::advance() {
 
 	for (auto& t : _trainsList)
 		t->advance();
+
 	_scene->update();
 	
 }
@@ -262,6 +263,23 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 					if (_linesList.at(_activeLine)->circularLine()) {
 						
 						_linesList.at(_activeLine)->updateTcapPoint();
+						
+						bool hasTrain = false;
+
+						for (auto& t : _trainsList)
+							if (t->lineIndex() == _activeLine) {
+								t->setPath(_linesList.at(_activeLine)->path());
+								t->setDirection(2);
+								hasTrain = true;
+							}
+
+						if (!hasTrain) {
+							_trainsList.emplace_back();
+							_trainsList.back() = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+							_trainsList.back()->setDirection(2);
+							_scene->addItem(_trainsList.back());
+						}
+
 						_mousePressed = false;
 					}
 				}
@@ -275,26 +293,38 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
 
 	if (_mousePressed) {
-	
+
 		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
-				
+
 		if (_linesList.at(_activeLine)->size() < 2) {
 			_scene->removeItem(_linesList.at(_activeLine));
 			//delete _linesList.at(_activeLine);
 			_linesList.at(_activeLine) = 0;
 		}
 
-		if(_linesList.at(_activeLine))
+		if (_linesList.at(_activeLine)){
+
 			_linesList.at(_activeLine)->updateTcapPoint();
+			
+			bool hasTrain = false;
+
+			for (auto& t : _trainsList)
+				if (t->lineIndex() == _activeLine) {
+					t->setPath(_linesList.at(_activeLine)->path());
+					hasTrain = true;
+				}
+			
+			if (!hasTrain) {
+				_trainsList.emplace_back();
+				_trainsList.back() = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+				_scene->addItem(_trainsList.back());
+			}
+
+
+		}
 
 		_mousePressed = false;
-		
-		if (_linesList.at(_activeLine) != 0) {
-			_trainsList.emplace_back();
-			_trainsList.back() = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
-			_scene->addItem(_trainsList.back());
-		}
-		
+				
 	}
 
 	_activeLine = -1;
