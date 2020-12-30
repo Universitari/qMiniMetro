@@ -19,6 +19,8 @@ private:
 	QPainterPath _path;
 	float _increment;
 	Direction _direction;
+	float _length;
+	QPainterPath _oldPath;
 
 public:
 
@@ -42,7 +44,5 @@ public:
 
 	// Getter
 	int lineIndex() { return _lineIndex; }
-
-	// Utility
 
 };

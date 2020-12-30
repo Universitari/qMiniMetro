@@ -8,6 +8,7 @@ const int WINDOW_HEIGHT = 1080;
 const int STATION_SIZE = 30;
 const int MAX_STATIONS = 200;
 const int MAX_LINES = 7;
+const int MAX_TRAINS = 20;
 const int MENU_HEIGHT = 1020;
 const int BUTTON_SIZE = 30;
 const int BUTTON_SIZE_BIG = 60;

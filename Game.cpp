@@ -74,8 +74,10 @@ void Game::reset() {
 
 void Game::advance() {
 
+
 	for (auto& t : _trainsList)
-		t->advance();
+		if(t != 0)
+			t->advance();
 
 	_scene->update();
 	
@@ -106,6 +108,12 @@ void Game::start() {
 			Line* tmp = 0;
 			_linesList.push_back(tmp);
 			_linesList.shrink_to_fit();
+		}
+
+		for (int i = 0; i < MAX_TRAINS; i++) {
+			Train* tmp = 0;
+			_trainsList.push_back(tmp);
+			_trainsList.shrink_to_fit();
 		}
 
 		//treno = new Train(0, QPoint(400, 400));
@@ -149,10 +157,21 @@ Station* Game::spawnStation(int x, int y) {
 void Game::deleteLine(int lineIndex){
 
 	// it crashed with the delete action
-	if (_linesList.at(lineIndex) != 0) {
+	if (lineExists(lineIndex)) {
+
+		for (auto& t : _trainsList) 
+			if (t != 0) 
+				if (t->lineIndex() == lineIndex) {
+					// if the program doesn't behave correctly, try this
+					// t->setPath(QPainterPath());
+					t->setVisible(false);
+					t = 0;
+				}
+		
 		_scene->removeItem(_linesList.at(lineIndex));
 		// delete _linesList.at(lineIndex);
 		_linesList.at(lineIndex) = 0;
+		
 	}
 }
 
@@ -267,17 +286,23 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 						bool hasTrain = false;
 
 						for (auto& t : _trainsList)
-							if (t->lineIndex() == _activeLine) {
-								t->setPath(_linesList.at(_activeLine)->path());
-								t->setDirection(2);
-								hasTrain = true;
+							if (t != 0) {
+								if (t->lineIndex() == _activeLine) {
+									t->setPath(_linesList.at(_activeLine)->path());
+									t->setDirection(2);
+									hasTrain = true;
+								}
 							}
 
 						if (!hasTrain) {
-							_trainsList.emplace_back();
-							_trainsList.back() = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
-							_trainsList.back()->setDirection(2);
-							_scene->addItem(_trainsList.back());
+							for (auto& t : _trainsList) {
+								if (t == 0) {
+									t = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+									t->setDirection(2);
+									_scene->addItem(t);
+									break;
+								}
+							}
 						}
 
 						_mousePressed = false;
@@ -302,22 +327,28 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 			_linesList.at(_activeLine) = 0;
 		}
 
-		if (_linesList.at(_activeLine)){
+		if (lineExists(_activeLine)){
 
 			_linesList.at(_activeLine)->updateTcapPoint();
 			
 			bool hasTrain = false;
 
 			for (auto& t : _trainsList)
-				if (t->lineIndex() == _activeLine) {
-					t->setPath(_linesList.at(_activeLine)->path());
-					hasTrain = true;
+				if (t != 0) {
+					if (t->lineIndex() == _activeLine) {
+						t->setPath(_linesList.at(_activeLine)->path());
+						hasTrain = true;
+					}
 				}
 			
 			if (!hasTrain) {
-				_trainsList.emplace_back();
-				_trainsList.back() = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
-				_scene->addItem(_trainsList.back());
+				for (auto& t : _trainsList) {
+					if (t == 0) {
+						t = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+						_scene->addItem(t);
+						break;
+					}
+				}
 			}
 
 

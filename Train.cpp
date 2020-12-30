@@ -6,8 +6,10 @@ Train::Train(int index, QPoint _centerPoint, QPainterPath linePath){
 	_lineIndex = index;
 	_color = setColor(_lineIndex);
 	_path = linePath;
+	_oldPath = _path;
 	_rotationAngle = 90;
 	_increment = 0;
+	_length = _path.length();
 	_direction = FORWARD;
 	_trainRect = new QRect(_centerPoint.x() - TRAIN_WIDTH / 2, 
 						   _centerPoint.y() - TRAIN_HEIGHT / 2,
@@ -41,6 +43,13 @@ QRectF Train::boundingRect() const{
 
 void Train::advance(){
 
+	if(_path.elementAt(0) != _oldPath.elementAt(0) && 
+	  (_direction == FORWARD || _direction == BACKWARD))
+		_increment += _path.length() - _length;
+
+	_length = _path.length();
+	_oldPath = _path;
+	
 	float t = _path.percentAtLength(_increment);
 
 	if (_direction != CIRCULAR) {
