@@ -4,10 +4,10 @@
 #include <QPoint>
 #include <QPainter>
 #include <QLine>
-#include "Entity.h"
+#include "Object.h"
 #include "utils.h"
 
-class Line : public Entity {
+class Line : public Object {
 
 	enum Name { CIRCLE, CENTRAL, PICCADILLY, VICTORIA, DISTRICT, HAMMERSMITH, BAKERLOO };
 	enum State { INITIAL, MOD_TAIL, MOD_HEAD };

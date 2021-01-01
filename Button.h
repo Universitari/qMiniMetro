@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Inert.h"
+#include "Object.h"
 #include <QPainter>
 
-class Button : public Inert {
+class Button : public Object {
 
 	enum Type {LINE, TRAIN};
 
 private:
 
 	QPoint _position;
+	QColor _color;
 	Type _type;
 	int _index = -1;
-	QColor _color;
 
 public:
 

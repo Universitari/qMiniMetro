@@ -1,30 +1,35 @@
 #pragma once
 
-#include "Entity.h"
+#include "Object.h"
 #include "utils.h"
 #include <QPainter>
 
-class Train : public Entity {
+class Train : public Object {
 
 	enum Direction{FORWARD, BACKWARD, CIRCULAR};
 
 private:
 
-	QPoint _position;
-	unsigned int _maxPass;
-	QRect *_trainRect;
-	int _lineIndex;
+	// Graphic elements
+	QRect* _trainRect;
 	QColor _color;
-	int _rotationAngle;
+	QPoint _position;
 	QPainterPath _path;
-	float _increment;
-	Direction _direction;
-	float _length;
 	QPainterPath _oldPath;
+	int _rotationAngle;
+	
+	// Logic elements
+	Direction _direction;
+	float _increment;
+	float _length;
+	unsigned int _maxPass;
+	int _lineIndex;
+	bool _circular;
+	int _index;
 
 public:
 
-	Train(int index, QPoint _centerPoint, QPainterPath linePath);
+	Train(int lineIndex, int index, QPoint _centerPoint, QPainterPath linePath);
 
 	// Metodi virtuali reimplementati
 	void paint(QPainter* painter,
@@ -40,9 +45,10 @@ public:
 
 	// Setters
 	void setPath(QPainterPath linePath) { _path = linePath; }
-	void setDirection(int dir) { _direction = Direction(dir); }
+	void setCircular(bool flag) { _circular = flag; }
 
 	// Getter
 	int lineIndex() { return _lineIndex; }
+	int index() { return _index; }
 
 };

@@ -33,7 +33,7 @@ void Line::paint(QPainter* painter,
     // painter->drawRect(boundingRect().adjusted(5, 5, -5, -5));
 
     if (_stations.size() == 0) return;
-    pen.setWidth(10);
+    pen.setWidth(LINE_WIDTH);
     pen.setColor(_color);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);

@@ -51,7 +51,7 @@ void Station::paint(QPainter* painter,
 QRectF Station::boundingRect() const{
 
 	qreal penWidth = 1;
-	return QRectF(0, 0, 30, 30);
+	return QRectF(0, 0, STATION_SIZE, STATION_SIZE);
 }
 
 bool Station::pointerOnStation(QPoint pointerPos) {

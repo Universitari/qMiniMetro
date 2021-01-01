@@ -3,10 +3,10 @@
 #include <QPoint>
 #include <QPainter>
 #include <time.h>
-#include "Inert.h"
+#include "Object.h"
 #include "config.h"
 
-class Station : public Inert {
+class Station : public Object {
 
 	enum Shape { SQUARE, TRIANGLE, CIRCLE };
 

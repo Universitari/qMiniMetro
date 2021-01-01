@@ -93,6 +93,7 @@ void Game::start() {
 		_scene->addItem(_stationsList.back());
 		_stationsList.push_back(spawnStation(200, 400));
 		_scene->addItem(_stationsList.back());
+
 		for (int i = 0; i < 20; i++) {
 			_stationsList.push_back(spawnStation());
 			_scene->addItem(_stationsList.back());
@@ -116,8 +117,8 @@ void Game::start() {
 			_trainsList.shrink_to_fit();
 		}
 
-		//treno = new Train(0, QPoint(400, 400));
-		//_scene->addItem(treno);
+		passeggero = new Passenger(1, QPoint(100, 100), 1);
+		_scene->addItem(passeggero);
 
 		_engine.start();
 		_state = RUNNING;
@@ -192,12 +193,20 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	if (e->key() == Qt::Key_P) {
 
+		std::cout << "---------- Graph ----------\n";
 		for (int i = 0; i < _graph.size(); i++) {
 			std::cout << "Station " << i << " connected to station ";
 			for (auto& i : _graph.at(i))
 				std::cout << i << ", ";
 			std::cout << std::endl;
 		}
+
+		std::cout << "---------- Trains ----------\n";
+		for (auto& t : _trainsList)
+			if(t != 0)
+				std::cout << "Train " << t->index() << " on line "
+					<< t->lineIndex() << "\n";
+
 	}
 	if (e->key() == Qt::Key_D && _state == RUNNING) {
 		bool visible = true;
@@ -284,12 +293,13 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 						_linesList.at(_activeLine)->updateTcapPoint();
 						
 						bool hasTrain = false;
+						int id = 0;
 
 						for (auto& t : _trainsList)
 							if (t != 0) {
 								if (t->lineIndex() == _activeLine) {
 									t->setPath(_linesList.at(_activeLine)->path());
-									t->setDirection(2);
+									t->setCircular(true);
 									hasTrain = true;
 								}
 							}
@@ -297,11 +307,12 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 						if (!hasTrain) {
 							for (auto& t : _trainsList) {
 								if (t == 0) {
-									t = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
-									t->setDirection(2);
+									t = new Train(_activeLine, id, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+									t->setCircular(true);
 									_scene->addItem(t);
 									break;
 								}
+								id++;
 							}
 						}
 
@@ -332,6 +343,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 			_linesList.at(_activeLine)->updateTcapPoint();
 			
 			bool hasTrain = false;
+			int id = 0;
 
 			for (auto& t : _trainsList)
 				if (t != 0) {
@@ -340,14 +352,15 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 						hasTrain = true;
 					}
 				}
-			
+
 			if (!hasTrain) {
 				for (auto& t : _trainsList) {
 					if (t == 0) {
-						t = new Train(_activeLine, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
+						t = new Train(_activeLine, id, _linesList.at(_activeLine)->firstPoint(), _linesList.at(_activeLine)->path());
 						_scene->addItem(t);
 						break;
 					}
+					id++;
 				}
 			}
 
