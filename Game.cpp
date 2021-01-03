@@ -25,6 +25,8 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	QObject::connect(&_engine, SIGNAL(timeout()), this, SLOT(advance()));
+	QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
+	QObject::connect(&_stationsTimer, SIGNAL(timeout()), this, SLOT(spawnStation()));
 
 }
 
@@ -43,6 +45,9 @@ void Game::init() {
 
 void Game::reset() {
 
+	_stationsTimer.stop();
+	_passengerTimer.stop();
+
 	for (auto& s : _stationsList)
 		delete s;
 	_stationsList.clear();
@@ -50,8 +55,6 @@ void Game::reset() {
 	for (auto& l : _linesList)
 		delete l;
 	_linesList.clear();
-
-	_graph.clear();
 
 	for (auto& b : _deleteButtons)
 		delete b;
@@ -61,12 +64,21 @@ void Game::reset() {
 		delete t;
 	_trainsList.clear();
 
+	for (auto& p : _passengersList)
+		delete p;
+	_passengersList.clear();
+
+	_graph.clear();
+
 	_stationsNumber = -1;
 	_activeStation = -1;
 	_activeLine = -1;
 
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
+
+	_stationsTimer.setInterval(2000);
+	_passengerTimer.setInterval(10000 / sqrt(5));
 	_state = READY;
 
 	this->init();
@@ -74,7 +86,7 @@ void Game::reset() {
 
 void Game::advance() {
 
-
+	// Trains movement
 	for (auto& t : _trainsList)
 		if(t != 0)
 			t->advance();
@@ -87,22 +99,14 @@ void Game::start() {
 
 	if (_state == READY) {
 
-		_stationsList.push_back(spawnStation(200, 200));
-		_scene->addItem(_stationsList.back());
-		_stationsList.push_back(spawnStation(200, 600));
-		_scene->addItem(_stationsList.back());
-		_stationsList.push_back(spawnStation(200, 400));
-		_scene->addItem(_stationsList.back());
-
-		for (int i = 0; i < 20; i++) {
-			_stationsList.push_back(spawnStation());
-			_scene->addItem(_stationsList.back());
-			printf("Stazione %d, Forma %d, in coordinate %d, %d\n", i, _stationsList.back()->shape(), _stationsList.back()->position().x(), _stationsList.back()->position().y());
-		}
-
 		for (int i = 0; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
 			_scene->addItem(_deleteButtons.back());
+		}
+
+		for (int i = 0; i < 3; i++) {
+			spawnStation();
+			_scene->addItem(_stationsList.back());
 		}
 
 		for (int i = 0; i < MAX_LINES; i++) {
@@ -117,42 +121,95 @@ void Game::start() {
 			_trainsList.shrink_to_fit();
 		}
 
-		passeggero = new Passenger(1, QPoint(100, 100), 1);
-		_scene->addItem(passeggero);
 
 		_engine.start();
+		_passengerTimer.start();
+		_stationsTimer.start();
 		_state = RUNNING;
 		printf("Game started\n");
 	}
 }
 
-Station* Game::spawnStation(int x, int y) {
-	QPoint spawnPoint(x, y);
+void Game::spawnStation() {
+
+	QPoint spawnPoint;
+	spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
+	spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
 	bool found = false;
 
-	if (!_stationsList.empty())
+	if (!_stationsList.empty()) // da cambiare
 		do {
 
-			for (auto& s : _stationsList) {
+			if(spawnAreaAvailable(spawnPoint, _stationsNumber))
+				for (auto& s : _stationsList) {
 				
-				if (distance(spawnPoint, s->position()) < STATION_SIZE*4) {
+					if (distance(spawnPoint, s->position()) < STATION_SIZE*4) {
 
-					spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE));
-					spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 8*STATION_SIZE));
-					// printf("cambiate coordinate\n");
-					found = true;
-					break;
+						spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE - PASSENGER_SIZE*(MAX_PASS_STATION/2)));
+						spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 8*STATION_SIZE));
+						// printf("cambiate coordinate\n");
+						found = true;
+						break;
+					}
+					else
+						found = false;
+
 				}
-				else
-					found = false;
-
+			else {
+				spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
+				spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
+				found = true;
 			}
 		} while (found);
 
 	_stationsNumber++;
 	Station* newStation = new Station(spawnPoint, _stationsNumber);
 	_graph.emplace_back();
-	return newStation;
+	_stationsList.push_back(newStation);
+	_scene->addItem(_stationsList.back());
+}
+
+void Game::spawnPassenger(){
+
+	int index;
+	int i = 0;
+	bool stationsFull = false;
+	do {
+		index = (rand() % _stationsNumber);
+		if (i++ == 100)
+			stationsFull = true;
+	} while (_stationsList.at(index)->passengers() >= MAX_PASS_STATION && !stationsFull);
+
+	if (!stationsFull) {
+		QPoint position = _stationsList.at(index)->position();
+
+		position.setX(position.x() + STATION_SIZE + 5);
+		if (_stationsList.at(index)->passengers() < MAX_PASS_STATION / 2)
+			position.setY(position.y() - PASSENGER_SIZE - 1);
+		else position.setY(position.y() + 1);
+
+		position.setX(position.x() + (_stationsList.at(index)->passengers() % (MAX_PASS_STATION / 2)) * (2 + PASSENGER_SIZE));
+		int shape;
+		do {
+			shape = randomShape();
+		} while (shape == _stationsList.at(index)->shape());
+
+		_stationsList.at(index)->addPassenger();
+
+		Passenger* passenger = new Passenger(index, position, shape);
+		_passengersList.push_back(passenger);
+		_scene->addItem(_passengersList.back());
+	}
+	else printf("YOU DIED\n"); // implement death
+
+	_passengerTimer.setInterval((10000 / sqrt(_stationsNumber)) + ((rand() % 3) - 1)*(rand() % 1000));
+
+}
+
+int Game::randomShape(){
+
+	int index = rand() % MAX_STATIONS;
+	return _stationsList.at(index)->shape();
 }
 
 void Game::deleteLine(int lineIndex){
@@ -214,6 +271,23 @@ void Game::keyPressEvent(QKeyEvent* e){
 			visible = false;
 		for (auto& s : _stationsList)
 			s->setVisible(visible);
+	}
+
+	if (e->key() == Qt::Key_O) {
+		/*
+		for (int i = 0; i < 10; i++) {
+
+			Passenger* passenger = spawnPassenger();
+			if (passenger == 0) {
+				printf("HAI PERSO\n");
+				break;
+			}
+			else {
+				_passengersList.push_back(passenger);
+				_scene->addItem(_passengersList.back());
+			}
+		}
+		*/
 	}
 }
 

@@ -10,6 +10,7 @@ Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 	_trainIndex = -1;
 	_stationIndex = stationIndex;
 	_position = pos;
+	setZValue(3);
 
 }
 
@@ -19,7 +20,7 @@ void Passenger::paint(QPainter* painter,
 
 	QPen pen;
 	pen.setColor(QColor(0, 0, 0));
-	pen.setWidth(5);
+	pen.setWidth(1);
 	painter->setBrush(QBrush(QColor(0, 0, 0)));
 	pen.setJoinStyle(Qt::MiterJoin);
 

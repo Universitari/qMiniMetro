@@ -13,10 +13,9 @@ class Station : public Object {
 private:
 
 	QPoint _position;
-	static const unsigned int _maxPass;
-	unsigned int _currentPass = 0;
+	unsigned int _currentPass;
 	Shape _shape;
-	int _index = -1;
+	int _index;
 
 public:
 
@@ -38,8 +37,10 @@ public:
 	QPoint position() { return _position; }
 	int shape() { return _shape; }
 	int index() { return _index; }
+	int passengers() { return _currentPass; }
 
 	// Utility
 	bool pointerOnStation(QPoint pointerPos);
+	void addPassenger() { _currentPass++; }
 
 };

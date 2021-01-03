@@ -30,6 +30,8 @@ private:
 
 	QGraphicsScene* _scene;
 	QTimer _engine;
+	QTimer _passengerTimer;
+	QTimer _stationsTimer;
 	game_state _state;
 	bool _mousePressed = false;
 	int _stationsNumber = -1;
@@ -40,8 +42,8 @@ private:
 	std::vector<Line*> _linesList;
 	std::vector<Button*> _deleteButtons;
 	std::vector<Train*> _trainsList;
+	std::vector<Passenger*> _passengersList;
 
-	Passenger* passeggero;
 
 	std::vector<std::list<int>> _graph;
 
@@ -50,11 +52,9 @@ private:
 public:
 
 	static Game* instance();
-
-	Station* spawnStation(int x = 400, int y = 400);
-
+	
+	int randomShape();
 	void deleteLine(int lineIndex);
-
 	bool lineExists(int index) { return _linesList.at(index); }
 
 	// Event handling
@@ -71,6 +71,10 @@ public slots:
 	void reset();
 	// starts the game
 	void start();
+	// Spawns a passenger
+	void spawnPassenger();
+	// Spawns a station
+	void spawnStation();
 
 
 };
