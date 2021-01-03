@@ -208,7 +208,7 @@ void Game::spawnPassenger(){
 
 int Game::randomShape(){
 
-	int index = rand() % MAX_STATIONS;
+	int index = rand() % _stationsNumber;
 	return _stationsList.at(index)->shape();
 }
 
