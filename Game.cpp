@@ -68,7 +68,8 @@ void Game::reset() {
 		delete p;
 	_passengersList.clear();
 
-	_graph.clear();
+	for (int i = 0; i < MAX_LINES; i++)
+		_graph[i].clear();
 
 	_stationsNumber = -1;
 	_activeStation = -1;
@@ -91,6 +92,25 @@ void Game::advance() {
 		if(t != 0)
 			t->advance();
 
+	// Passengers get on the trains
+	/*
+	for (auto& t : _trainsList) {
+		
+		auto iter = _graph[t->lineIndex()].begin();
+		int i=0;
+		for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
+			if (!(*iter).empty())
+				if (t->position() == _stationsList.at(i)->centerPos()) {
+					for (auto& p : _passengersList) {
+						if (p->stationIndex() == i)
+							p->salisultreno();
+					}
+				}
+					
+			i++;
+		}
+	}
+	*/
 	_scene->update();
 	
 }
@@ -105,8 +125,12 @@ void Game::start() {
 		}
 
 		for (int i = 0; i < 3; i++) {
-			spawnStation();
+			_stationsNumber++;
+			Station* station = new Station(startPos[i], _stationsNumber);
+			_stationsList.push_back(station);
 			_scene->addItem(_stationsList.back());
+			for(int i = 0; i < MAX_LINES; i++)
+				_graph[i].emplace_back();
 		}
 
 		for (int i = 0; i < MAX_LINES; i++) {
@@ -137,36 +161,38 @@ void Game::spawnStation() {
 	spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
 	bool found = false;
 
-	if (!_stationsList.empty()) // da cambiare
-		do {
+	do {
 
-			if(spawnAreaAvailable(spawnPoint, _stationsNumber))
-				for (auto& s : _stationsList) {
-				
-					if (distance(spawnPoint, s->position()) < STATION_SIZE*4) {
+		if (spawnAreaAvailable(spawnPoint, _stationsNumber))
+			for (auto& s : _stationsList)
+				if (distance(spawnPoint, s->position()) < STATION_SIZE * 4) {
 
-						spawnPoint.setX(2*STATION_SIZE + rand() % (WINDOW_WIDTH - 4*STATION_SIZE - PASSENGER_SIZE*(MAX_PASS_STATION/2)));
-						spawnPoint.setY(2*STATION_SIZE + rand() % (WINDOW_HEIGHT - 8*STATION_SIZE));
-						// printf("cambiate coordinate\n");
-						found = true;
-						break;
-					}
-					else
-						found = false;
-
+					spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
+					spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
+					// printf("cambiate coordinate\n");
+					found = true;
+					break;
 				}
-			else {
-				spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
-				spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
-				found = true;
-			}
+				else
+					found = false;
+			
+		else {
+			spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
+			spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
+			found = true;
+		}
 		} while (found);
 
 	_stationsNumber++;
 	Station* newStation = new Station(spawnPoint, _stationsNumber);
-	_graph.emplace_back();
 	_stationsList.push_back(newStation);
 	_scene->addItem(_stationsList.back());
+	
+	for (int i = 0; i < MAX_LINES; i++)
+		_graph[i].emplace_back();
+
+	if (_stationsNumber == MAX_STATIONS)
+		_stationsTimer.stop();
 }
 
 void Game::spawnPassenger(){
@@ -175,7 +201,7 @@ void Game::spawnPassenger(){
 	int i = 0;
 	bool stationsFull = false;
 	do {
-		index = (rand() % _stationsNumber);
+		index = (rand() % (_stationsNumber + 1));
 		if (i++ == 100)
 			stationsFull = true;
 	} while (_stationsList.at(index)->passengers() >= MAX_PASS_STATION && !stationsFull);
@@ -208,7 +234,7 @@ void Game::spawnPassenger(){
 
 int Game::randomShape(){
 
-	int index = rand() % _stationsNumber;
+	int index = rand() % (_stationsNumber+1);
 	return _stationsList.at(index)->shape();
 }
 
@@ -250,12 +276,14 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	if (e->key() == Qt::Key_P) {
 
-		std::cout << "---------- Graph ----------\n";
-		for (int i = 0; i < _graph.size(); i++) {
-			std::cout << "Station " << i << " connected to station ";
-			for (auto& i : _graph.at(i))
-				std::cout << i << ", ";
-			std::cout << std::endl;
+		for (int j = 0; j < MAX_LINES; j++) {
+			std::cout << "---------- Graph " << j << " ----------\n";
+			for (int i = 0; i < _graph[j].size(); i++) {
+				std::cout << "Station " << i << " connected to station ";
+				for (auto& i : _graph[j].at(i))
+					std::cout << i << ", ";
+				std::cout << std::endl;
+			}
 		}
 
 		std::cout << "---------- Trains ----------\n";
@@ -358,8 +386,8 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 				if (_linesList.at(_activeLine)->validPoint(centerPoint)) {
 					_linesList.at(_activeLine)->setNextPoint(centerPoint);
 
-					_graph.at(_activeStation).push_back(s->index());
-					_graph.at(s->index()).push_back(_activeStation);
+					_graph[_activeLine].at(_activeStation).push_back(s->index());
+					_graph[_activeLine].at(s->index()).push_back(_activeStation);
 					_activeStation = s->index();
 
 					if (_linesList.at(_activeLine)->circularLine()) {

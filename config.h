@@ -26,3 +26,8 @@ const int STATION_CURVE = -15;
 const int TCAP_DISTANCE = 40;
 const float TRAIN_SPEED = 0.4;
 const float PI = 3.14159;
+
+// Starting stations coordinates
+const int ST_1[2] = {800, 450};
+const int ST_2[2] = {1000, 450};
+const int ST_3[2] = {1000, 650};

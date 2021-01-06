@@ -35,6 +35,8 @@ public:
 
 	// Getters
 	QPoint position() { return _position; }
+	QPoint centerPos() {return QPoint(_position.x() + STATION_SIZE / 2,
+									  _position.y() + STATION_SIZE / 2);}
 	int shape() { return _shape; }
 	int index() { return _index; }
 	int passengers() { return _currentPass; }

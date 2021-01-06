@@ -57,7 +57,7 @@ void rotate(QPainter* p, const QRect& r, qreal angle) {
 
 bool spawnAreaAvailable(QPoint spawnPoint, int stationsNum){
 
-    if (distance(spawnPoint, QPoint(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)) < (200 + stationsNum * 10))
+    if (distance(spawnPoint, QPoint(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)) < (300 + stationsNum * 20))
         return true;
     else
         return false;

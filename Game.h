@@ -33,10 +33,15 @@ private:
 	QTimer _passengerTimer;
 	QTimer _stationsTimer;
 	game_state _state;
+
 	bool _mousePressed = false;
 	int _stationsNumber = -1;
 	int _activeLine = -1;
 	int _activeStation = -1;
+
+	QPoint startPos[3] = { QPoint(ST_1[0], ST_1[1]),
+						   QPoint(ST_2[0], ST_2[1]), 
+						   QPoint(ST_3[0], ST_3[1]) };
 
 	std::vector<Station*> _stationsList;
 	std::vector<Line*> _linesList;
@@ -45,7 +50,7 @@ private:
 	std::vector<Passenger*> _passengersList;
 
 
-	std::vector<std::list<int>> _graph;
+	std::vector<std::list<int>> _graph[7];
 
 	// typename std::vector<Line*>::iterator _lineIterator = _linesList.begin();
 

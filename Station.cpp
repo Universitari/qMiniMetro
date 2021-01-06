@@ -3,7 +3,26 @@
 Station::Station(QPoint pos, int index) {
 
 	_position = pos;
-	_shape = Shape(rand() % GAME_PROGRESSION);
+
+	switch (index) {
+		case(0): {
+			_shape = Shape(0);
+			break;
+		}
+		case(1): {
+			_shape = Shape(1);
+			break;
+		}
+		case(2): {
+			_shape = Shape(2);
+			break;
+		}
+		default: {
+			_shape = Shape(rand() % GAME_PROGRESSION);
+			break;
+		}
+	}
+	
 	_index = index;
 	_currentPass = 0;
 	setZValue(3);

@@ -13,7 +13,6 @@ private:
 	// Graphic elements
 	QRect* _trainRect;
 	QColor _color;
-	QPoint _position;
 	QPainterPath _path;
 	QPainterPath _oldPath;
 	int _rotationAngle;
@@ -50,5 +49,6 @@ public:
 	// Getter
 	int lineIndex() { return _lineIndex; }
 	int index() { return _index; }
+	QPoint position() { return _trainRect->center(); }
 
 };

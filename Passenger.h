@@ -33,4 +33,7 @@ public:
 	void solveCollisions() {}
 	void hit(Object* what) {}
 
+	// Getters
+	int stationIndex() { return _stationIndex; }
+
 };
