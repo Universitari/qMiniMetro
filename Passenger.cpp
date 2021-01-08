@@ -4,12 +4,10 @@ Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 
 	_status = WAITING;
 	_shape = Shape(shape); 
-	// allora praticamente tu devi fare quella funzione epica 
-	// che prende la shape da una delle stazioni create all'interno 
-	// del vettore in game.
 	_trainIndex = -1;
 	_stationIndex = stationIndex;
 	_position = pos;
+	_rotationAngle = 0;
 	setZValue(3);
 
 }
@@ -27,26 +25,52 @@ void Passenger::paint(QPainter* painter,
 	painter->setPen(pen);
 	painter->setRenderHint(QPainter::Antialiasing);
 
+
 	if (_shape == SQUARE) {
 
-		painter->drawRect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
+		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
+		rotate(painter, rect, _rotationAngle);
+		painter->drawRect(rect);
 	}
 	else if (_shape == TRIANGLE) {
 
 		QPolygon triangle;
 		triangle << QPoint(_position.x() + PASSENGER_SIZE / 2, _position.y())
-			<< QPoint(_position.x(), _position.y() + PASSENGER_SIZE)
-			<< QPoint(_position.x() + PASSENGER_SIZE, _position.y() + PASSENGER_SIZE);
+				 << QPoint(_position.x(), _position.y() + PASSENGER_SIZE)
+				 << QPoint(_position.x() + PASSENGER_SIZE, _position.y() + PASSENGER_SIZE);
+		
+		rotate(painter, triangle.boundingRect(), _rotationAngle);
 		painter->drawPolygon(triangle);
 	}
 	else if (_shape == CIRCLE) {
 
-		painter->drawEllipse(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
+		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
+		rotate(painter, rect, _rotationAngle);
+		painter->drawEllipse(rect);
 	}
 
 }
 
 QRectF Passenger::boundingRect() const{
 
-	return QRectF(0, 0, PASSENGER_SIZE, PASSENGER_SIZE);
+	return QRectF(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
+}
+
+void Passenger::getOnTrain(int trainIndex, QPoint pos){
+
+	_trainIndex = trainIndex;
+	_stationIndex = -1;
+
+	_position = pos;
+
+}
+
+void Passenger::translate(QLineF shiftLine) { 
+
+	_position.setX(_position.x() + shiftLine.dx());
+	_position.setY(_position.y() + shiftLine.dy());
+}
+
+void Passenger::advance() {
+
 }

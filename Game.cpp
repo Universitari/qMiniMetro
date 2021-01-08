@@ -92,25 +92,35 @@ void Game::advance() {
 		if(t != 0)
 			t->advance();
 
-	// Passengers get on the trains
-	/*
+	// Passengers get on trains
 	for (auto& t : _trainsList) {
-		
-		auto iter = _graph[t->lineIndex()].begin();
-		int i=0;
-		for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
-			if (!(*iter).empty())
-				if (t->position() == _stationsList.at(i)->centerPos()) {
-					for (auto& p : _passengersList) {
-						if (p->stationIndex() == i)
-							p->salisultreno();
+		if (t != 0) {
+			auto iter = _graph[t->lineIndex()].begin();
+			int i = 0;
+			for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
+				if (!(*iter).empty())
+					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) { // t->position() == _stationsList.at(i)->centerPos()
+						for (auto& p : _passengersList) {
+							if (p->stationIndex() == i) {
+								p->getOnTrain(t->index(), t->passengerPos());
+								p->setRotation(t->rotationAngle());
+								t->incrementPassengers();
+							}
+						}
 					}
-				}
-					
-			i++;
+
+				i++;
+			}
 		}
 	}
-	*/
+	
+
+	for (auto& p : _passengersList)
+		if (p->trainIndex() != -1) {
+			p->translate(_trainsList.at(p->trainIndex())->shiftLine());
+			p->setRotation(_trainsList.at(p->trainIndex())->rotationAngle());
+		}
+
 	_scene->update();
 	
 }
@@ -218,7 +228,7 @@ void Game::spawnPassenger(){
 		int shape;
 		do {
 			shape = randomShape();
-		} while (shape == _stationsList.at(index)->shape());
+		} while (shape == _stationsList.at(index)->stationShape());
 
 		_stationsList.at(index)->addPassenger();
 
@@ -235,7 +245,7 @@ void Game::spawnPassenger(){
 int Game::randomShape(){
 
 	int index = rand() % (_stationsNumber+1);
-	return _stationsList.at(index)->shape();
+	return _stationsList.at(index)->stationShape();
 }
 
 void Game::deleteLine(int lineIndex){

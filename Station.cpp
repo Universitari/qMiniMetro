@@ -25,7 +25,7 @@ Station::Station(QPoint pos, int index) {
 	
 	_index = index;
 	_currentPass = 0;
-	setZValue(3);
+	setZValue(4);
 }
 
 Station::Station(const Station& s) {
@@ -69,7 +69,7 @@ void Station::paint(QPainter* painter,
 QRectF Station::boundingRect() const{
 
 	qreal penWidth = 1;
-	return QRectF(0, 0, STATION_SIZE, STATION_SIZE);
+	return QRectF(_position.x(), _position.y(), STATION_SIZE, STATION_SIZE);
 }
 
 bool Station::pointerOnStation(QPoint pointerPos) {

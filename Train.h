@@ -15,13 +15,15 @@ private:
 	QColor _color;
 	QPainterPath _path;
 	QPainterPath _oldPath;
+	QLineF _shiftLine;
 	int _rotationAngle;
 	
 	// Logic elements
 	Direction _direction;
 	float _increment;
 	float _length;
-	unsigned int _maxPass;
+	int _maxPass;
+	int _passengers;
 	int _lineIndex;
 	bool _circular;
 	int _index;
@@ -50,5 +52,11 @@ public:
 	int lineIndex() { return _lineIndex; }
 	int index() { return _index; }
 	QPoint position() { return _trainRect->center(); }
+	int rotationAngle() { return _rotationAngle; }
+	QLineF shiftLine() { return _shiftLine; }
+
+	// Utility
+	QPoint passengerPos();
+	void incrementPassengers() { _passengers++; }
 
 };

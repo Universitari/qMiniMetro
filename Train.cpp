@@ -3,6 +3,7 @@
 Train::Train(int lineIndex, int index, QPoint _centerPoint, QPainterPath linePath){
 
 	_maxPass = 6;
+	_passengers = 0;
 	_lineIndex = lineIndex;
 	_index = index;
 	_color = setColor(_lineIndex);
@@ -26,7 +27,7 @@ void Train::paint(QPainter* painter,
 
 	QPen pen;
 	painter->setRenderHint(QPainter::Antialiasing);
-	pen.setWidth(10);
+	pen.setWidth(1);
 	pen.setColor(_color);
 	pen.setJoinStyle(Qt::MiterJoin);
 	painter->setBrush(QBrush(_color));
@@ -66,8 +67,8 @@ void Train::advance(){
 		else if (t == 0 && _direction == BACKWARD)
 			_increment = _path.length();
 
-	QLineF _line = QLineF(_trainRect->center(), _path.pointAtPercent(t));
-	_trainRect->translate(_line.dx(), _line.dy());
+	_shiftLine = QLineF(_trainRect->center(), _path.pointAtPercent(t));
+	_trainRect->translate(_shiftLine.dx(), _shiftLine.dy());
 	// float m = _path.slopeAtPercent(t);
 	_rotationAngle = 90 - _path.angleAtPercent(t);
 	
@@ -75,4 +76,38 @@ void Train::advance(){
 		_increment -= TRAIN_SPEED;
 	else 
 		_increment += TRAIN_SPEED;
+}
+
+QPoint Train::passengerPos(){
+
+	switch (_passengers) {
+		case 0: {
+			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() - 1.5 * PASSENGER_SIZE - 2);
+			break;
+		}
+		case 1: {
+			return QPoint(position().x() + 2, position().y() - 1.5 * PASSENGER_SIZE - 2);
+			break;
+		}
+		case 2: {
+			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() - PASSENGER_SIZE / 2);
+			break;
+		}
+		case 3: {
+			return QPoint(position().x() + 2, position().y() - PASSENGER_SIZE / 2);
+			break;
+		}
+		case 4: {
+			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() + PASSENGER_SIZE/2 + 2);
+			break;
+		}
+		case 5: {
+			return QPoint(position().x() + 2, position().y() + PASSENGER_SIZE/2 + 2);
+			break;
+		}
+		case 6: {
+			return QPoint(10, 10);
+			break;
+		}
+	}
 }
