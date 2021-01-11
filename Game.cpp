@@ -102,9 +102,12 @@ void Game::advance() {
 					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) { // t->position() == _stationsList.at(i)->centerPos()
 						for (auto& p : _passengersList) {
 							if (p->stationIndex() == i) {
-								p->getOnTrain(t->index(), t->passengerPos());
-								p->setRotation(t->rotationAngle());
 								t->incrementPassengers();
+								p->setTicket(t->passengers());
+								p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
+								p->setRotation(t->rotationAngle());
+								//t->incrementPassengers();
+								//p->setTicket(t->passengers());
 							}
 						}
 					}
@@ -116,8 +119,10 @@ void Game::advance() {
 	
 
 	for (auto& p : _passengersList)
+		if (p != 0)
 		if (p->trainIndex() != -1) {
-			p->translate(_trainsList.at(p->trainIndex())->shiftLine());
+			p->setPos(_trainsList.at(p->trainIndex())->passengerPos(p->ticket()));
+			//p->translate(_trainsList.at(p->trainIndex())->shiftLine());
 			p->setRotation(_trainsList.at(p->trainIndex())->rotationAngle());
 		}
 

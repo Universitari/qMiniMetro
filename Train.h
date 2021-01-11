@@ -54,9 +54,10 @@ public:
 	QPoint position() { return _trainRect->center(); }
 	int rotationAngle() { return _rotationAngle; }
 	QLineF shiftLine() { return _shiftLine; }
+	int passengers() { return _passengers; }
 
 	// Utility
-	QPoint passengerPos();
+	QPoint passengerPos(int ticket);
 	void incrementPassengers() { _passengers++; }
 
 };

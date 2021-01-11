@@ -1,10 +1,11 @@
 #include "Passenger.h"
-
+class Train;
 Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 
 	_status = WAITING;
 	_shape = Shape(shape); 
 	_trainIndex = -1;
+	_ticket = -1;
 	_stationIndex = stationIndex;
 	_position = pos;
 	_rotationAngle = 0;
@@ -72,5 +73,5 @@ void Passenger::translate(QLineF shiftLine) {
 }
 
 void Passenger::advance() {
-
+	
 }

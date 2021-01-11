@@ -78,36 +78,37 @@ void Train::advance(){
 		_increment += TRAIN_SPEED;
 }
 
-QPoint Train::passengerPos(){
+QPoint Train::passengerPos(int ticket){
 
-	switch (_passengers) {
-		case 0: {
+	switch (ticket) {
+		case 1: {
 			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() - 1.5 * PASSENGER_SIZE - 2);
 			break;
 		}
-		case 1: {
+		case 2: {
 			return QPoint(position().x() + 2, position().y() - 1.5 * PASSENGER_SIZE - 2);
 			break;
 		}
-		case 2: {
+		case 3: {
 			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() - PASSENGER_SIZE / 2);
 			break;
 		}
-		case 3: {
+		case 4: {
 			return QPoint(position().x() + 2, position().y() - PASSENGER_SIZE / 2);
 			break;
 		}
-		case 4: {
+		case 5: {
 			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() + PASSENGER_SIZE/2 + 2);
 			break;
 		}
-		case 5: {
+		case 6: {
 			return QPoint(position().x() + 2, position().y() + PASSENGER_SIZE/2 + 2);
 			break;
 		}
-		case 6: {
+		default:
+		//case 7: {
 			return QPoint(10, 10);
 			break;
-		}
+		//}
 	}
 }

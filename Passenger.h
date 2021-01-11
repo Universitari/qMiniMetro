@@ -18,6 +18,7 @@ private:
 	int _stationIndex;
 	QPoint _position;
 	int _rotationAngle;
+	int _ticket;
 
 public:
 
@@ -35,12 +36,14 @@ public:
 	void hit(Object* what) {}
 
 	// Setters
-	//void setPos(QPoint pos) { _position = pos; }
+	void setPos(QPoint pos) { _position = pos; }
 	void setRotation(int angle) { _rotationAngle = angle; }
+	void setTicket(int passengers) { _ticket = passengers; }
 
 	// Getters
 	int stationIndex() { return _stationIndex; }
 	int trainIndex() { return _trainIndex; }
+	int ticket() { return _ticket; }
 
 	// Utility
 	void getOnTrain(int trainIndex, QPoint pos);
