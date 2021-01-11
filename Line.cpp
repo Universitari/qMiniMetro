@@ -166,19 +166,6 @@ bool Line::validPoint(QPoint p){
     return true;
 }
 
-QPoint Line::nextPointOnLine(QPoint p1, QPoint p2, int length){
-
-    float m = angularCoeff(p1, p2);
-    float angle = atan(m);
-    int x = cos(angle) * length;
-    int y = sin(angle) * length;
- 
-    if (p1.x() > p2.x())
-        x = -x;
-
-    return QPoint(p1.x() - x, p1.y() - y);
-}
-
 void Line::updateTcapPoint(){
 
     std::list<QPoint>::iterator iter = std::next(_stations.begin());

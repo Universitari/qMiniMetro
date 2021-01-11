@@ -60,7 +60,6 @@ public:
 	// Utility
 	bool validPoint(QPoint p);
 	unsigned int size() { return _stations.size(); }
-	QPoint nextPointOnLine(QPoint p1, QPoint p2, int length);
 
 	void updateTcapPoint();
 	QLine setTcap(QPoint p1, QPoint p2);

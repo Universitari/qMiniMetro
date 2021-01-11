@@ -17,7 +17,6 @@ private:
 	int _trainIndex;
 	int _stationIndex;
 	QPoint _position;
-	int _rotationAngle;
 	int _ticket;
 
 public:
@@ -37,7 +36,6 @@ public:
 
 	// Setters
 	void setPos(QPoint pos) { _position = pos; }
-	void setRotation(int angle) { _rotationAngle = angle; }
 	void setTicket(int passengers) { _ticket = passengers; }
 
 	// Getters
@@ -47,6 +45,6 @@ public:
 
 	// Utility
 	void getOnTrain(int trainIndex, QPoint pos);
-	void translate(QLineF shiftLine);
+	void foo(QPoint punto) { setTransformOriginPoint(punto); }
 
 };

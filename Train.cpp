@@ -1,6 +1,6 @@
 #include "Train.h"
 
-Train::Train(int lineIndex, int index, QPoint _centerPoint, QPainterPath linePath){
+Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath){
 
 	_maxPass = 6;
 	_passengers = 0;
@@ -14,8 +14,8 @@ Train::Train(int lineIndex, int index, QPoint _centerPoint, QPainterPath linePat
 	_circular = false;
 	_length = _path.length();
 	_direction = FORWARD;
-	_trainRect = new QRect(_centerPoint.x() - TRAIN_WIDTH / 2, 
-						   _centerPoint.y() - TRAIN_HEIGHT / 2,
+	_trainRect = new QRect(centerPoint.x() - TRAIN_WIDTH / 2, 
+						   centerPoint.y() - TRAIN_HEIGHT / 2,
 						   TRAIN_WIDTH, TRAIN_HEIGHT);
 	setZValue(2);
 
@@ -67,8 +67,8 @@ void Train::advance(){
 		else if (t == 0 && _direction == BACKWARD)
 			_increment = _path.length();
 
-	_shiftLine = QLineF(_trainRect->center(), _path.pointAtPercent(t));
-	_trainRect->translate(_shiftLine.dx(), _shiftLine.dy());
+	QLineF line = QLineF(_trainRect->center(), _path.pointAtPercent(t));
+	_trainRect->translate(line.dx(), line.dy());
 	// float m = _path.slopeAtPercent(t);
 	_rotationAngle = 90 - _path.angleAtPercent(t);
 	
@@ -79,36 +79,34 @@ void Train::advance(){
 }
 
 QPoint Train::passengerPos(int ticket){
-
+	
 	switch (ticket) {
 		case 1: {
-			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() - 1.5 * PASSENGER_SIZE - 2);
+			return QPoint(position().x() - (PASSENGER_SIZE) - 1, position().y() - 1.5 * PASSENGER_SIZE - 2);
 			break;
 		}
 		case 2: {
-			return QPoint(position().x() + 2, position().y() - 1.5 * PASSENGER_SIZE - 2);
+			return QPoint(position().x() + 3, position().y() - 1.5 * PASSENGER_SIZE - 2);
 			break;
 		}
 		case 3: {
-			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() - PASSENGER_SIZE / 2);
+			return QPoint(position().x() - (PASSENGER_SIZE) - 1, position().y() - PASSENGER_SIZE / 2);
 			break;
 		}
 		case 4: {
-			return QPoint(position().x() + 2, position().y() - PASSENGER_SIZE / 2);
+			return QPoint(position().x() + 3, position().y() - PASSENGER_SIZE / 2);
 			break;
 		}
 		case 5: {
-			return QPoint(position().x() - (PASSENGER_SIZE) - 2, position().y() + PASSENGER_SIZE/2 + 2);
+			return QPoint(position().x() - (PASSENGER_SIZE) - 1, position().y() + PASSENGER_SIZE/2 + 2);
 			break;
 		}
 		case 6: {
-			return QPoint(position().x() + 2, position().y() + PASSENGER_SIZE/2 + 2);
+			return QPoint(position().x() + 3, position().y() + PASSENGER_SIZE/2 + 2);
 			break;
 		}
 		default:
-		//case 7: {
 			return QPoint(10, 10);
 			break;
-		//}
 	}
 }

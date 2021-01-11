@@ -15,7 +15,6 @@ private:
 	QColor _color;
 	QPainterPath _path;
 	QPainterPath _oldPath;
-	QLineF _shiftLine;
 	int _rotationAngle;
 	
 	// Logic elements
@@ -53,7 +52,6 @@ public:
 	int index() { return _index; }
 	QPoint position() { return _trainRect->center(); }
 	int rotationAngle() { return _rotationAngle; }
-	QLineF shiftLine() { return _shiftLine; }
 	int passengers() { return _passengers; }
 
 	// Utility

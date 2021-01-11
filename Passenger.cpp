@@ -8,7 +8,6 @@ Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 	_ticket = -1;
 	_stationIndex = stationIndex;
 	_position = pos;
-	_rotationAngle = 0;
 	setZValue(3);
 
 }
@@ -30,7 +29,7 @@ void Passenger::paint(QPainter* painter,
 	if (_shape == SQUARE) {
 
 		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
-		rotate(painter, rect, _rotationAngle);
+		//rotate(painter, rect, _rotationAngle);
 		painter->drawRect(rect);
 	}
 	else if (_shape == TRIANGLE) {
@@ -40,13 +39,13 @@ void Passenger::paint(QPainter* painter,
 				 << QPoint(_position.x(), _position.y() + PASSENGER_SIZE)
 				 << QPoint(_position.x() + PASSENGER_SIZE, _position.y() + PASSENGER_SIZE);
 		
-		rotate(painter, triangle.boundingRect(), _rotationAngle);
+		//rotate(painter, triangle.boundingRect(), _rotationAngle);
 		painter->drawPolygon(triangle);
 	}
 	else if (_shape == CIRCLE) {
 
 		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
-		rotate(painter, rect, _rotationAngle);
+		//rotate(painter, rect, _rotationAngle);
 		painter->drawEllipse(rect);
 	}
 
@@ -64,12 +63,6 @@ void Passenger::getOnTrain(int trainIndex, QPoint pos){
 
 	_position = pos;
 
-}
-
-void Passenger::translate(QLineF shiftLine) { 
-
-	_position.setX(_position.x() + shiftLine.dx());
-	_position.setY(_position.y() + shiftLine.dy());
 }
 
 void Passenger::advance() {
