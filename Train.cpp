@@ -2,7 +2,6 @@
 
 Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath){
 
-	_maxPass = 6;
 	_passengers = 0;
 	_lineIndex = lineIndex;
 	_index = index;
@@ -12,8 +11,11 @@ Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath
 	_rotationAngle = 90;
 	_increment = 0;
 	_circular = false;
+	_colliding = false;
+	_speedMultiplier = 1;
 	_length = _path.length();
 	_direction = FORWARD;
+	_state = MOVING;
 	_trainRect = new QRect(centerPoint.x() - TRAIN_WIDTH / 2, 
 						   centerPoint.y() - TRAIN_HEIGHT / 2,
 						   TRAIN_WIDTH, TRAIN_HEIGHT);
@@ -46,6 +48,23 @@ QRectF Train::boundingRect() const{
 
 void Train::advance(){
 
+	if (_state == STOPPED)
+		_speedMultiplier = 0;
+
+	/*if (_state == DEPARTING) {
+		_speedMultiplier += 0.008;
+		if (_speedMultiplier > 1)
+			_state = MOVING;
+	}
+
+	if (_state == BRAKING) {
+		_speedMultiplier -= 0.008;
+		if (_speedMultiplier <= 0) {
+			_speedMultiplier = 0;
+			//_state = STOPPED;
+		}
+	}*/
+
 	if(_path.elementAt(0) != _oldPath.elementAt(0) && 
 	  (_direction == FORWARD || _direction == BACKWARD))
 		_increment += _path.length() - _length;
@@ -73,9 +92,9 @@ void Train::advance(){
 	_rotationAngle = 90 - _path.angleAtPercent(t);
 	
 	if (_direction == BACKWARD)
-		_increment -= TRAIN_SPEED;
+		_increment -= TRAIN_SPEED * _speedMultiplier;
 	else 
-		_increment += TRAIN_SPEED;
+		_increment += TRAIN_SPEED * _speedMultiplier;
 }
 
 QPoint Train::passengerPos(int ticket){

@@ -61,6 +61,8 @@ public:
 	int randomShape();
 	void deleteLine(int lineIndex);
 	bool lineExists(int index) { return _linesList.at(index); }
+	QPoint passPosStation(int stationIndex);
+	void reorgPassengers(int stationIndex);
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);

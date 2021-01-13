@@ -44,5 +44,5 @@ public:
 	// Utility
 	bool pointerOnStation(QPoint pointerPos);
 	void addPassenger() { _currentPass++; }
-
+	void removePassengers() { _currentPass = 0; }
 };

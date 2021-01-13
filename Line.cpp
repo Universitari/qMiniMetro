@@ -146,7 +146,6 @@ void Line::setCurrentPoint(QPoint currP) {
     }
 }
 
-
 bool Line::validPoint(QPoint p){
 
     if (!_circularLine && _stations.size() > 2) {
