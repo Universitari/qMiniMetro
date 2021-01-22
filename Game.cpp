@@ -88,49 +88,31 @@ void Game::reset() {
 void Game::advance() {
 
 	// Trains movement
+	for (auto& t : _trainsList)
+		if (t != 0)
+			t->advance();
+
+	// Passengers get on trains
 	for (auto& t : _trainsList) {
 		if (t != 0) {
-			if (t->passengers() != 6) {
-				auto iter = _graph[t->lineIndex()].begin();
-				int i = 0;
-				for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
-					if (!(*iter).empty()) { // if the station is connected to the line
-
-						if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect) && !t->colliding()) {
-							t->setColliding(true);
-							if (t->state() == 1) // state == MOVING
-								t->setState(0); // set state = STOPPED
-								
-						}
-						else {
-							t->setState(1); // state == MOVING
-							if (!t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect))
-								t->setColliding(false);
-						}
-
-						//if (t->state() == 2 && distance(t->position(), _stationsList.at(i)->centerPos()) < 0.1) // state == BRAKING
-						//	t->setState(3); // set state = STOPPED
-						
-						if (t->state() == 0) { // state == STOPPED
-							for (auto& p : _passengersList) {
-								if (p->stationIndex() == i) {
-									t->incrementPassengers();
-									p->setTicket(t->passengers());
-									p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
-									p->setRotation(t->rotationAngle());
-
-									reorgPassengers(i);
-								}
+			auto iter = _graph[t->lineIndex()].begin();
+			int i = 0;
+			for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
+				if (!(*iter).empty())
+					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) { // t->position() == _stationsList.at(i)->centerPos()
+						for (auto& p : _passengersList) {
+							if (p->stationIndex() == i) {
+								t->incrementPassengers();
+								p->setTicket(t->passengers());
+								p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
+								p->setRotation(t->rotationAngle());
 							}
-							t->setState(1); // set state = MOVING
 						}
 					}
-					i++;
-				}
-			}
-			t->advance();
-		}
 
+				i++;
+			}
+		}
 	}
 
 	for (auto& p : _passengersList)

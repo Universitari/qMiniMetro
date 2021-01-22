@@ -51,20 +51,6 @@ void Train::advance(){
 	if (_state == STOPPED)
 		_speedMultiplier = 0;
 
-	/*if (_state == DEPARTING) {
-		_speedMultiplier += 0.008;
-		if (_speedMultiplier > 1)
-			_state = MOVING;
-	}
-
-	if (_state == BRAKING) {
-		_speedMultiplier -= 0.008;
-		if (_speedMultiplier <= 0) {
-			_speedMultiplier = 0;
-			//_state = STOPPED;
-		}
-	}*/
-
 	if(_path.elementAt(0) != _oldPath.elementAt(0) && 
 	  (_direction == FORWARD || _direction == BACKWARD))
 		_increment += _path.length() - _length;

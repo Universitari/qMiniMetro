@@ -7,7 +7,7 @@
 class Train : public Object {
 
 	enum Direction{FORWARD, BACKWARD, CIRCULAR};
-	enum State{STOPPED, MOVING, DEPARTING, BRAKING};
+	enum State{STOPPED, MOVING};
 
 private:
 
