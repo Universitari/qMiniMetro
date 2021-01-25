@@ -27,6 +27,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	QObject::connect(&_engine, SIGNAL(timeout()), this, SLOT(advance()));
 	QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
 	QObject::connect(&_stationsTimer, SIGNAL(timeout()), this, SLOT(spawnStation()));
+	QObject::connect(&_passengersInOutTimer, SIGNAL(timeout()), this, SLOT(passengersInOut()));
 
 }
 
@@ -47,6 +48,8 @@ void Game::reset() {
 
 	_stationsTimer.stop();
 	_passengerTimer.stop();
+	_passengersInOutTimer.stop();
+
 
 	for (auto& s : _stationsList)
 		delete s;
@@ -79,7 +82,8 @@ void Game::reset() {
 	_engine.setTimerType(Qt::PreciseTimer);
 
 	_stationsTimer.setInterval(20000);
-	_passengerTimer.setInterval(10000 / sqrt(5));
+	_passengerTimer.setInterval(1000 / sqrt(5));
+	_passengersInOutTimer.setInterval(500);
 	_state = READY;
 
 	this->init();
@@ -100,14 +104,28 @@ void Game::advance() {
 			for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
 				if (!(*iter).empty())
 					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) { // t->position() == _stationsList.at(i)->centerPos()
+						
+						if (_stationsList.at(i)->passengers() > 0) {
+							t->setState(0);
+							t->setStationIndex(i);
+							//printf("train stopped!\n");
+						}
+						if (_stationsList.at(i)->passengers() == 0 || t->passengers() == 6) {
+							t->setState(1);
+							t->setStationIndex(-1);
+							//printf("train moving!\n");
+						}
+						/*
 						for (auto& p : _passengersList) {
 							if (p->stationIndex() == i) {
 								t->incrementPassengers();
 								p->setTicket(t->passengers());
 								p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
 								p->setRotation(t->rotationAngle());
+								reorgPassengers(i);
 							}
 						}
+						*/
 					}
 
 				i++;
@@ -161,6 +179,7 @@ void Game::start() {
 		_engine.start();
 		_passengerTimer.start();
 		_stationsTimer.start();
+		_passengersInOutTimer.start();
 		_state = RUNNING;
 		printf("Game started\n");
 	}
@@ -205,6 +224,25 @@ void Game::spawnStation() {
 
 	if (_stationsNumber == MAX_STATIONS)
 		_stationsTimer.stop();
+}
+
+void Game::passengersInOut(){
+
+	for(auto& t : _trainsList)
+		if(t != 0)
+			if (t->state() == 0) {
+
+				for (auto& p : _passengersList) {
+					if (p->stationIndex() == t->stationIndex()) {
+						t->incrementPassengers();
+						p->setTicket(t->passengers());
+						p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
+						p->setRotation(t->rotationAngle());
+						reorgPassengers(t->stationIndex());
+						break;
+					}
+				}
+			}
 }
 
 void Game::spawnPassenger(){

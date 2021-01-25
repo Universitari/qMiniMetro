@@ -4,6 +4,7 @@ Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath
 
 	_passengers = 0;
 	_lineIndex = lineIndex;
+	_stationIndex = -1;
 	_index = index;
 	_color = setColor(_lineIndex);
 	_path = linePath;
@@ -50,6 +51,8 @@ void Train::advance(){
 
 	if (_state == STOPPED)
 		_speedMultiplier = 0;
+	else if (_state == MOVING)
+		_speedMultiplier = 1;
 
 	if(_path.elementAt(0) != _oldPath.elementAt(0) && 
 	  (_direction == FORWARD || _direction == BACKWARD))

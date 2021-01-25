@@ -17,6 +17,7 @@ private:
 	QPainterPath _path;
 	QPainterPath _oldPath;
 	int _rotationAngle;
+	float _speedMultiplier;
 	
 	// Logic elements
 	Direction _direction;
@@ -25,10 +26,10 @@ private:
 	float _length;
 	int _passengers;
 	int _lineIndex;
+	int _stationIndex;
 	bool _circular;
 	bool _colliding;
 	int _index;
-	float _speedMultiplier;
 
 public:
 
@@ -51,6 +52,7 @@ public:
 	void setCircular(bool flag) { _circular = flag; }
 	void setState(int state) { _state = State(state); }
 	void setColliding(bool flag) { _colliding = flag; }
+	void setStationIndex(int index) { _stationIndex = index; }
 
 	// Getter
 	int lineIndex() { return _lineIndex; }
@@ -60,6 +62,8 @@ public:
 	int passengers() { return _passengers; }
 	int state() { return int(_state); }
 	bool colliding() { return _colliding; }
+	int stationIndex() { return _stationIndex; }
+
 
 	// Utility
 	QPoint passengerPos(int ticket);

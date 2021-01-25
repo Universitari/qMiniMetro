@@ -32,6 +32,7 @@ private:
 	QTimer _engine;
 	QTimer _passengerTimer;
 	QTimer _stationsTimer;
+	QTimer _passengersInOutTimer;
 	game_state _state;
 
 	bool _mousePressed = false;
@@ -82,6 +83,8 @@ public slots:
 	void spawnPassenger();
 	// Spawns a station
 	void spawnStation();
+	// Passengers move from and to the stations
+	void passengersInOut();
 
 
 };
