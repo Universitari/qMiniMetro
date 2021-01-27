@@ -2,7 +2,6 @@
 class Train;
 Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 
-	_status = WAITING;
 	_shape = Shape(shape); 
 	_trainIndex = -1;
 	_ticket = -1;
@@ -17,10 +16,18 @@ void Passenger::paint(QPainter* painter,
 					  QWidget* widget){
 
 	QPen pen;
-	pen.setColor(QColor(0, 0, 0));
+
+	pen.setColor(QColor(0, 0, 0));	
 	pen.setWidth(1);
 	painter->setBrush(QBrush(QColor(0, 0, 0)));
 	pen.setJoinStyle(Qt::MiterJoin);
+	painter->setOpacity(1);
+
+	if (_trainIndex != -1) {
+		pen.setColor(QColor(255, 255, 255));
+		painter->setBrush(QBrush(QColor(255, 255, 255)));
+		painter->setOpacity(0.65);
+	}
 
 	painter->setPen(pen);
 	painter->setRenderHint(QPainter::Antialiasing);
@@ -56,12 +63,10 @@ QRectF Passenger::boundingRect() const{
 	return QRectF(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
 }
 
-void Passenger::getOnTrain(int trainIndex, QPoint pos){
+void Passenger::getOnTrain(int trainIndex){
 
 	_trainIndex = trainIndex;
 	_stationIndex = -1;
-
-	_position = pos;
 
 }
 

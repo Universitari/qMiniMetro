@@ -8,12 +8,10 @@
 class Passenger : public Object {
 
 	enum Shape { SQUARE, TRIANGLE, CIRCLE };
-	enum Status { WAITING, TRAVELLING };
 
 private:
 
 	Shape _shape;
-	Status _status;
 	int _trainIndex;
 	int _stationIndex;
 	QPoint _position;
@@ -42,9 +40,10 @@ public:
 	int stationIndex() { return _stationIndex; }
 	int trainIndex() { return _trainIndex; }
 	int ticket() { return _ticket; }
+	int passengerShape() { return int(_shape); }
 
 	// Utility
-	void getOnTrain(int trainIndex, QPoint pos);
-	void moveTransformPoint(QPoint punto) { setTransformOriginPoint(punto); }
+	void getOnTrain(int trainIndex);
+	void moveTransformPoint(QPoint point) { setTransformOriginPoint(point); }
 
 };

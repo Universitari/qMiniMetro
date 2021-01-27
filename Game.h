@@ -39,6 +39,7 @@ private:
 	int _stationsNumber = -1;
 	int _activeLine = -1;
 	int _activeStation = -1;
+	unsigned int _score = 0;
 
 	QPoint startPos[3] = { QPoint(ST_1[0], ST_1[1]),
 						   QPoint(ST_2[0], ST_2[1]), 
@@ -64,6 +65,7 @@ public:
 	bool lineExists(int index) { return _linesList.at(index); }
 	QPoint passPosStation(int stationIndex);
 	void reorgPassengers(int stationIndex);
+	bool passengersArrived(int TrainIndex, int StationIndex);
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);

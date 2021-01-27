@@ -28,8 +28,8 @@ private:
 	int _lineIndex;
 	int _stationIndex;
 	bool _circular;
-	bool _colliding;
 	int _index;
+	bool _seats[6]; // false = occupied, true = available
 
 public:
 
@@ -51,7 +51,6 @@ public:
 	void setPath(QPainterPath linePath) { _path = linePath; }
 	void setCircular(bool flag) { _circular = flag; }
 	void setState(int state) { _state = State(state); }
-	void setColliding(bool flag) { _colliding = flag; }
 	void setStationIndex(int index) { _stationIndex = index; }
 
 	// Getter
@@ -61,12 +60,13 @@ public:
 	int rotationAngle() { return _rotationAngle; }
 	int passengers() { return _passengers; }
 	int state() { return int(_state); }
-	bool colliding() { return _colliding; }
 	int stationIndex() { return _stationIndex; }
 
 
 	// Utility
 	QPoint passengerPos(int ticket);
-	void incrementPassengers() { _passengers++; }
+	void incrementPassengers(int passengerTicket);
+	void decrementPassengers(int passengerTicket);
+	int firstSeatAvailable();
 
 };

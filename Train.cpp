@@ -12,7 +12,6 @@ Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath
 	_rotationAngle = 90;
 	_increment = 0;
 	_circular = false;
-	_colliding = false;
 	_speedMultiplier = 1;
 	_length = _path.length();
 	_direction = FORWARD;
@@ -22,6 +21,8 @@ Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath
 						   TRAIN_WIDTH, TRAIN_HEIGHT);
 	setZValue(2);
 
+	for (int i = 0; i < 6; i++)
+		_seats[i] = true;
 }
 
 void Train::paint(QPainter* painter, 
@@ -89,27 +90,27 @@ void Train::advance(){
 QPoint Train::passengerPos(int ticket){
 	
 	switch (ticket) {
-		case 1: {
+		case 0: {
 			return QPoint(position().x() - (PASSENGER_SIZE) - 1, position().y() - 1.5 * PASSENGER_SIZE - 2);
 			break;
 		}
-		case 2: {
+		case 1: {
 			return QPoint(position().x() + 3, position().y() - 1.5 * PASSENGER_SIZE - 2);
 			break;
 		}
-		case 3: {
+		case 2: {
 			return QPoint(position().x() - (PASSENGER_SIZE) - 1, position().y() - PASSENGER_SIZE / 2);
 			break;
 		}
-		case 4: {
+		case 3: {
 			return QPoint(position().x() + 3, position().y() - PASSENGER_SIZE / 2);
 			break;
 		}
-		case 5: {
+		case 4: {
 			return QPoint(position().x() - (PASSENGER_SIZE) - 1, position().y() + PASSENGER_SIZE/2 + 2);
 			break;
 		}
-		case 6: {
+		case 5: {
 			return QPoint(position().x() + 3, position().y() + PASSENGER_SIZE/2 + 2);
 			break;
 		}
@@ -117,4 +118,26 @@ QPoint Train::passengerPos(int ticket){
 			return QPoint(10, 10);
 			break;
 	}
+}
+
+void Train::incrementPassengers(int passengerTicket){
+
+	_passengers++;
+	_seats[passengerTicket] = false;
+}
+
+void Train::decrementPassengers(int passengerTicket){
+
+	_passengers--;
+	_seats[passengerTicket] = true;
+
+}
+
+int Train::firstSeatAvailable(){
+
+	int i = 0;
+	while (_seats[i] == false)
+		i++;
+
+	return i;
 }

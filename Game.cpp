@@ -77,12 +77,15 @@ void Game::reset() {
 	_stationsNumber = -1;
 	_activeStation = -1;
 	_activeLine = -1;
+	_score = 0;
 
 	_engine.setInterval(1000 / GAME_FPS);
 	_engine.setTimerType(Qt::PreciseTimer);
 
-	_stationsTimer.setInterval(20000);
-	_passengerTimer.setInterval(1000 / sqrt(5));
+	_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
+
+	_stationsTimer.setInterval(10000);
+	_passengerTimer.setInterval(2000 / sqrt(5));
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
 
@@ -105,29 +108,17 @@ void Game::advance() {
 				if (!(*iter).empty())
 					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) { // t->position() == _stationsList.at(i)->centerPos()
 						
-						if (_stationsList.at(i)->passengers() > 0) {
+						if ((_stationsList.at(i)->passengers() > 0) || passengersArrived(t->index(), i)) {
 							t->setState(0);
 							t->setStationIndex(i);
 							//printf("train stopped!\n");
 						}
-						if (_stationsList.at(i)->passengers() == 0 || t->passengers() == 6) {
+						if ((_stationsList.at(i)->passengers() == 0 || t->passengers() == 6) && !passengersArrived(t->index(), i)) {
 							t->setState(1);
 							t->setStationIndex(-1);
 							//printf("train moving!\n");
 						}
-						/*
-						for (auto& p : _passengersList) {
-							if (p->stationIndex() == i) {
-								t->incrementPassengers();
-								p->setTicket(t->passengers());
-								p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
-								p->setRotation(t->rotationAngle());
-								reorgPassengers(i);
-							}
-						}
-						*/
 					}
-
 				i++;
 			}
 		}
@@ -232,13 +223,34 @@ void Game::passengersInOut(){
 		if(t != 0)
 			if (t->state() == 0) {
 
-				for (auto& p : _passengersList) {
-					if (p->stationIndex() == t->stationIndex()) {
-						t->incrementPassengers();
-						p->setTicket(t->passengers());
-						p->getOnTrain(t->index(), t->passengerPos(p->ticket()));
-						p->setRotation(t->rotationAngle());
+				auto iter = _passengersList.begin();
+
+				for (iter; iter < _passengersList.end(); iter++) {
+
+					// One passengers gets off the train
+					if((*iter)->trainIndex() == t->index())
+						if ((*iter)->passengerShape() == _stationsList.at(t->stationIndex())->stationShape()) {
+
+							t->decrementPassengers((*iter)->ticket());
+							printf("Score = %d\n", ++_score);
+							_scene->removeItem((*iter));
+							(*iter)->setVisible(false);
+							_passengersList.erase(iter);
+							// memory leak
+
+							break;
+						}
+
+					// One passenger gets on the train
+					if ((*iter)->stationIndex() == t->stationIndex() && t->passengers() < 6) {
+
+						(*iter)->setTicket(t->firstSeatAvailable());
+						t->incrementPassengers((*iter)->ticket());
+						(*iter)->getOnTrain(t->index());
+						(*iter)->setPos(t->passengerPos((*iter)->ticket()));
+						(*iter)->setRotation(t->rotationAngle());
 						reorgPassengers(t->stationIndex());
+
 						break;
 					}
 				}
@@ -275,7 +287,7 @@ void Game::spawnPassenger(){
 	}
 	else printf("YOU DIED\n"); // implement death
 
-	_passengerTimer.setInterval((10000 / sqrt(_stationsNumber)) + ((rand() % 3) - 1)*(rand() % 1000));
+	_passengerTimer.setInterval((2000 / sqrt(_stationsNumber)) + ((rand() % 3) - 1)*(rand() % 100));
 
 }
 
@@ -330,6 +342,17 @@ void Game::reorgPassengers(int stationIndex){
 			_stationsList.at(stationIndex)->addPassenger();
 		}
 	}
+}
+
+bool Game::passengersArrived(int TrainIndex, int StationIndex){
+
+	for (auto& p : _passengersList) {
+		if (p->trainIndex() == TrainIndex)
+			if (_stationsList.at(StationIndex)->stationShape() == p->passengerShape())
+				return true;
+	}
+
+	return false;
 }
 
 void Game::keyPressEvent(QKeyEvent* e){
