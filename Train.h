@@ -62,7 +62,6 @@ public:
 	int state() { return int(_state); }
 	int stationIndex() { return _stationIndex; }
 
-
 	// Utility
 	QPoint passengerPos(int ticket);
 	void incrementPassengers(int passengerTicket);

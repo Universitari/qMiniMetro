@@ -99,6 +99,7 @@ void Game::advance() {
 		if (t != 0)
 			t->advance();
 
+
 	// Passengers get on trains
 	for (auto& t : _trainsList) {
 		if (t != 0) {
@@ -106,7 +107,7 @@ void Game::advance() {
 			int i = 0;
 			for (iter; iter < _graph[t->lineIndex()].end(); iter++) {
 				if (!(*iter).empty())
-					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) { // t->position() == _stationsList.at(i)->centerPos()
+					if (t->collidesWithItem(_stationsList.at(i), Qt::IntersectsItemBoundingRect)) {
 						
 						if ((_stationsList.at(i)->passengers() > 0) || passengersArrived(t->index(), i)) {
 							t->setState(0);
@@ -232,7 +233,7 @@ void Game::passengersInOut(){
 						if ((*iter)->passengerShape() == _stationsList.at(t->stationIndex())->stationShape()) {
 
 							t->decrementPassengers((*iter)->ticket());
-							printf("Score = %d\n", ++_score);
+							//printf("Score = %d\n", ++_score);
 							_scene->removeItem((*iter));
 							(*iter)->setVisible(false);
 							_passengersList.erase(iter);
@@ -458,6 +459,20 @@ void Game::mousePressEvent(QMouseEvent* e){
 			if (l->pointerOnCap(e->pos()) && !l->circularLine()) {
 				_mousePressed = true;
 				_activeLine = i;
+
+				if (l->state() == 2) {
+					for (auto& s : _stationsList)
+						if (s->centerPos() == l->firstPoint()) {
+							_activeStation = s->index();
+							break;
+						}
+				} 
+				else
+					for (auto& s : _stationsList)
+						if (s->centerPos() == l->lastPoint()) {
+							_activeStation = s->index();
+							break;
+						}
 			}
 		i++;
 	}
