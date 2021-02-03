@@ -26,7 +26,7 @@ private:
 	QColor _color;
 	Name _name;
 	State _state;
-	std::list<QPoint> _stations;
+	std::vector<QPoint> _stations;
 
 public:
 
@@ -53,13 +53,15 @@ public:
 	// Getters
 	QPoint firstPoint() { return _stations.front(); }
 	QPoint lastPoint() { return _stations.back(); }
+	QPoint stationPoint(int index) { return _stations.at(index); }
+
 	bool circularLine() { return _circularLine; }
 	State state() { return _state; }
 	QPainterPath path() { return _path; }
 
 	// Utility
 	bool validPoint(QPoint p);
-	unsigned int size() { return _stations.size(); }
+	int size() { return _stations.size(); }
 
 	void updateTcapPoint();
 	QLine setTcap(QPoint p1, QPoint p2);

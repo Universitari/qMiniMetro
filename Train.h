@@ -6,7 +6,7 @@
 
 class Train : public Object {
 
-	enum Direction{FORWARD, BACKWARD, CIRCULAR};
+	enum Direction{FORWARD, BACKWARD};
 	enum State{STOPPED, MOVING};
 
 private:
@@ -26,14 +26,16 @@ private:
 	float _length;
 	int _passengers;
 	int _lineIndex;
-	int _stationIndex;
+	int _currentStation;
+	int _nextStation;
 	bool _circular;
 	int _index;
+	float _distanceFromStation;
 	bool _seats[6]; // false = occupied, true = available
 
 public:
 
-	Train(int lineIndex, int index, QPoint _centerPoint, QPainterPath linePath);
+	Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath, int stationIndex);
 
 	// Metodi virtuali reimplementati
 	void paint(QPainter* painter,
@@ -51,7 +53,10 @@ public:
 	void setPath(QPainterPath linePath) { _path = linePath; }
 	void setCircular(bool flag) { _circular = flag; }
 	void setState(int state) { _state = State(state); }
-	void setStationIndex(int index) { _stationIndex = index; }
+	void setCurrentStation(int index) { _currentStation = index; }
+	void setNextStation(int index) { _nextStation = index; }
+	void setDistanceFromStation(float distance) { _distanceFromStation = distance; }
+
 
 	// Getter
 	int lineIndex() { return _lineIndex; }
@@ -60,7 +65,11 @@ public:
 	int rotationAngle() { return _rotationAngle; }
 	int passengers() { return _passengers; }
 	int state() { return int(_state); }
-	int stationIndex() { return _stationIndex; }
+	int currentStation() { return _currentStation; }
+	int nextStation() { return _nextStation; }
+	int direction() { return int(_direction); }
+	float distanceFromStation() { return _distanceFromStation; }
+	bool circular() { return _circular; }
 
 	// Utility
 	QPoint passengerPos(int ticket);

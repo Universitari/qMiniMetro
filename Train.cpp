@@ -1,10 +1,12 @@
 #include "Train.h"
 
-Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath){
+Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath, int stationIndex){
 
 	_passengers = 0;
 	_lineIndex = lineIndex;
-	_stationIndex = -1;
+	_currentStation = stationIndex;
+	_nextStation = -1;
+	_distanceFromStation = std::numeric_limits<float>::max();
 	_index = index;
 	_color = setColor(_lineIndex);
 	_path = linePath;

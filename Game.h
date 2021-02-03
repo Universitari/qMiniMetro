@@ -45,16 +45,13 @@ private:
 						   QPoint(ST_2[0], ST_2[1]), 
 						   QPoint(ST_3[0], ST_3[1]) };
 
-	std::vector<Station*> _stationsList;
-	std::vector<Line*> _linesList;
+	std::vector<Station*> _stationsVec;
+	std::vector<Line*> _linesVec;
 	std::vector<Button*> _deleteButtons;
-	std::vector<Train*> _trainsList;
-	std::vector<Passenger*> _passengersList;
-
+	std::vector<Train*> _trainsVec;
+	std::vector<Passenger*> _passengersVec;
 
 	std::vector<std::list<int>> _graph[7];
-
-	// typename std::vector<Line*>::iterator _lineIterator = _linesList.begin();
 
 public:
 
@@ -62,10 +59,13 @@ public:
 	
 	int randomShape();
 	void deleteLine(int lineIndex);
-	bool lineExists(int index) { return _linesList.at(index); }
+	bool lineExists(int index) { return _linesVec.at(index); }
 	QPoint passPosStation(int stationIndex);
 	void reorgPassengers(int stationIndex);
 	bool passengersArrived(int TrainIndex, int StationIndex);
+	int nearestStation(QPoint trainPos);
+	int nextStation(int lineIndex, int stationIndex, int trainIndex);
+	bool trainArrived(int trainIndex);
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);

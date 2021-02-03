@@ -74,11 +74,11 @@ void Line::setNextPoint(QPoint nextP) {
         _stations.push_back(nextP);
 
     else if (_state == MOD_HEAD)
-        _stations.push_front(nextP);
+        _stations.insert(_stations.begin(), nextP);
 
     _path.clear();
     
-    std::list<QPoint>::iterator iter = _stations.begin();
+    std::vector<QPoint>::iterator iter = _stations.begin();
     _path.moveTo(*iter);
 
     QPoint p;
@@ -167,7 +167,7 @@ bool Line::validPoint(QPoint p){
 
 void Line::updateTcapPoint(){
 
-    std::list<QPoint>::iterator iter = std::next(_stations.begin());
+    std::vector<QPoint>::iterator iter = std::next(_stations.begin());
 
     QPoint point;
 
