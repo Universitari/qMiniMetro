@@ -19,7 +19,7 @@ class Game : public QGraphicsView {
 
 	Q_OBJECT
 
-enum game_state{READY, RUNNING, PAUSE, GAME_OVER};
+enum game_state{READY, RUNNING, PAUSED, GAME_OVER};
 
 private:
 
@@ -34,6 +34,8 @@ private:
 	QTimer _stationsTimer;
 	QTimer _passengersInOutTimer;
 	game_state _state;
+	bool _debug;
+	float _fpsMultiplier;
 
 	bool _mousePressed = false;
 	int _stationsNumber = -1;

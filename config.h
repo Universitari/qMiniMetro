@@ -22,8 +22,8 @@ const int BUTTON_SIZE_BIG = 60;
 const int BUTTONS_SPACING = 50;
 
 
-const int MIDPOINT_CURVE = -15;
-const int STATION_CURVE = -15;
+const int MIDPOINT_CURVE = -5;
+const int STATION_CURVE = -5;
 const int TCAP_DISTANCE = 40;
 const float TRAIN_SPEED = 0.8;
 const float PI = 3.14159;

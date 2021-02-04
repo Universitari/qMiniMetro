@@ -88,6 +88,8 @@ void Game::reset() {
 	_passengerTimer.setInterval(2000 / sqrt(5));
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
+	_debug = false;
+	_fpsMultiplier = 1;
 
 	this->init();
 }
@@ -280,7 +282,7 @@ void Game::spawnPassenger(){
 	}
 	else printf("YOU DIED\n"); // implement death
 
-	_passengerTimer.setInterval((2000 / sqrt(_stationsNumber)) + ((rand() % 3) - 1)*(rand() % 100));
+	_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
 
 }
 
@@ -374,18 +376,26 @@ int Game::nextStation(int lineIndex, int stationIndex, int trainIndex){
 
 		if (_linesVec.at(lineIndex)->stationPoint(i) == _stationsVec.at(stationIndex)->centerPos()) {
 
-			if (_trainsVec.at(trainIndex)->state() == 0) // FORWARD
-				if (i != _linesVec.at(lineIndex)->size() - 1)
-					index = (i + 1);
-				else index = (i - 1);
-			if (_trainsVec.at(trainIndex)->state() == 1) // BACKWARD
-				if (i != 0)
-					index = (i - 1);
-				else index = (i + 1);
-			if (_trainsVec.at(trainIndex)->circular()) // CIRCULAR
-				if (i != _linesVec.at(lineIndex)->size() - 1)
-					index = (i + 1);
-				else index = 1;
+			if (_trainsVec.at(trainIndex)->direction() == 0) { // TRAIN MOVING FORWARD
+				
+				index = i + 1;
+
+				if (_trainsVec.at(trainIndex)->circular()) { // CIRCULAR LINE?
+
+					if (i == _linesVec.at(lineIndex)->size() - 1)
+						index = 1;
+				}
+			}
+			else { // TRAIN MOVING BACKWARD
+
+				index = i - 1;
+
+				if (_trainsVec.at(trainIndex)->circular()) { // CIRCULAR LINE?
+
+					if (i == 0)
+						index = _linesVec.at(lineIndex)->size() - 2;
+				}
+			}
 		}
 
 	}
@@ -407,8 +417,8 @@ bool Game::trainArrived(int trainIndex){
 	if (distance(trainPos, nextStationPos) > t->distanceFromStation()) {
 
 		t->setCurrentStation(t->nextStation());
-		t->setNextStation(nextStation(t->lineIndex(), t->currentStation(), t->direction()));
-		printf("current station: %d\nnext station: %d\n", t->currentStation(), t->nextStation());
+		t->setNextStation(nextStation(t->lineIndex(), t->currentStation(), t->index()));
+		// printf("current station: %d\nnext station: %d\n", t->currentStation(), t->nextStation());
 		t->setDistanceFromStation(std::numeric_limits<float>::max());
 		return true;
 	}
@@ -420,7 +430,7 @@ bool Game::trainArrived(int trainIndex){
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
-	if (e->key() == Qt::Key_R || _state == GAME_OVER) {
+	if (e->key() == Qt::Key_R) {
 
 		reset();
 		init();
@@ -433,6 +443,24 @@ void Game::keyPressEvent(QKeyEvent* e){
 	}
 
 	if (e->key() == Qt::Key_P) {
+
+		if (_state == RUNNING) {
+			_state = PAUSED;
+			_engine.stop();
+			_passengerTimer.stop();
+			_stationsTimer.stop();
+			_passengersInOutTimer.stop();
+		}
+		else {
+			_state = RUNNING;
+			_engine.start();
+			_passengerTimer.start();
+			_stationsTimer.start();
+			_passengersInOutTimer.start();
+		}
+	}
+
+	if (e->key() == Qt::Key_G && _debug) {
 
 		for (int j = 0; j < MAX_LINES; j++) {
 			std::cout << "---------- Graph " << j << " ----------\n";
@@ -451,7 +479,23 @@ void Game::keyPressEvent(QKeyEvent* e){
 					<< t->lineIndex() << "\n";
 
 	}
-	if (e->key() == Qt::Key_D && _state == RUNNING) {
+	if (e->key() == Qt::Key_D) {
+
+		if (_debug)
+			_debug = false;
+		else {
+			_debug = true;
+			printf("------------ Debug Commands ------------\n");
+			printf("  V KEY - Toggle stations visibility\n");
+			printf("  G KEY - Print game graph\n");
+			printf("  UP ARROW - increase game speed\n");
+			printf("  DOWN ARROW - decrease game speed\n");
+			printf("  RIGHT ARROW - reset game speed\n");
+		}
+	}
+
+	if (e->key() == Qt::Key_V && _debug) {
+
 		bool visible = true;
 		if (_stationsVec.at(0)->isVisible())
 			visible = false;
@@ -459,21 +503,36 @@ void Game::keyPressEvent(QKeyEvent* e){
 			s->setVisible(visible);
 	}
 
-	if (e->key() == Qt::Key_O) {
-		/*
-		for (int i = 0; i < 10; i++) {
+	if (e->key() == Qt::Key_Down && _debug) {
 
-			Passenger* passenger = spawnPassenger();
-			if (passenger == 0) {
-				printf("HAI PERSO\n");
-				break;
-			}
-			else {
-				_passengersList.push_back(passenger);
-				_scene->addItem(_passengersList.back());
-			}
+		if (1000 / (GAME_FPS * _fpsMultiplier - 0.1) >= 0) {
+			_fpsMultiplier -= 0.1;
+			_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
+			_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
+			_passengersInOutTimer.setInterval(500 / _fpsMultiplier);
+			_stationsTimer.setInterval(10000 / _fpsMultiplier);
+
 		}
-		*/
+	}
+
+	if (e->key() == Qt::Key_Up && _debug) {
+
+		_fpsMultiplier += 0.1;
+		_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
+		_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
+		_passengersInOutTimer.setInterval(500 / _fpsMultiplier);
+		_stationsTimer.setInterval(10000 / _fpsMultiplier);
+
+	}
+
+	if (e->key() == Qt::Key_Right && _debug) {
+
+		_fpsMultiplier = 1;
+		_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
+		_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
+		_passengersInOutTimer.setInterval(500 / _fpsMultiplier);
+		_stationsTimer.setInterval(10000 / _fpsMultiplier);
+
 	}
 }
 
@@ -574,6 +633,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 								if (t->lineIndex() == _activeLine) {
 									t->setPath(_linesVec.at(_activeLine)->path());
 									t->setCircular(true);
+									t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 									hasTrain = true;
 								}
 							}
@@ -587,9 +647,8 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 												  _linesVec.at(_activeLine)->path(), 
 												  nearestStation(_linesVec.at(_activeLine)->firstPoint()));
 									t->setCircular(true);
-									t->setNextStation(nextStation(_activeLine, t->currentStation(), t->direction()));
+									t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 
-									
 									_scene->addItem(t);
 									break;
 								}
@@ -642,7 +701,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 							_linesVec.at(_activeLine)->firstPoint(),
 							_linesVec.at(_activeLine)->path(),
 							nearestStation(_linesVec.at(_activeLine)->firstPoint()));
-						t->setNextStation(nextStation(_activeLine, t->currentStation(), t->direction()));
+						t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 
 						_scene->addItem(t);
 						break;

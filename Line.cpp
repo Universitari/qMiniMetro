@@ -105,7 +105,7 @@ void Line::setNextPoint(QPoint nextP) {
         iter = std::next(iter);
     }
 
-    printf("inseriti %d punti\n", _stations.size());
+    // printf("inseriti %d punti\n", _stations.size());
 }
 
 void Line::setCurrentPoint(QPoint currP) { 
