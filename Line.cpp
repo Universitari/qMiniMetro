@@ -3,6 +3,7 @@
 Line::Line(QPoint startP, int index) {
 
     _circularLine = false;
+    _deleting = false;
     _name = Name(index);
     _state = INITIAL;
     setZValue(1);

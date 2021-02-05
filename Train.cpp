@@ -5,7 +5,7 @@ Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath
 	_passengers = 0;
 	_lineIndex = lineIndex;
 	_currentStation = stationIndex;
-	_nextStation = -1;
+	_nextStation = _currentStation;
 	_distanceFromStation = std::numeric_limits<float>::max();
 	_index = index;
 	_color = setColor(_lineIndex);

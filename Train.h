@@ -57,7 +57,6 @@ public:
 	void setNextStation(int index) { _nextStation = index; }
 	void setDistanceFromStation(float distance) { _distanceFromStation = distance; }
 
-
 	// Getter
 	int lineIndex() { return _lineIndex; }
 	int index() { return _index; }

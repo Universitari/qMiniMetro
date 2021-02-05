@@ -96,6 +96,31 @@ void Game::reset() {
 
 void Game::advance() {
 
+	
+	// Lines
+	for (auto& l : _linesVec) {
+		bool deleteLine = true;
+		if (l)
+			if (l->deleting()) {
+				for (auto& t : _trainsVec)
+					if(t)
+						if (t->passengers() != 0 && _linesVec.at(t->lineIndex()) == l) {
+							deleteLine = false;
+							break;
+						}
+				if (deleteLine) {
+					for (auto& t : _trainsVec)
+						if (t)
+							if (_linesVec.at(t->lineIndex()) == l) {
+								t->setVisible(false);
+								t = 0;
+							}
+					_scene->removeItem(l);
+					l = 0;
+				}
+			}
+	}
+
 	// Trains movement
 	for (auto& t : _trainsVec)
 		if (t != 0)
@@ -106,13 +131,18 @@ void Game::advance() {
 	for (auto& t : _trainsVec) {
 		if (t != 0) {
 			if (trainArrived(t->index())) {
-				if ((_stationsVec.at(t->currentStation())->passengers() > 0) || passengersArrived(t->index(), t->currentStation())) {
+
+				// Train stops under normal circumstances
+				if ((_stationsVec.at(t->currentStation())->passengers() > 0) || passengersArrived(t->index(), t->currentStation()))
 					t->setState(0);
-					//printf("train stopped!\n");
-					}
+
+				// Train stops because the line will be deleted
+				if (_linesVec.at(t->lineIndex())->deleting())
+					t->setState(0);
+
 				}
 			if(t->state() == 0)
-				if ((_stationsVec.at(t->currentStation())->passengers() == 0 || t->passengers() == 6) && !passengersArrived(t->index(), t->currentStation())) {
+				if ((_stationsVec.at(t->currentStation())->passengers() == 0 || t->passengers() == 6) && !passengersArrived(t->index(), t->currentStation()) && !_linesVec.at(t->lineIndex())->deleting()) {
 					t->setState(1);
 					//printf("train moving!\n");
 				}
@@ -223,21 +253,34 @@ void Game::passengersInOut(){
 				for (iter; iter < _passengersVec.end(); iter++) {
 
 					// One passengers gets off the train
-					if((*iter)->trainIndex() == t->index())
-						if ((*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
+					if ((*iter)->trainIndex() == t->index()) {
+
+						// if the line is being deleted
+						if (_linesVec.at(t->lineIndex())->deleting() || (*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
 
 							t->decrementPassengers((*iter)->ticket());
-							//printf("Score = %d\n", ++_score);
-							_scene->removeItem((*iter));
-							(*iter)->setVisible(false);
-							_passengersVec.erase(iter);
-							// memory leak
+							(*iter)->getOffTrain(t->currentStation());
+							(*iter)->setPos(passPosStation(t->currentStation()));
+							(*iter)->setRotation(0);
+
+							if ((*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
+
+								//printf("Score = %d\n", ++_score);
+								_scene->removeItem((*iter));
+								(*iter)->setVisible(false);
+								_passengersVec.erase(iter);
+							}
+							else 
+								_stationsVec.at(t->currentStation())->addPassenger();
+
 
 							break;
 						}
 
+					}
+
 					// One passenger gets on the train
-					if ((*iter)->stationIndex() == t->currentStation() && t->passengers() < 6) {
+					if ((*iter)->stationIndex() == t->currentStation() && t->passengers() < 6 && !_linesVec.at(t->lineIndex())->deleting()) {
 
 						(*iter)->setTicket(t->firstSeatAvailable());
 						t->incrementPassengers((*iter)->ticket());
@@ -294,23 +337,20 @@ int Game::randomShape(){
 
 void Game::deleteLine(int lineIndex){
 
-	// it crashed with the delete action
-	if (lineExists(lineIndex)) {
+	if (lineExists(lineIndex))
+		_linesVec.at(lineIndex)->setDeleting(true);
 
+		/*
 		for (auto& t : _trainsVec) 
 			if (t != 0) 
 				if (t->lineIndex() == lineIndex) {
-					// if the program doesn't behave correctly, try this
-					// t->setPath(QPainterPath());
 					t->setVisible(false);
 					t = 0;
 				}
 		
 		_scene->removeItem(_linesVec.at(lineIndex));
-		// delete _linesList.at(lineIndex);
 		_linesVec.at(lineIndex) = 0;
-		
-	}
+		*/
 }
 
 QPoint Game::passPosStation(int stationIndex)
@@ -633,7 +673,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 								if (t->lineIndex() == _activeLine) {
 									t->setPath(_linesVec.at(_activeLine)->path());
 									t->setCircular(true);
-									t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
+									//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 									hasTrain = true;
 								}
 							}
@@ -647,7 +687,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 												  _linesVec.at(_activeLine)->path(), 
 												  nearestStation(_linesVec.at(_activeLine)->firstPoint()));
 									t->setCircular(true);
-									t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
+									//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 
 									_scene->addItem(t);
 									break;
@@ -701,7 +741,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 							_linesVec.at(_activeLine)->firstPoint(),
 							_linesVec.at(_activeLine)->path(),
 							nearestStation(_linesVec.at(_activeLine)->firstPoint()));
-						t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
+						//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 
 						_scene->addItem(t);
 						break;

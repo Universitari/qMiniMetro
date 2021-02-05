@@ -44,6 +44,7 @@ public:
 
 	// Utility
 	void getOnTrain(int trainIndex);
+	void getOffTrain(int stationIndex);
 	void moveTransformPoint(QPoint point) { setTransformOriginPoint(point); }
 
 };

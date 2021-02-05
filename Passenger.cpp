@@ -70,6 +70,13 @@ void Passenger::getOnTrain(int trainIndex){
 
 }
 
+void Passenger::getOffTrain(int stationIndex){
+
+	_trainIndex = -1;
+	_stationIndex = stationIndex;
+
+}
+
 void Passenger::advance() {
 	
 }

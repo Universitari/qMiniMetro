@@ -23,6 +23,7 @@ private:
 
 	// Logic elements
 	bool _circularLine;
+	bool _deleting;
 	QColor _color;
 	Name _name;
 	State _state;
@@ -49,6 +50,7 @@ public:
 	void setNextPoint(QPoint nextP);
 	void setCurrentPoint(QPoint currP);
 	void setCircularLine(bool flag) { _circularLine = flag; }
+	void setDeleting(bool flag) { _deleting = flag; }
 
 	// Getters
 	QPoint firstPoint() { return _stations.front(); }
@@ -56,6 +58,7 @@ public:
 	QPoint stationPoint(int index) { return _stations.at(index); }
 
 	bool circularLine() { return _circularLine; }
+	bool deleting() { return _deleting; }
 	State state() { return _state; }
 	QPainterPath path() { return _path; }
 
