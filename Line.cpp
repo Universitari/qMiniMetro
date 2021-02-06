@@ -33,6 +33,11 @@ void Line::paint(QPainter* painter,
     painter->setPen(pen);
     // painter->drawRect(boundingRect().adjusted(5, 5, -5, -5));
 
+    if (_deleting)
+        painter->setOpacity(0.5);
+    else
+        painter->setOpacity(1);
+
     if (_stations.size() == 0) return;
     pen.setWidth(LINE_WIDTH);
     pen.setColor(_color);

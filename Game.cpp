@@ -420,24 +420,26 @@ int Game::nextStation(int lineIndex, int stationIndex, int trainIndex){
 				
 				index = i + 1;
 
-				if (_trainsVec.at(trainIndex)->circular()) { // CIRCULAR LINE?
+				if(i == _linesVec.at(lineIndex)->size() - 1) // TRAIN ON LAST STATION?
+					index = i - 1;
 
+				if (_trainsVec.at(trainIndex)->circular()) // CIRCULAR LINE?
 					if (i == _linesVec.at(lineIndex)->size() - 1)
 						index = 1;
-				}
+
 			}
 			else { // TRAIN MOVING BACKWARD
 
 				index = i - 1;
 
-				if (_trainsVec.at(trainIndex)->circular()) { // CIRCULAR LINE?
+				if (i == 0) // TRAIN ON FIRST STATION?
+					index = i + 1;
 
+				if (_trainsVec.at(trainIndex)->circular()) // CIRCULAR LINE?
 					if (i == 0)
 						index = _linesVec.at(lineIndex)->size() - 2;
-				}
 			}
 		}
-
 	}
 
 	for (int i = 0; i < _stationsVec.size(); i++)

@@ -50,7 +50,7 @@ public:
 	void setNextPoint(QPoint nextP);
 	void setCurrentPoint(QPoint currP);
 	void setCircularLine(bool flag) { _circularLine = flag; }
-	void setDeleting(bool flag) { _deleting = flag; }
+	void setDeleting(bool flag) { _deleting = flag; update(); }
 
 	// Getters
 	QPoint firstPoint() { return _stations.front(); }
