@@ -430,3 +430,11 @@ QPoint Line::middlePoint(QPoint s, QPoint p){
     case(-2): return p;
     }
 }
+
+bool Line::pathColliding(QRect rect){
+
+    if (_path.intersects(rect))
+        return true;
+    else
+        return false;
+}

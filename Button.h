@@ -2,6 +2,8 @@
 
 #include "Object.h"
 #include <QPainter>
+#include <QGraphicsSceneMouseEvent>
+#include <QPixmap>
 
 class Button : public Object {
 
@@ -10,8 +12,10 @@ class Button : public Object {
 private:
 
 	QPoint _position;
+	QPoint _mousePos;
 	QColor _color;
 	Type _type;
+	bool _addingTrain;
 	int _index = -1;
 
 public:
@@ -31,5 +35,7 @@ public:
 
 	// Event Handling
 	void mousePressEvent(QGraphicsSceneMouseEvent* e);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 };

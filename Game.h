@@ -68,6 +68,8 @@ public:
 	int nearestStation(QPoint trainPos);
 	int nextStation(int lineIndex, int stationIndex, int trainIndex);
 	bool trainArrived(int trainIndex);
+	void addTrain(QRect rect);
+	bool availableTrains();
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);

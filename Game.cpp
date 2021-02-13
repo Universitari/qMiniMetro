@@ -165,7 +165,7 @@ void Game::start() {
 
 	if (_state == READY) {
 
-		for (int i = 0; i < MAX_LINES; i++){
+		for (int i = -1; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
 			_scene->addItem(_deleteButtons.back());
 		}
@@ -467,6 +467,47 @@ bool Game::trainArrived(int trainIndex){
 	else t->setDistanceFromStation(distance(trainPos, nextStationPos));
 
 	return false;
+}
+
+void Game::addTrain(QRect rect){
+	
+	int lineIndex = -1;
+	int i = 0;
+
+	for (auto& l : _linesVec) {
+
+		if(l)
+			if (l->pathColliding(rect)) {
+				lineIndex = i;
+				break;
+			}
+		i++;
+	}
+
+	i = 0;
+
+	if (lineIndex != -1) {
+		for (auto& t : _trainsVec) {
+			if (!t) {
+				t = new Train(lineIndex, i, 
+					_linesVec.at(lineIndex)->firstPoint(),
+					_linesVec.at(lineIndex)->path(),
+					nearestStation(_linesVec.at(lineIndex)->firstPoint()));
+				_scene->addItem(t);
+				break;
+			}
+			i++;
+		}
+	}
+
+}
+
+bool Game::availableTrains(){
+
+	if (_trainsVec.at(MAX_TRAINS - 1) == 0)
+		return true;
+	else 
+		return false;
 }
 
 void Game::keyPressEvent(QKeyEvent* e){

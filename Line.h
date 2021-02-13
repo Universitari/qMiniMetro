@@ -73,4 +73,6 @@ public:
 	int sector(QPoint s, QPoint pointerPos);
 	QPoint middlePoint(QPoint s, QPoint p);
 
+	bool pathColliding(QRect rect);
+
 };
