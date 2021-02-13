@@ -476,7 +476,7 @@ void Game::addTrain(QRect rect){
 
 	for (auto& l : _linesVec) {
 
-		if(l)
+		if (l)
 			if (l->pathColliding(rect)) {
 				lineIndex = i;
 				break;

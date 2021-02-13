@@ -74,5 +74,4 @@ public:
 	QPoint middlePoint(QPoint s, QPoint p);
 
 	bool pathColliding(QRect rect);
-
 };

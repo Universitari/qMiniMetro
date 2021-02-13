@@ -433,8 +433,13 @@ QPoint Line::middlePoint(QPoint s, QPoint p){
 
 bool Line::pathColliding(QRect rect){
 
-    if (_path.intersects(rect))
-        return true;
-    else
-        return false;
+    float i = 0;
+
+    while( i < 1){
+        if (rect.contains(QPoint(_path.pointAtPercent(i).x(), _path.pointAtPercent(i).y())))
+            return true;
+        i += 0.001;
+    }
+
+    return false;
 }
