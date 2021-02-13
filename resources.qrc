@@ -2,5 +2,9 @@
 <qresource>
     <file>Graphics/LondonMap.png</file>
     <file>Graphics/Train.png</file>
+	<file>Graphics/MainMenu.png</file>
+	<file>Graphics/Button_New_Game.png</file>
+	<file>Graphics/Button_Continue.png</file>
+	<file>Graphics/Button_Exit.png</file>
 </qresource>
 </RCC>

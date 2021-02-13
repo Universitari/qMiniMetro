@@ -4,9 +4,9 @@
 #include <QGraphicsView>
 #include <QKeyEvent>
 #include <QTimer>
-#include <QPixMap>
+#include <QPixmap>
+#include <QGraphicsPixmapItem>
 #include <iostream>
-#include "Map.h"
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"

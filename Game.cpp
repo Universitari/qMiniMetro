@@ -17,12 +17,15 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	setScene(_scene);
 	_scene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	setInteractive(true);
+	setRenderHints(QPainter::Antialiasing
+				 | QPainter::SmoothPixmapTransform);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	this->reset();
 	
 	scale(GAME_SCALE, GAME_SCALE);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 
 	QObject::connect(&_engine, SIGNAL(timeout()), this, SLOT(advance()));
 	QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
@@ -40,7 +43,19 @@ void Game::init() {
 		// set window dimensions
 		setFixedWidth(GAME_SCALE * _scene->width());
 		setFixedHeight(GAME_SCALE * _scene->height() + 2);
-		Map::instance()->load(":/Graphics/LondonMap.png", _scene);
+		QGraphicsPixmapItem *_mainMenu = new QGraphicsPixmapItem(QPixmap(":/Graphics/MainMenu.png"));
+		QGraphicsPixmapItem *_newGame = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_New_Game.png"));
+		QGraphicsPixmapItem *_continue = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Continue.png"));
+		QGraphicsPixmapItem *_exit = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Exit.png"));
+		_scene->addItem(_mainMenu);
+
+		_newGame->setPos(WINDOW_WIDTH/2 - 250, WINDOW_HEIGHT/2 - 45 - 90 - 5);
+		_continue->setPos(WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT/2 - 45);
+		_exit->setPos(WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT/2 - 45 + 90 + 5);
+		_scene->addItem(_newGame);
+		_scene->addItem(_continue);
+		_scene->addItem(_exit);
+		
 	}
 }
 
@@ -164,6 +179,10 @@ void Game::advance() {
 void Game::start() {
 
 	if (_state == READY) {
+
+		_scene->clear();
+		QGraphicsPixmapItem* Map = new QGraphicsPixmapItem(QPixmap(":/Graphics/LondonMap.png"));
+		_scene->addItem(Map);
 
 		for (int i = -1; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
