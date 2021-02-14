@@ -20,17 +20,17 @@ private:
 	float _speedMultiplier;
 	
 	// Logic elements
-	Direction _direction;
-	State _state;
-	float _increment;
+	Direction _direction; //
+	State _state; //
+	float _increment; //
 	float _length;
-	int _passengers;
-	int _lineIndex;
-	int _currentStation;
-	int _nextStation;
-	bool _circular;
-	int _index;
-	float _distanceFromStation;
+	int _passengers; //
+	int _lineIndex; //
+	int _currentStation; //
+	int _nextStation; //
+	bool _circular; //
+	int _index; //
+	float _distanceFromStation; //
 	bool _seats[6]; // false = occupied, true = available
 
 public:

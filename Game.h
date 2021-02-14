@@ -10,6 +10,9 @@
 #include <iostream>
 #include <QApplication>
 #include <QFont>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"
@@ -74,6 +77,13 @@ public:
 	bool trainArrived(int trainIndex);
 	void addTrain(QRect rect);
 	bool availableTrains();
+
+	// Savegame functions
+	bool loadGame();
+	bool saveGame() const;
+
+	void read(const QJsonObject& json);
+	void write(QJsonObject& json) const;
 
 	// Event handling
 	void keyPressEvent(QKeyEvent* e);

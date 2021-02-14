@@ -89,7 +89,6 @@ void Button::mousePressEvent(QGraphicsSceneMouseEvent* e) {
 			_addingTrain = true;
 	}
 		
-
 }
 
 void Button::mouseMoveEvent(QGraphicsSceneMouseEvent* e){

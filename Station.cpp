@@ -72,6 +72,35 @@ QRectF Station::boundingRect() const{
 	return QRectF(_position.x(), _position.y(), STATION_SIZE, STATION_SIZE);
 }
 
+void Station::read(const QJsonObject& json){
+
+	if (json.contains("Shape") && json["Shape"].isDouble())
+		_shape = Shape(json["Shape"].toInt());
+
+	if (json.contains("Index") && json["Index"].isDouble())
+		_index = json["Index"].toInt();	
+	
+	if (json.contains("Position (x)") && json["Position (x)"].isDouble())
+		_currentPass = json["Current Passengers"].toInt();
+	
+	if (json.contains("Position (x)") && json["Position (x)"].isDouble())
+		_position.setX(json["Position (x)"].toInt());
+
+	if (json.contains("Position (y)") && json["Position (y)"].isDouble())
+		_position.setY(json["Position (y)"].toInt());
+
+}
+
+void Station::write(QJsonObject& json) const{
+
+	json["Shape"] = int(_shape);
+	json["Index"] = _index;
+	json["Current Passengers"] = int(_currentPass);
+	json["Position (x)"] = _position.x();
+	json["Position (y)"] = _position.y();
+
+}
+
 bool Station::pointerOnStation(QPoint pointerPos) {
 
 	if (pointerPos.x() >= position().x() * GAME_SCALE &&

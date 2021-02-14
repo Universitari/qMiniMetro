@@ -2,6 +2,7 @@
 
 #include <QPoint>
 #include <QPainter>
+#include <QJsonObject>
 #include <time.h>
 #include "Object.h"
 #include "config.h"
@@ -32,6 +33,10 @@ public:
 	void advance() { }
 	void solveCollisions() { }
 	void hit(Object* what) { }
+
+	// Savegame functions
+	void read(const QJsonObject& json);
+	void write(QJsonObject& json) const;
 
 	// Getters
 	QPoint position() { return _position; }

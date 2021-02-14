@@ -564,6 +564,94 @@ bool Game::availableTrains(){
 		return false;
 }
 
+bool Game::loadGame() {
+
+	QFile loadFile(QStringLiteral("save.json"));
+
+	if (!loadFile.open(QIODevice::ReadOnly)) {
+		qWarning("Couldn't open save file.");
+		return false;
+	}
+
+	QByteArray saveData = loadFile.readAll();
+	QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+	read(loadDoc.object());
+	return true;
+}
+
+bool Game::saveGame() const {
+
+	QFile saveFile(QStringLiteral("save.json"));
+
+	if (!saveFile.open(QIODevice::WriteOnly)) {
+		qWarning("Couldn't open save file.");
+		return false;
+	}
+
+	QJsonObject gameObject;
+	write(gameObject);
+	saveFile.write(QJsonDocument(gameObject).toJson());
+	return true;
+}
+
+void Game::read(const QJsonObject& json){
+
+	// Load stations
+	if (json.contains("Stations") && json["Stations"].isArray()) {
+		QJsonArray stationsArray = json["Stations"].toArray();
+		_stationsVec.clear();
+
+		for (int i = 0; i < MAX_LINES; i++)
+			_graph[i].clear();
+
+		for (int i = 0; i < stationsArray.size(); i++) {
+			QJsonObject stationObj = stationsArray[i].toObject();
+			Station *s = new Station(QPoint(0, 0), -1);
+			s->read(stationObj);
+			_stationsVec.push_back(s);
+			_scene->addItem(s);
+
+			for (int i = 0; i < MAX_LINES; i++)
+				_graph[i].emplace_back();
+		}
+	}
+
+	// Load Game variables
+	if (json.contains("Active line") && json["Active line"].isDouble())
+		_activeLine = json["Active line"].toInt();
+
+	if (json.contains("Active Station") && json["Active Station"].isDouble())
+		_activeStation = json["Active Station"].toInt();
+
+	if (json.contains("Score") && json["Score"].isDouble())
+		_score = json["Score"].toInt();
+
+	if (json.contains("Stations number") && json["Stations number"].isDouble())
+		_stationsNumber = json["Stations number"].toInt();
+
+	// Load all the other stuff
+
+}
+
+void Game::write(QJsonObject& json) const{
+
+	// Save Game variables
+	json["Active line"] = _activeLine;
+	json["Active Station"] = _activeStation;
+	json["Score"] = int(_score);
+	json["Stations number"] = _stationsNumber;
+
+	// Save stations array
+	QJsonArray stationsArray;
+	for (auto& s : _stationsVec) {
+		QJsonObject stationObj;
+		s->write(stationObj);
+		stationsArray.append(stationObj);
+	}
+	json["Stations"] = stationsArray;
+
+}
+
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
@@ -638,6 +726,16 @@ void Game::keyPressEvent(QKeyEvent* e){
 			visible = false;
 		for (auto& s : _stationsVec)
 			s->setVisible(visible);
+	}
+
+	if (e->key() == Qt::Key_K ) {
+
+		saveGame();
+	}
+
+	if (e->key() == Qt::Key_L) {
+
+		loadGame();
 	}
 
 	if (e->key() == Qt::Key_Down && _debug) {
