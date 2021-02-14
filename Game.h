@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <iostream>
 #include <QApplication>
+#include <QFont>
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"
@@ -44,6 +45,7 @@ private:
 	int _activeLine = -1;
 	int _activeStation = -1;
 	unsigned int _score = 0;
+	QGraphicsTextItem *_scoreText = 0;
 
 	QPoint startPos[3] = { QPoint(ST_1[0], ST_1[1]),
 						   QPoint(ST_2[0], ST_2[1]), 

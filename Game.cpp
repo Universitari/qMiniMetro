@@ -47,12 +47,12 @@ void Game::init() {
 		QGraphicsPixmapItem *_mainMenu = new QGraphicsPixmapItem(QPixmap(":/Graphics/MainMenu.png"));
 		QGraphicsPixmapItem *_newGame = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_New_Game.png"));
 		QGraphicsPixmapItem *_continue = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Continue.png"));
-		QGraphicsPixmapItem *_exit = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Exit.png"));
-		_scene->addItem(_mainMenu);
+		QGraphicsPixmapItem* _exit = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Exit.png"));
 
 		_newGame->setPos(WINDOW_WIDTH/2 - 250, WINDOW_HEIGHT/2 - 45 - 90 - 5);
 		_continue->setPos(WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT/2 - 45);
 		_exit->setPos(WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT/2 - 45 + 90 + 5);
+		_scene->addItem(_mainMenu); 
 		_scene->addItem(_newGame);
 		_scene->addItem(_continue);
 		_scene->addItem(_exit);
@@ -90,6 +90,9 @@ void Game::reset() {
 	for (int i = 0; i < MAX_LINES; i++)
 		_graph[i].clear();
 
+	if(_scoreText)
+		delete _scoreText;
+
 	_stationsNumber = -1;
 	_activeStation = -1;
 	_activeLine = -1;
@@ -101,7 +104,7 @@ void Game::reset() {
 	_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
 
 	_stationsTimer.setInterval(10000);
-	_passengerTimer.setInterval(2000 / sqrt(5));
+	_passengerTimer.setInterval(2000);
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
 	_debug = false;
@@ -184,6 +187,11 @@ void Game::start() {
 		_scene->clear();
 		QGraphicsPixmapItem* Map = new QGraphicsPixmapItem(QPixmap(":/Graphics/LondonMap.png"));
 		_scene->addItem(Map);
+		
+		_scoreText = new QGraphicsTextItem;
+		_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
+		_scoreText->setScale(3);
+		_scene->addItem(_scoreText);
 
 		for (int i = -1; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
@@ -286,6 +294,8 @@ void Game::passengersInOut(){
 							if ((*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
 
 								//printf("Score = %d\n", ++_score);
+								_score++;
+								_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
 								_scene->removeItem((*iter));
 								(*iter)->setVisible(false);
 								_passengersVec.erase(iter);
@@ -317,6 +327,30 @@ void Game::passengersInOut(){
 
 void Game::spawnPassenger(){
 
+	srand(time(NULL));
+
+	for (auto& s : _stationsVec) {
+		
+		if ((rand() % 100) <= SPAWN_CHANCE && s->passengers() < 10) {
+
+			QPoint position = passPosStation(s->index());
+
+			int shape;
+			do {
+				shape = randomShape();
+			} while (shape == _stationsVec.at(s->index())->stationShape());
+
+			_stationsVec.at(s->index())->addPassenger();
+
+			Passenger* passenger = new Passenger(s->index(), position, shape);
+			_passengersVec.push_back(passenger);
+			_scene->addItem(_passengersVec.back());
+
+		}
+
+	}
+
+	/*
 	int index;
 	int i = 0;
 	bool stationsFull = false;
@@ -346,7 +380,7 @@ void Game::spawnPassenger(){
 	else printf("YOU DIED\n"); // implement death
 
 	_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
-
+	*/
 }
 
 int Game::randomShape(){
@@ -649,7 +683,7 @@ void Game::mousePressEvent(QMouseEvent* e){
 		else if (false)
 			;
 		else if (QRect(QPoint(WINDOW_WIDTH / 2 - 250 + 92, WINDOW_HEIGHT / 2 - 45 + 90 + 5),
-			QPoint(WINDOW_WIDTH / 2 - 250 + 229, WINDOW_HEIGHT / 2 - 45 + 90 + 5 + 90)).contains(e->pos() / GAME_SCALE))
+				 QPoint(WINDOW_WIDTH / 2 - 250 + 229, WINDOW_HEIGHT / 2 - 45 + 90 + 5 + 90)).contains(e->pos() / GAME_SCALE))
 			QApplication::quit();
 	}
 
