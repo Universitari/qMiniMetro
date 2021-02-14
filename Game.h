@@ -6,7 +6,9 @@
 #include <QTimer>
 #include <QPixmap>
 #include <QGraphicsPixmapItem>
+#include <QPushButton>
 #include <iostream>
+#include <QApplication>
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"

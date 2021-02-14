@@ -21,6 +21,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 				 | QPainter::SmoothPixmapTransform);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	//showFullScreen();
 
 	this->reset();
 	
@@ -640,7 +641,17 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 void Game::mousePressEvent(QMouseEvent* e){
 
-	// printf("Cursor in pos = %d, %d\n", e->pos().x(), e->pos().y());
+	if (_state == READY) {
+
+		if (QRect(QPoint(WINDOW_WIDTH / 2 - 250 + 92, WINDOW_HEIGHT / 2 - 45 - 90 - 5),
+			QPoint(WINDOW_WIDTH / 2 - 250 + 500 - 48, WINDOW_HEIGHT / 2 - 45 - 90 - 5 + 90)).contains(e->pos() / GAME_SCALE))
+			start();
+		else if (false)
+			;
+		else if (QRect(QPoint(WINDOW_WIDTH / 2 - 250 + 92, WINDOW_HEIGHT / 2 - 45 + 90 + 5),
+			QPoint(WINDOW_WIDTH / 2 - 250 + 229, WINDOW_HEIGHT / 2 - 45 + 90 + 5 + 90)).contains(e->pos() / GAME_SCALE))
+			QApplication::quit();
+	}
 
 	// Add new line
 	if (!_mousePressed) {
