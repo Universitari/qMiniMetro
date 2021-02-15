@@ -6,5 +6,6 @@
 	<file>Graphics/Button_New_Game.png</file>
 	<file>Graphics/Button_Continue.png</file>
 	<file>Graphics/Button_Exit.png</file>
+	<file>Graphics/icon.png</file>
 </qresource>
 </RCC>

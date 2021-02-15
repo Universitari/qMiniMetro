@@ -350,37 +350,6 @@ void Game::spawnPassenger(){
 
 	}
 
-	/*
-	int index;
-	int i = 0;
-	bool stationsFull = false;
-
-	// Are all stations full?
-	do {
-		index = (rand() % (_stationsNumber + 1));
-		if (i++ == 100)
-			stationsFull = true;
-	} while (_stationsVec.at(index)->passengers() >= MAX_PASS_STATION && !stationsFull);
-
-	if (!stationsFull) {
-
-		QPoint position = passPosStation(index);
-		
-		int shape;
-		do {
-			shape = randomShape();
-		} while (shape == _stationsVec.at(index)->stationShape());
-
-		_stationsVec.at(index)->addPassenger();
-
-		Passenger* passenger = new Passenger(index, position, shape);
-		_passengersVec.push_back(passenger);
-		_scene->addItem(_passengersVec.back());
-	}
-	else printf("YOU DIED\n"); // implement death
-
-	_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
-	*/
 }
 
 int Game::randomShape(){
