@@ -570,18 +570,12 @@ void Game::read(const QJsonObject& json){
 		QJsonArray stationsArray = json["Stations"].toArray();
 		_stationsVec.clear();
 
-		for (int i = 0; i < MAX_LINES; i++)
-			_graph[i].clear();
-
 		for (int i = 0; i < stationsArray.size(); i++) {
 			QJsonObject stationObj = stationsArray[i].toObject();
 			Station *s = new Station(QPoint(0, 0), -1);
 			s->read(stationObj);
 			_stationsVec.push_back(s);
 			_scene->addItem(s);
-
-			for (int i = 0; i < MAX_LINES; i++)
-				_graph[i].emplace_back();
 		}
 	}
 
@@ -598,8 +592,38 @@ void Game::read(const QJsonObject& json){
 	if (json.contains("Stations number") && json["Stations number"].isDouble())
 		_stationsNumber = json["Stations number"].toInt();
 
-	// Load all the other stuff
+	// Load the graph
 
+	for (int i = 0; i < MAX_LINES; i++)
+		_graph[i].clear();
+
+	for(int i = 0; i <= _stationsNumber; i++)
+		for (int j = 0; j < MAX_LINES; j++)
+			_graph[j].emplace_back();
+
+	if (json.contains("Graph") && json["Graph"].isArray()) {
+		QJsonArray arr = json["Graph"].toArray();
+
+		for (int i = 0; i < MAX_LINES; i++) {
+
+			QJsonArray arr2 = arr.at(i).toArray();
+
+			for (int j = 0; i <= _stationsNumber; j++) {
+				
+				QJsonObject obj = arr2.at(j).toObject();
+				int index = -1;
+				if (obj.contains("First adjacent station") && obj["First adjacent station"].isDouble()) {
+					index = obj["First adjacent station"].toInt();
+					_graph[i].at(j).push_back(index);
+				}
+
+				if (obj.contains("Second adjacent station") && obj["Second adjacent station"].isDouble()){
+					index = obj["Second adjacent station"].toInt();
+					_graph[i].at(j).push_back(index);
+				}
+			}
+		}
+	}
 }
 
 void Game::write(QJsonObject& json) const{
@@ -618,6 +642,29 @@ void Game::write(QJsonObject& json) const{
 		stationsArray.append(stationObj);
 	}
 	json["Stations"] = stationsArray;
+	
+	// Save Graph
+	QJsonArray graphArray;
+	QJsonArray graphStationsArray[300];
+	
+	for (int i = 0; i < MAX_LINES; i++) {
+
+		for (int j = 0; j <= _stationsNumber; j++) {
+
+			QJsonObject obj;
+
+			if(!_graph[i].at(j).empty())
+				obj["First adjacent station"] = _graph[i].at(j).front();
+			if(_graph[i].at(j).size() == 2)
+				obj["Second adjacent station"] = _graph[i].at(j).back();
+
+			graphStationsArray[i].append(obj);
+		}
+		graphArray.append(graphStationsArray[i]);
+		
+	}
+
+	json["Graph"] = graphArray;
 
 }
 

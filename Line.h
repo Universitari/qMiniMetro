@@ -4,6 +4,7 @@
 #include <QPoint>
 #include <QPainter>
 #include <QLine>
+#include <QJsonObject>
 #include "Object.h"
 #include "utils.h"
 
@@ -45,6 +46,10 @@ public:
 	void advance() {}
 	void solveCollisions() {}
 	void hit(Object* what) {}
+
+	// Savegame functions
+	void read(const QJsonObject& json);
+	void write(QJsonObject& json) const;
 
 	// Setters
 	void setNextPoint(QPoint nextP);

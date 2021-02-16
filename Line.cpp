@@ -74,6 +74,23 @@ QRectF Line::boundingRect() const{
     return QRectF(QPointF(0, 0), QPointF(1920, 1080));
 }
 
+void Line::read(const QJsonObject& json){
+
+    if (json.contains("Circular line") && json["Circular line"].isBool())
+        _circularLine = json["Circular line"].toBool();
+
+    if (json.contains("State") && json["State"].isDouble())
+        _state = State(json["State"].toInt());
+
+}
+
+void Line::write(QJsonObject& json) const{
+
+    json["Circular line"] = _circularLine;
+    json["State"] = int(_state);
+
+}
+
 void Line::setNextPoint(QPoint nextP) {
 
     if (_state == MOD_TAIL || _state == INITIAL)
