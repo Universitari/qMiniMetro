@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QLine>
 #include <QJsonObject>
+#include <QJsonArray>
 #include "Object.h"
 #include "utils.h"
 

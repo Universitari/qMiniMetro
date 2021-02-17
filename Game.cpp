@@ -597,18 +597,19 @@ void Game::read(const QJsonObject& json){
 	for (int i = 0; i < MAX_LINES; i++)
 		_graph[i].clear();
 
-	for(int i = 0; i <= _stationsNumber; i++)
-		for (int j = 0; j < MAX_LINES; j++)
+	for (int j = 0; j < MAX_LINES; j++)
+		for(int i = 0; i <= _stationsNumber; i++)
 			_graph[j].emplace_back();
 
 	if (json.contains("Graph") && json["Graph"].isArray()) {
+
 		QJsonArray arr = json["Graph"].toArray();
 
 		for (int i = 0; i < MAX_LINES; i++) {
 
 			QJsonArray arr2 = arr.at(i).toArray();
 
-			for (int j = 0; i <= _stationsNumber; j++) {
+			for (int j = 0; j <= _stationsNumber; j++) {
 				
 				QJsonObject obj = arr2.at(j).toObject();
 				int index = -1;
@@ -623,6 +624,36 @@ void Game::read(const QJsonObject& json){
 				}
 			}
 		}
+	}
+
+	// Load the lines and add trains
+	if (json.contains("Lines") && json["Lines"].isArray()) {
+		QJsonArray linesArray = json["Lines"].toArray();
+
+		for (int i = 0; i < linesArray.size(); i++) {
+			QJsonObject lineObj = linesArray[i].toObject();
+
+			_linesVec.at(i) = new Line(QPoint(0, 0), i);
+			_linesVec.at(i)->read(lineObj);
+
+			int id = 0;
+			for (auto& t : _trainsVec){
+				if (!t) {
+					t = new Train(i, id,
+						_linesVec.at(i)->firstPoint(),
+						_linesVec.at(i)->path(),
+						nearestStation(_linesVec.at(i)->firstPoint()));
+					if (_linesVec.at(i)->circularLine())
+						t->setCircular(true);
+					_scene->addItem(t);
+					break;
+				}
+				id++;
+			}
+
+			_scene->addItem(_linesVec.at(i));
+		}
+
 	}
 }
 
@@ -648,23 +679,30 @@ void Game::write(QJsonObject& json) const{
 	QJsonArray graphStationsArray[300];
 	
 	for (int i = 0; i < MAX_LINES; i++) {
-
 		for (int j = 0; j <= _stationsNumber; j++) {
-
 			QJsonObject obj;
 
-			if(!_graph[i].at(j).empty())
+			if (!_graph[i].at(j).empty())
 				obj["First adjacent station"] = _graph[i].at(j).front();
-			if(_graph[i].at(j).size() == 2)
+			if (_graph[i].at(j).size() == 2)
 				obj["Second adjacent station"] = _graph[i].at(j).back();
 
 			graphStationsArray[i].append(obj);
 		}
 		graphArray.append(graphStationsArray[i]);
-		
 	}
-
 	json["Graph"] = graphArray;
+
+	// Save Lines
+	QJsonArray linesArray;
+	for (auto& l : _linesVec) {
+		if (l) {
+			QJsonObject lineObj;
+			l->write(lineObj);
+			linesArray.append(lineObj);
+		}
+	}
+	json["Lines"] = linesArray;
 
 }
 
@@ -924,6 +962,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 		}
 	}
 
+	_scene->update();
 	QGraphicsView::mouseMoveEvent(e);
 }
 
@@ -979,6 +1018,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	}
 
 	_activeLine = -1;
+	_scene->update();
 
 	QGraphicsView::mouseReleaseEvent(e);
 }

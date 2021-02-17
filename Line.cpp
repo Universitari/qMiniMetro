@@ -82,12 +82,48 @@ void Line::read(const QJsonObject& json){
     if (json.contains("State") && json["State"].isDouble())
         _state = State(json["State"].toInt());
 
+    if (json.contains("Stations") && json["Stations"].isArray()) {
+        QJsonArray stationsArray = json["Stations"].toArray();
+
+        _stations.clear();
+
+        QPoint p;
+        QJsonObject obj = stationsArray.at(0).toObject();
+
+        p.setX(obj["x"].toInt());
+        p.setY(obj["y"].toInt());
+
+        _path.moveTo(p);
+        _stations.push_back(p);
+
+        for (int i = 1; i < stationsArray.size(); i++) {
+
+            obj = stationsArray.at(i).toObject();
+
+            p.setX(obj["x"].toInt());
+            p.setY(obj["y"].toInt());
+
+            setNextPoint(p);
+        }
+
+        updateTcapPoint();
+    }
+
 }
 
 void Line::write(QJsonObject& json) const{
 
     json["Circular line"] = _circularLine;
     json["State"] = int(_state);
+
+    QJsonArray stationsArray;
+    for (auto& s : _stations) {
+        QJsonObject stationObj;
+        stationObj["x"] = s.x();
+        stationObj["y"] = s.y();
+        stationsArray.append(stationObj);
+    }
+    json["Stations"] = stationsArray;
 
 }
 
