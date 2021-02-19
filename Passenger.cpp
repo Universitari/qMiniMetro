@@ -1,4 +1,6 @@
 #include "Passenger.h"
+#include "AI.h"
+
 class Train;
 Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 
@@ -7,6 +9,7 @@ Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 	_ticket = -1;
 	_stationIndex = stationIndex;
 	_position = pos;
+	_finalStation = AI::instance()->findFinalStation(stationIndex, shape);
 	setZValue(3);
 
 }

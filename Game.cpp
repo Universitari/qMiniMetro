@@ -29,7 +29,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 
 
 	QObject::connect(&_engine, SIGNAL(timeout()), this, SLOT(advance()));
-	QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
+	//QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
 	QObject::connect(&_stationsTimer, SIGNAL(timeout()), this, SLOT(spawnStation()));
 	QObject::connect(&_passengersInOutTimer, SIGNAL(timeout()), this, SLOT(passengersInOut()));
 
@@ -89,6 +89,8 @@ void Game::reset() {
 
 	for (int i = 0; i < MAX_LINES; i++)
 		_graph[i].clear();
+
+	AI::instance()->clearGraph();
 
 	if(_scoreText)
 		delete _scoreText;
@@ -205,6 +207,7 @@ void Game::start() {
 			_scene->addItem(_stationsVec.back());
 			for(int i = 0; i < MAX_LINES; i++)
 				_graph[i].emplace_back();
+			AI::instance()->addStation();
 		}
 
 		for (int i = 0; i < MAX_LINES; i++) {
@@ -219,7 +222,18 @@ void Game::start() {
 			_trainsVec.shrink_to_fit();
 		}
 
+		AI::instance();
 
+		/* EVENT FILTER
+		button = new QPushButton();
+		button->setIcon(QIcon(QPixmap(":/Graphics/Button_Exit.png")));
+		button->setFlat(true);
+		button->setBaseSize(500, 90);
+		button->setIconSize(QSize(500, 90));
+		button->installEventFilter(this);
+		_scene->addWidget(button);
+		*/
+		
 		_engine.start();
 		_passengerTimer.start();
 		_stationsTimer.start();
@@ -265,6 +279,7 @@ void Game::spawnStation() {
 	
 	for (int i = 0; i < MAX_LINES; i++)
 		_graph[i].emplace_back();
+	AI::instance()->addStation();
 
 	if (_stationsNumber == MAX_STATIONS)
 		_stationsTimer.stop();
@@ -284,7 +299,8 @@ void Game::passengersInOut(){
 					if ((*iter)->trainIndex() == t->index()) {
 
 						// if the line is being deleted
-						if (_linesVec.at(t->lineIndex())->deleting() || (*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
+						if (_linesVec.at(t->lineIndex())->deleting() || 
+							AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) != t->nextStation()) {
 
 							t->decrementPassengers((*iter)->ticket());
 							(*iter)->getOffTrain(t->currentStation());
@@ -303,15 +319,17 @@ void Game::passengersInOut(){
 							else 
 								_stationsVec.at(t->currentStation())->addPassenger();
 
-
 							break;
 						}
 
 					}
 
 					// One passenger gets on the train
-					if ((*iter)->stationIndex() == t->currentStation() && t->passengers() < 6 && !_linesVec.at(t->lineIndex())->deleting()) {
-
+					if ((*iter)->stationIndex() == t->currentStation() && 
+						t->passengers() < 6 && 
+						!_linesVec.at(t->lineIndex())->deleting() &&
+						AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) == t->nextStation())
+					{
 						(*iter)->setTicket(t->firstSeatAvailable());
 						t->incrementPassengers((*iter)->ticket());
 						(*iter)->getOnTrain(t->index());
@@ -341,6 +359,8 @@ void Game::spawnPassenger(){
 			} while (shape == _stationsVec.at(s->index())->stationShape());
 
 			_stationsVec.at(s->index())->addPassenger();
+
+			printf("Station: %d, shape: %d\n", s->index(), shape);
 
 			Passenger* passenger = new Passenger(s->index(), position, shape);
 			_passengersVec.push_back(passenger);
@@ -532,6 +552,27 @@ bool Game::availableTrains(){
 	else 
 		return false;
 }
+
+/*
+bool Game::eventFilter(QObject* watched, QEvent* event){
+
+	if (watched == button) {
+		if (event->type() == QEvent::HoverEnter) {
+			button->resize(500 * 0.5, 90 * 0.5);
+			button->setIconSize(QSize(500 * 0.5, 90 * 0.5));
+			button->setGeometry(125, 22, 250, 45);
+			return true;
+		}
+		if (event->type() == QEvent::HoverLeave) {
+			button->resize(500 , 90);
+			button->setIconSize(QSize(500, 90));
+			button->setGeometry(0, 0, 500, 22);
+			return true;
+		}
+	}
+	return false;
+}
+*/
 
 bool Game::loadGame() {
 
@@ -771,6 +812,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 			printf("  DOWN ARROW - decrease game speed\n");
 			printf("  RIGHT ARROW - reset game speed\n");
 		}
+
 	}
 
 	if (e->key() == Qt::Key_V && _debug) {
@@ -790,6 +832,11 @@ void Game::keyPressEvent(QKeyEvent* e){
 	if (e->key() == Qt::Key_L) {
 
 		loadGame();
+	}
+
+	if (e->key() == Qt::Key_O) {
+
+		AI::instance()->printGraph();
 	}
 
 	if (e->key() == Qt::Key_Down && _debug) {
@@ -918,6 +965,9 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 
 					_graph[_activeLine].at(_activeStation).push_back(s->index());
 					_graph[_activeLine].at(s->index()).push_back(_activeStation);
+					AI::instance()->setAdjacentStation(_activeStation, s->index());
+					AI::instance()->update();
+
 					_activeStation = s->index();
 
 					if (_linesVec.at(_activeLine)->circularLine()) {

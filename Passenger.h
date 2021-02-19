@@ -16,6 +16,7 @@ private:
 	int _stationIndex;
 	QPoint _position;
 	int _ticket;
+	int _finalStation;
 
 public:
 
@@ -41,6 +42,7 @@ public:
 	int trainIndex() { return _trainIndex; }
 	int ticket() { return _ticket; }
 	int passengerShape() { return int(_shape); }
+	int finalStation() { return _finalStation; }
 
 	// Utility
 	void getOnTrain(int trainIndex);

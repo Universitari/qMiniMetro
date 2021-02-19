@@ -19,6 +19,7 @@
 #include "Button.h"
 #include "Train.h"
 #include "Passenger.h"
+#include "AI.h"
 
 
 class Game : public QGraphicsView {
@@ -62,6 +63,8 @@ private:
 
 	std::vector<std::list<int>> _graph[7];
 
+	//QPushButton *button;
+
 public:
 
 	static Game* instance();
@@ -77,6 +80,11 @@ public:
 	bool trainArrived(int trainIndex);
 	void addTrain(QRect rect);
 	bool availableTrains();
+
+	// Getters
+	Station* station(int index) { return _stationsVec.at(index); }
+
+	//bool eventFilter(QObject* watched, QEvent* event);
 
 	// Savegame functions
 	bool loadGame();
