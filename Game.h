@@ -10,9 +10,6 @@
 #include <iostream>
 #include <QApplication>
 #include <QFont>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
 #include "utils.h"
 #include "Station.h"
 #include "Line.h"
@@ -61,8 +58,6 @@ private:
 	std::vector<Train*> _trainsVec;
 	std::vector<Passenger*> _passengersVec;
 
-	std::vector<std::list<int>> _graph[7];
-
 	//QPushButton *button;
 
 public:
@@ -75,14 +70,17 @@ public:
 	QPoint passPosStation(int stationIndex);
 	void reorgPassengers(int stationIndex);
 	bool passengersArrived(int TrainIndex, int StationIndex);
+	bool passengersSmoothing(int TrainIndex, int StationIndex);
 	int nearestStation(QPoint trainPos);
 	int nextStation(int lineIndex, int stationIndex, int trainIndex);
 	bool trainArrived(int trainIndex);
 	void addTrain(QRect rect);
 	bool availableTrains();
+	void updatePassengersDestinations();
 
 	// Getters
 	Station* station(int index) { return _stationsVec.at(index); }
+	int stationsNumber() { return _stationsNumber; }
 
 	//bool eventFilter(QObject* watched, QEvent* event);
 

@@ -42,7 +42,7 @@ public:
 		QWidget* widget);
 	QRectF boundingRect() const;
 	std::string name() { return "Linea"; }
-	int nome() { return _name; }
+	int nome() { return int(_name); }
 	void animate() {}
 	void advance() {}
 	void solveCollisions() {}

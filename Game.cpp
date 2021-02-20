@@ -29,7 +29,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 
 
 	QObject::connect(&_engine, SIGNAL(timeout()), this, SLOT(advance()));
-	//QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
+	QObject::connect(&_passengerTimer, SIGNAL(timeout()), this, SLOT(spawnPassenger()));
 	QObject::connect(&_stationsTimer, SIGNAL(timeout()), this, SLOT(spawnStation()));
 	QObject::connect(&_passengersInOutTimer, SIGNAL(timeout()), this, SLOT(passengersInOut()));
 
@@ -87,10 +87,9 @@ void Game::reset() {
 		delete p;
 	_passengersVec.clear();
 
-	for (int i = 0; i < MAX_LINES; i++)
-		_graph[i].clear();
-
 	AI::instance()->clearGraph();
+
+	AI::instance()->clearBigGraph();
 
 	if(_scoreText)
 		delete _scoreText;
@@ -136,6 +135,8 @@ void Game::advance() {
 								t->setVisible(false);
 								t = 0;
 							}
+
+					AI::instance()->deleteGraphLine(l->nome());
 					_scene->removeItem(l);
 					l = 0;
 				}
@@ -154,16 +155,25 @@ void Game::advance() {
 			if (trainArrived(t->index())) {
 
 				// Train stops under normal circumstances
-				if ((_stationsVec.at(t->currentStation())->passengers() > 0) || passengersArrived(t->index(), t->currentStation()))
+				if (passengersSmoothing(t->index(), t->currentStation()) || passengersArrived(t->index(), t->currentStation())) {
 					t->setState(0);
+					printf("Train stopped, first IF\n");
+				}
 
 				// Train stops because the line will be deleted
-				if (_linesVec.at(t->lineIndex())->deleting())
+				if (_linesVec.at(t->lineIndex())->deleting()){
 					t->setState(0);
-
+					printf("Train stopped, second IF\n");
 				}
+			}
+
 			if(t->state() == 0)
-				if ((_stationsVec.at(t->currentStation())->passengers() == 0 || t->passengers() == 6) && !passengersArrived(t->index(), t->currentStation()) && !_linesVec.at(t->lineIndex())->deleting()) {
+				if ( (t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation())) ||
+					(!passengersArrived(t->index(), t->currentStation()) &&
+					!passengersSmoothing(t->index(), t->currentStation())) &&
+					!_linesVec.at(t->lineIndex())->deleting()) {
+
+					printf("Train moving\n");
 					t->setState(1);
 					//printf("train moving!\n");
 				}
@@ -186,6 +196,8 @@ void Game::start() {
 
 	if (_state == READY) {
 
+		AI::instance();
+
 		_scene->clear();
 		QGraphicsPixmapItem* Map = new QGraphicsPixmapItem(QPixmap(":/Graphics/LondonMap.png"));
 		_scene->addItem(Map);
@@ -205,9 +217,9 @@ void Game::start() {
 			Station* station = new Station(startPos[i], _stationsNumber);
 			_stationsVec.push_back(station);
 			_scene->addItem(_stationsVec.back());
-			for(int i = 0; i < MAX_LINES; i++)
-				_graph[i].emplace_back();
+
 			AI::instance()->addStation();
+			AI::instance()->update();
 		}
 
 		for (int i = 0; i < MAX_LINES; i++) {
@@ -221,8 +233,6 @@ void Game::start() {
 			_trainsVec.push_back(tmp);
 			_trainsVec.shrink_to_fit();
 		}
-
-		AI::instance();
 
 		/* EVENT FILTER
 		button = new QPushButton();
@@ -277,9 +287,8 @@ void Game::spawnStation() {
 	_stationsVec.push_back(newStation);
 	_scene->addItem(_stationsVec.back());
 	
-	for (int i = 0; i < MAX_LINES; i++)
-		_graph[i].emplace_back();
 	AI::instance()->addStation();
+	AI::instance()->update();
 
 	if (_stationsNumber == MAX_STATIONS)
 		_stationsTimer.stop();
@@ -325,20 +334,21 @@ void Game::passengersInOut(){
 					}
 
 					// One passenger gets on the train
-					if ((*iter)->stationIndex() == t->currentStation() && 
-						t->passengers() < 6 && 
-						!_linesVec.at(t->lineIndex())->deleting() &&
-						AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) == t->nextStation())
-					{
-						(*iter)->setTicket(t->firstSeatAvailable());
-						t->incrementPassengers((*iter)->ticket());
-						(*iter)->getOnTrain(t->index());
-						(*iter)->setPos(t->passengerPos((*iter)->ticket()));
-						(*iter)->setRotation(t->rotationAngle());
-						reorgPassengers(t->currentStation());
+					if ((*iter)->stationIndex() == t->currentStation())
+						if(t->passengers() < 6 && 
+							!_linesVec.at(t->lineIndex())->deleting() &&
+							AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) == t->nextStation())
+						{
+							printf("Next passenger station: %d\n", AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()));
+							(*iter)->setTicket(t->firstSeatAvailable());
+							t->incrementPassengers((*iter)->ticket());
+							(*iter)->getOnTrain(t->index());
+							(*iter)->setPos(t->passengerPos((*iter)->ticket()));
+							(*iter)->setRotation(t->rotationAngle());
+							reorgPassengers(t->currentStation());
 
-						break;
-					}
+							break;
+						}
 				}
 			}
 }
@@ -426,8 +436,21 @@ bool Game::passengersArrived(int TrainIndex, int StationIndex){
 
 	for (auto& p : _passengersVec) {
 		if (p->trainIndex() == TrainIndex)
-			if (_stationsVec.at(StationIndex)->stationShape() == p->passengerShape())
+			if (AI::instance()->nextStationInShortestPath(StationIndex, p->finalStation()) != _trainsVec.at(TrainIndex)->nextStation())
 				return true;
+	}
+
+	return false;
+}
+
+bool Game::passengersSmoothing(int TrainIndex, int StationIndex){
+
+	for (auto& p : _passengersVec) {
+		if (p->stationIndex() == StationIndex)
+			if (AI::instance()->nextStationInShortestPath(StationIndex, p->finalStation()) == _trainsVec.at(TrainIndex)->nextStation()) {
+				printf("Passenger going to station %d\n", _trainsVec.at(TrainIndex)->nextStation());
+				return true;
+			}
 	}
 
 	return false;
@@ -553,6 +576,14 @@ bool Game::availableTrains(){
 		return false;
 }
 
+void Game::updatePassengersDestinations(){
+
+	for (auto& p : _passengersVec)
+		if(p->stationIndex() != -1)
+			p->setFinalStation(AI::instance()->findFinalStation(p->stationIndex(), p->passengerShape()));
+
+}
+
 /*
 bool Game::eventFilter(QObject* watched, QEvent* event){
 
@@ -634,38 +665,7 @@ void Game::read(const QJsonObject& json){
 		_stationsNumber = json["Stations number"].toInt();
 
 	// Load the graph
-
-	for (int i = 0; i < MAX_LINES; i++)
-		_graph[i].clear();
-
-	for (int j = 0; j < MAX_LINES; j++)
-		for(int i = 0; i <= _stationsNumber; i++)
-			_graph[j].emplace_back();
-
-	if (json.contains("Graph") && json["Graph"].isArray()) {
-
-		QJsonArray arr = json["Graph"].toArray();
-
-		for (int i = 0; i < MAX_LINES; i++) {
-
-			QJsonArray arr2 = arr.at(i).toArray();
-
-			for (int j = 0; j <= _stationsNumber; j++) {
-				
-				QJsonObject obj = arr2.at(j).toObject();
-				int index = -1;
-				if (obj.contains("First adjacent station") && obj["First adjacent station"].isDouble()) {
-					index = obj["First adjacent station"].toInt();
-					_graph[i].at(j).push_back(index);
-				}
-
-				if (obj.contains("Second adjacent station") && obj["Second adjacent station"].isDouble()){
-					index = obj["Second adjacent station"].toInt();
-					_graph[i].at(j).push_back(index);
-				}
-			}
-		}
-	}
+	AI::instance()->read(json);
 
 	// Load the lines and add trains
 	if (json.contains("Lines") && json["Lines"].isArray()) {
@@ -716,23 +716,7 @@ void Game::write(QJsonObject& json) const{
 	json["Stations"] = stationsArray;
 	
 	// Save Graph
-	QJsonArray graphArray;
-	QJsonArray graphStationsArray[300];
-	
-	for (int i = 0; i < MAX_LINES; i++) {
-		for (int j = 0; j <= _stationsNumber; j++) {
-			QJsonObject obj;
-
-			if (!_graph[i].at(j).empty())
-				obj["First adjacent station"] = _graph[i].at(j).front();
-			if (_graph[i].at(j).size() == 2)
-				obj["Second adjacent station"] = _graph[i].at(j).back();
-
-			graphStationsArray[i].append(obj);
-		}
-		graphArray.append(graphStationsArray[i]);
-	}
-	json["Graph"] = graphArray;
+	AI::instance()->write(json);
 
 	// Save Lines
 	QJsonArray linesArray;
@@ -782,15 +766,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	if (e->key() == Qt::Key_G && _debug) {
 
-		for (int j = 0; j < MAX_LINES; j++) {
-			std::cout << "---------- Graph " << j << " ----------\n";
-			for (int i = 0; i < _graph[j].size(); i++) {
-				std::cout << "Station " << i << " connected to station ";
-				for (auto& i : _graph[j].at(i))
-					std::cout << i << ", ";
-				std::cout << std::endl;
-			}
-		}
+		AI::instance()->printGraph();
 
 		std::cout << "---------- Trains ----------\n";
 		for (auto& t : _trainsVec)
@@ -836,7 +812,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	if (e->key() == Qt::Key_O) {
 
-		AI::instance()->printGraph();
+		AI::instance()->printBigGraph();
 	}
 
 	if (e->key() == Qt::Key_Down && _debug) {
@@ -963,9 +939,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 				if (_linesVec.at(_activeLine)->validPoint(centerPoint)) {
 					_linesVec.at(_activeLine)->setNextPoint(centerPoint);
 
-					_graph[_activeLine].at(_activeStation).push_back(s->index());
-					_graph[_activeLine].at(s->index()).push_back(_activeStation);
-					AI::instance()->setAdjacentStation(_activeStation, s->index());
+					AI::instance()->addLink(_activeStation, s->index(), _activeLine);
 					AI::instance()->update();
 
 					_activeStation = s->index();

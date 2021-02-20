@@ -36,6 +36,7 @@ public:
 	// Setters
 	void setPos(QPoint pos) { _position = pos; }
 	void setTicket(int passengers) { _ticket = passengers; }
+	void setFinalStation(int stationIndex) { _finalStation = stationIndex; }
 
 	// Getters
 	int stationIndex() { return _stationIndex; }

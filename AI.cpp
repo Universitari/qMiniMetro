@@ -5,10 +5,11 @@ AI* AI::uniqueInstance = 0;
 
 AI::AI() {
 	
-	D = nullptr;
-	successor = nullptr;
+	D = 0;
+	successor = 0;
+	n = _bigGraph.size();
 
-	update();
+	updateBigGraph();
 
 }
 
@@ -23,7 +24,6 @@ int AI::findFinalStation(int startStation, int shape){
 	int finalStation = -1;
 
 	for (int i = 0; i < _bigGraph.size(); i++) {
-		printf("for, %d\n", i);
 		if(Game::instance()->station(i)->stationShape() == shape)
 			if (D[startStation][i] < distance) {
 				distance = D[startStation][i];
@@ -36,26 +36,26 @@ int AI::findFinalStation(int startStation, int shape){
 
 void AI::update(){
 
-	int n = _bigGraph.size();
-
 	printf("deallocating\n");
 
 	// Deallocations
-	if (D != nullptr) {
+	if (D != 0) {
 		for (int x = 0; x < n; x++)
 			delete[] D[x];
 		delete[] D;
-		D = nullptr;
+		D = 0;
 	}
 
-	if (successor != nullptr) {
+	if (successor != 0) {
 		for (int x = 0; x < n; x++)
 			delete[] successor[x];
 		delete[] successor;
-		successor = nullptr;
+		successor = 0;
 	}
-
+	
 	printf("initializing\n");
+
+	n = _bigGraph.size();
 
 	// Initialization
 	D = new int* [n];
@@ -92,15 +92,58 @@ void AI::update(){
 					D[x][y] = D[x][k] + D[k][y];
 					successor[x][y] = successor[x][k];
 				}
+
+	Game::instance()->updatePassengersDestinations();
+
 }
 
-void AI::setAdjacentStation(int x, int y){
+void AI::clearGraph(){
 
-	_bigGraph.at(x).push_back(y);
-	_bigGraph.at(y).push_back(x);
+	for (int i = 0; i < MAX_LINES; i++)
+		_graph[i].clear();
+
+}
+
+void AI::deleteGraphLine(int lineIndex){
+
+	for (auto& list : _graph[lineIndex])
+		list.clear();
+
+	updateBigGraph();
+
+}
+
+void AI::addStation(){
+
+	for (int i = 0; i < MAX_LINES; i++)
+		_graph[i].emplace_back();
+
+	_bigGraph.emplace_back();
+
+}
+
+void AI::addLink(int x, int y, int lineIndex){
+
+	_graph[lineIndex].at(x).push_back(y);
+	_graph[lineIndex].at(y).push_back(x);
+
+	updateBigGraph();
 }
 
 void AI::printGraph(){
+
+	for (int j = 0; j < MAX_LINES; j++) {
+		std::cout << "---------- Graph " << j << " ----------\n";
+		for (int i = 0; i < _graph[j].size(); i++) {
+			std::cout << "Station " << i << " connected to station ";
+			for (auto& i : _graph[j].at(i))
+				std::cout << i << ", ";
+			std::cout << std::endl;
+		}
+	}
+}
+
+void AI::printBigGraph(){
 
 	std::cout << "---------- bigGraph ----------\n";
 	for (auto& s : _bigGraph) {
@@ -111,6 +154,88 @@ void AI::printGraph(){
 		}
 		printf("\n");
 	}
+}
+
+void AI::updateBigGraph(){
+
+	std::set<int> adjacentStations;
+
+	clearBigGraph();
+
+	for (int i = 0; i < _graph[0].size(); i++) {
+		for (int j = 0; j < MAX_LINES; j++) {
+
+			for (auto& adjS : _graph[j].at(i))
+				adjacentStations.insert(adjS);
+		}
+
+		_bigGraph.emplace_back();
+		for (auto& adjS : adjacentStations)
+			_bigGraph.at(i).push_back(adjS);
+
+		adjacentStations.clear();
+	}
+
+}
+
+void AI::read(const QJsonObject& json){
+
+	for (int i = 0; i < MAX_LINES; i++)
+		_graph[i].clear();
+
+	for (int j = 0; j < MAX_LINES; j++)
+		for (int i = 0; i <= Game::instance()->stationsNumber(); i++)
+			_graph[j].emplace_back();
+
+	if (json.contains("Graph") && json["Graph"].isArray()) {
+
+		QJsonArray arr = json["Graph"].toArray();
+
+		for (int i = 0; i < MAX_LINES; i++) {
+
+			QJsonArray arr2 = arr.at(i).toArray();
+
+			for (int j = 0; j <= Game::instance()->stationsNumber(); j++) {
+
+				QJsonObject obj = arr2.at(j).toObject();
+				int index = -1;
+				if (obj.contains("First adjacent station") && obj["First adjacent station"].isDouble()) {
+					index = obj["First adjacent station"].toInt();
+					_graph[i].at(j).push_back(index);
+				}
+
+				if (obj.contains("Second adjacent station") && obj["Second adjacent station"].isDouble()) {
+					index = obj["Second adjacent station"].toInt();
+					_graph[i].at(j).push_back(index);
+				}
+			}
+		}
+	}
+
+	updateBigGraph();
+
+}
+
+void AI::write(QJsonObject& json) const{
+
+	QJsonArray graphArray;
+	QJsonArray graphStationsArray[300];
+
+	for (int i = 0; i < MAX_LINES; i++) {
+		for (int j = 0; j <= Game::instance()->stationsNumber(); j++) {
+			QJsonObject obj;
+
+			if (!_graph[i].at(j).empty())
+				obj["First adjacent station"] = _graph[i].at(j).front();
+			if (_graph[i].at(j).size() == 2)
+				obj["Second adjacent station"] = _graph[i].at(j).back();
+
+			graphStationsArray[i].append(obj);
+		}
+		graphArray.append(graphStationsArray[i]);
+	}
+	json["Graph"] = graphArray;
+
 }
 
 AI* AI::instance()
