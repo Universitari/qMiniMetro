@@ -70,7 +70,7 @@ public:
 	QPoint passPosStation(int stationIndex);
 	void reorgPassengers(int stationIndex);
 	bool passengersArrived(int TrainIndex, int StationIndex);
-	bool passengersSmoothing(int TrainIndex, int StationIndex);
+	bool passengersGetOn(int TrainIndex, int StationIndex);
 	int nearestStation(QPoint trainPos);
 	int nextStation(int lineIndex, int stationIndex, int trainIndex);
 	bool trainArrived(int trainIndex);

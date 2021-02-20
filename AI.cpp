@@ -30,13 +30,11 @@ int AI::findFinalStation(int startStation, int shape){
 				finalStation = i;
 			}
 	}
-	printf("final station: %d\n", finalStation);
+	//printf("final station: %d\n", finalStation);
 	return finalStation;
 }
 
 void AI::update(){
-
-	printf("deallocating\n");
 
 	// Deallocations
 	if (D != 0) {
@@ -53,8 +51,6 @@ void AI::update(){
 		successor = 0;
 	}
 	
-	printf("initializing\n");
-
 	n = _bigGraph.size();
 
 	// Initialization

@@ -155,25 +155,20 @@ void Game::advance() {
 			if (trainArrived(t->index())) {
 
 				// Train stops under normal circumstances
-				if (passengersSmoothing(t->index(), t->currentStation()) || passengersArrived(t->index(), t->currentStation())) {
+				if (passengersGetOn(t->index(), t->currentStation()) || passengersArrived(t->index(), t->currentStation()))
 					t->setState(0);
-					printf("Train stopped, first IF\n");
-				}
 
 				// Train stops because the line will be deleted
-				if (_linesVec.at(t->lineIndex())->deleting()){
+				if (_linesVec.at(t->lineIndex())->deleting())
 					t->setState(0);
-					printf("Train stopped, second IF\n");
-				}
 			}
 
 			if(t->state() == 0)
 				if ( (t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation())) ||
 					(!passengersArrived(t->index(), t->currentStation()) &&
-					!passengersSmoothing(t->index(), t->currentStation())) &&
+					!passengersGetOn(t->index(), t->currentStation())) &&
 					!_linesVec.at(t->lineIndex())->deleting()) {
 
-					printf("Train moving\n");
 					t->setState(1);
 					//printf("train moving!\n");
 				}
@@ -339,7 +334,7 @@ void Game::passengersInOut(){
 							!_linesVec.at(t->lineIndex())->deleting() &&
 							AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) == t->nextStation())
 						{
-							printf("Next passenger station: %d\n", AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()));
+							//printf("Next passenger station: %d\n", AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()));
 							(*iter)->setTicket(t->firstSeatAvailable());
 							t->incrementPassengers((*iter)->ticket());
 							(*iter)->getOnTrain(t->index());
@@ -443,14 +438,12 @@ bool Game::passengersArrived(int TrainIndex, int StationIndex){
 	return false;
 }
 
-bool Game::passengersSmoothing(int TrainIndex, int StationIndex){
+bool Game::passengersGetOn(int TrainIndex, int StationIndex){
 
 	for (auto& p : _passengersVec) {
 		if (p->stationIndex() == StationIndex)
-			if (AI::instance()->nextStationInShortestPath(StationIndex, p->finalStation()) == _trainsVec.at(TrainIndex)->nextStation()) {
-				printf("Passenger going to station %d\n", _trainsVec.at(TrainIndex)->nextStation());
+			if (AI::instance()->nextStationInShortestPath(StationIndex, p->finalStation()) == _trainsVec.at(TrainIndex)->nextStation())
 				return true;
-			}
 	}
 
 	return false;
