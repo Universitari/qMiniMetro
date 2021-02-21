@@ -1,20 +1,4 @@
-# MiniMetroAI
+# qMiniMetro  
 
-Classi
-
--Stazioni
-
--Inert (Passeggeri)
-
--Linee (tunnel e ponti)
-
--Entity (Locomotive e vagoni)
-
--Session
-
--Utils
-
--Map
-
-
-AI da implementare
+Fanmade remake of the popular game Mini Metro  
+written in C++ using the Qt framework  
