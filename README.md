@@ -1,4 +1,4 @@
-# qMiniMetro  
+# qMiniMetro (qiniqetro)  
 
-Fanmade remake of the popular game Mini Metro (qiniqetro) 
+Fanmade remake of the popular game Mini Metro  
 written in C++ using the Qt framework  
