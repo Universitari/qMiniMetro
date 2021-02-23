@@ -2,6 +2,7 @@
 
 #include "Object.h"
 #include "utils.h"
+#include <vector>
 #include <QPoint>
 #include <QPainter>
 
@@ -16,7 +17,7 @@ private:
 	int _stationIndex;
 	QPoint _position;
 	int _ticket;
-	int _finalStation;
+	std::vector<int> _finalStations;
 
 public:
 
@@ -36,18 +37,19 @@ public:
 	// Setters
 	void setPos(QPoint pos) { _position = pos; }
 	void setTicket(int passengers) { _ticket = passengers; }
-	void setFinalStation(int stationIndex) { _finalStation = stationIndex; }
 
 	// Getters
 	int stationIndex() { return _stationIndex; }
 	int trainIndex() { return _trainIndex; }
 	int ticket() { return _ticket; }
 	int passengerShape() { return int(_shape); }
-	int finalStation() { return _finalStation; }
+	std::vector<int> finalStations() { return _finalStations; }
 
 	// Utility
 	void getOnTrain(int trainIndex);
 	void getOffTrain(int stationIndex);
 	void moveTransformPoint(QPoint point) { setTransformOriginPoint(point); }
+	void updateFinalStations();
+
 
 };

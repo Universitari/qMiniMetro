@@ -77,6 +77,7 @@ public:
 	void addTrain(QRect rect);
 	bool availableTrains();
 	void updatePassengersDestinations();
+	bool acceptableStation(Train* t, Passenger* p);
 
 	// Getters
 	Station* station(int index) { return _stationsVec.at(index); }

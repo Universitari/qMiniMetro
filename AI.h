@@ -27,7 +27,7 @@ public:
 
 	// AI functions
 	int nextStationInShortestPath(int x, int y);
-	int findFinalStation(int startStation, int shape);
+	void findFinalStations(int startStation, int shape, std::vector<int> &v);
 	void update();
 
 	// Small Graphs functions

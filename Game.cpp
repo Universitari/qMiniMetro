@@ -302,26 +302,31 @@ void Game::passengersInOut(){
 					// One passengers gets off the train
 					if ((*iter)->trainIndex() == t->index()) {
 
-						// if the line is being deleted
-						if (_linesVec.at(t->lineIndex())->deleting() || 
-							AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) != t->nextStation()) {
+						// He is arrived at his destination
+						if ((*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
 
 							t->decrementPassengers((*iter)->ticket());
 							(*iter)->getOffTrain(t->currentStation());
 							(*iter)->setPos(passPosStation(t->currentStation()));
 							(*iter)->setRotation(0);
+							_score++;
+							_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
+							_scene->removeItem((*iter));
+							(*iter)->setVisible(false);
+							_passengersVec.erase(iter);
+							
+							break;
+						}
 
-							if ((*iter)->passengerShape() == _stationsVec.at(t->currentStation())->stationShape()) {
+						// if the line is being deleted
+						if (_linesVec.at(t->lineIndex())->deleting() || 
+							!acceptableStation(t, *iter)) {
 
-								//printf("Score = %d\n", ++_score);
-								_score++;
-								_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
-								_scene->removeItem((*iter));
-								(*iter)->setVisible(false);
-								_passengersVec.erase(iter);
-							}
-							else 
-								_stationsVec.at(t->currentStation())->addPassenger();
+							t->decrementPassengers((*iter)->ticket());
+							(*iter)->getOffTrain(t->currentStation());
+							(*iter)->setPos(passPosStation(t->currentStation()));
+							(*iter)->setRotation(0);
+							_stationsVec.at(t->currentStation())->addPassenger();
 
 							break;
 						}
@@ -332,8 +337,8 @@ void Game::passengersInOut(){
 					if ((*iter)->stationIndex() == t->currentStation())
 						if(t->passengers() < 6 && 
 							!_linesVec.at(t->lineIndex())->deleting() &&
-							AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()) == t->nextStation())
-						{
+							acceptableStation(t, *iter)){
+
 							//printf("Next passenger station: %d\n", AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()));
 							(*iter)->setTicket(t->firstSeatAvailable());
 							t->incrementPassengers((*iter)->ticket());
@@ -431,7 +436,7 @@ bool Game::passengersArrived(int TrainIndex, int StationIndex){
 
 	for (auto& p : _passengersVec) {
 		if (p->trainIndex() == TrainIndex)
-			if (AI::instance()->nextStationInShortestPath(StationIndex, p->finalStation()) != _trainsVec.at(TrainIndex)->nextStation())
+			if (!acceptableStation(_trainsVec.at(TrainIndex), p))
 				return true;
 	}
 
@@ -442,7 +447,7 @@ bool Game::passengersGetOn(int TrainIndex, int StationIndex){
 
 	for (auto& p : _passengersVec) {
 		if (p->stationIndex() == StationIndex)
-			if (AI::instance()->nextStationInShortestPath(StationIndex, p->finalStation()) == _trainsVec.at(TrainIndex)->nextStation())
+			if (acceptableStation(_trainsVec.at(TrainIndex), p))
 				return true;
 	}
 
@@ -559,13 +564,14 @@ void Game::addTrain(QRect rect){
 			}
 			i++;
 		}
-		for (auto& t : _trainsVec) {
-			if (t)
-				if (t->direction() == 1) { // BACKWARD
-					AI::instance()->setOrientation(false, nearestStation(_linesVec.at(lineIndex)->firstPoint()), t);
-					break;
-				}
-		}
+		if (_linesVec.at(lineIndex)->circularLine())
+			for (auto& t : _trainsVec) {
+				if (t)
+					if (t->direction() == 1) { // BACKWARD
+						AI::instance()->setOrientation(false, nearestStation(_linesVec.at(lineIndex)->firstPoint()), t);
+						break;
+					}
+			}
 
 	}
 
@@ -583,7 +589,17 @@ void Game::updatePassengersDestinations(){
 
 	for (auto& p : _passengersVec)
 		if(p->stationIndex() != -1)
-			p->setFinalStation(AI::instance()->findFinalStation(p->stationIndex(), p->passengerShape()));
+			p->updateFinalStations();
+
+}
+
+bool Game::acceptableStation(Train* t, Passenger* p){
+
+	for (auto& finalSt : p->finalStations())
+		if (AI::instance()->nextStationInShortestPath(t->currentStation(), finalSt) == t->nextStation())
+			return true;
+
+	return false;
 
 }
 
@@ -952,6 +968,8 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 						_linesVec.at(_activeLine)->updateTcapPoint();
 						
 						bool hasTrain = false;
+						bool forwardTrain = false;
+						bool backwardTrain = false;
 						int id = 0;
 
 						for (auto& t : _trainsVec)
@@ -959,11 +977,20 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 								if (t->lineIndex() == _activeLine) {
 									t->setPath(_linesVec.at(_activeLine)->path());
 									t->setCircular(true);
-									AI::instance()->setOrientation(true, _activeStation, t);
-									//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 									hasTrain = true;
+									id = t->index();
+
+									if (t->direction() == 0)
+										forwardTrain = true;
+									else if (t->direction() == 1)
+										backwardTrain = true;
 								}
 							}
+
+						if (!forwardTrain || !backwardTrain)
+							AI::instance()->setOrientation(true, _activeStation, _trainsVec.at(id));
+
+						id = 0;
 
 						if (!hasTrain) {
 							for (auto& t : _trainsVec) {

@@ -9,7 +9,7 @@ Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 	_ticket = -1;
 	_stationIndex = stationIndex;
 	_position = pos;
-	_finalStation = AI::instance()->findFinalStation(stationIndex, shape);
+	AI::instance()->findFinalStations(stationIndex, shape, _finalStations);
 	setZValue(3);
 
 }
@@ -78,6 +78,10 @@ void Passenger::getOffTrain(int stationIndex){
 	_trainIndex = -1;
 	_stationIndex = stationIndex;
 
+}
+
+void Passenger::updateFinalStations(){
+	AI::instance()->findFinalStations(_stationIndex, _shape, _finalStations);
 }
 
 void Passenger::advance() {

@@ -18,20 +18,20 @@ int AI::nextStationInShortestPath(int x, int y){
 	return successor[x][y];
 }
 
-int AI::findFinalStation(int startStation, int shape){
+void AI::findFinalStations(int startStation, int shape, std::vector<int>& v){
 
 	int distance = 9999;
-	int finalStation = -1;
 
 	for (int i = 0; i < _bigGraph.size(); i++) {
 		if(Game::instance()->station(i)->stationShape() == shape)
-			if (D[startStation][i] < distance) {
-				distance = D[startStation][i];
-				finalStation = i;
+			if (D[startStation][i] <= distance) {
+				if (D[startStation][i] < distance) {
+					v.clear();
+					distance = D[startStation][i];
+				}
+				v.push_back(i);
 			}
 	}
-	//printf("final station: %d\n", finalStation);
-	return finalStation;
 }
 
 void AI::update(){
