@@ -13,8 +13,8 @@ AI::AI() {
 
 }
 
-int AI::nextStationInShortestPath(int x, int y)
-{
+int AI::nextStationInShortestPath(int x, int y){
+
 	return successor[x][y];
 }
 
@@ -139,6 +139,54 @@ void AI::printGraph(){
 	}
 }
 
+void AI::setOrientation(bool oriented, int firstStation, Train* train){
+
+	printf("set orientation\n");
+	if (oriented) {
+
+		printf("if oriented\n");
+
+		for (auto& l : _graph[train->lineIndex()])
+			l.clear();
+
+		int s1 = firstStation;
+		bool flag = true;
+
+		do {
+			int s2 = Game::instance()->nextStation(train->lineIndex(), s1, train->index());
+			if (_graph[train->lineIndex()].at(s1).empty()) {
+				_graph[train->lineIndex()].at(s1).push_back(s2);
+				s1 = s2;
+			}
+			else
+				flag = false;
+
+		} while (flag);
+
+	} 
+	else { 
+
+		bool flag = true;
+		int s1 = firstStation;
+
+		do {
+
+			int s2 = _graph[train->lineIndex()].at(s1).front();
+			if (_graph[train->lineIndex()].at(s2).size() != 2) {
+				_graph[train->lineIndex()].at(s2).push_back(s1);
+				s1 = s2;
+			}
+			else
+				flag = false;
+
+		} while (flag);
+
+	}
+
+	updateBigGraph();
+	update();
+}
+
 void AI::printBigGraph(){
 
 	std::cout << "---------- bigGraph ----------\n";
@@ -171,7 +219,6 @@ void AI::updateBigGraph(){
 
 		adjacentStations.clear();
 	}
-
 }
 
 void AI::read(const QJsonObject& json){

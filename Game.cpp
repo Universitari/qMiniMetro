@@ -552,11 +552,21 @@ void Game::addTrain(QRect rect){
 					_linesVec.at(lineIndex)->firstPoint(),
 					_linesVec.at(lineIndex)->path(),
 					nearestStation(_linesVec.at(lineIndex)->firstPoint()));
+				if (_linesVec.at(lineIndex)->circularLine())
+					t->setCircular(true);
 				_scene->addItem(t);
 				break;
 			}
 			i++;
 		}
+		for (auto& t : _trainsVec) {
+			if (t)
+				if (t->direction() == 1) { // BACKWARD
+					AI::instance()->setOrientation(false, nearestStation(_linesVec.at(lineIndex)->firstPoint()), t);
+					break;
+				}
+		}
+
 	}
 
 }
@@ -949,6 +959,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 								if (t->lineIndex() == _activeLine) {
 									t->setPath(_linesVec.at(_activeLine)->path());
 									t->setCircular(true);
+									AI::instance()->setOrientation(true, _activeStation, t);
 									//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 									hasTrain = true;
 								}
@@ -963,6 +974,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 												  _linesVec.at(_activeLine)->path(), 
 												  nearestStation(_linesVec.at(_activeLine)->firstPoint()));
 									t->setCircular(true);
+									AI::instance()->setOrientation(true, _activeStation, t);
 									//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 
 									_scene->addItem(t);

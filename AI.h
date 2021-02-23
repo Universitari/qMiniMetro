@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include "Train.h"
 
 class AI {
 
@@ -35,6 +36,7 @@ public:
 	void addStation();
 	void addLink(int x, int y, int lineIndex);
 	void printGraph();
+	void setOrientation(bool oriented, int firstStation, Train* train);
 
 	// Big Graph functions	
 	void clearBigGraph() { _bigGraph.clear(); }
