@@ -48,6 +48,8 @@ private:
 	int _activeStation = -1;
 	unsigned int _score = 0;
 	QGraphicsTextItem *_scoreText = 0;
+	QPushButton* _pauseButton;
+	QPushButton* _saveButton;
 
 	QPoint startPos[3] = { QPoint(ST_1[0], ST_1[1]),
 						   QPoint(ST_2[0], ST_2[1]), 
@@ -107,6 +109,8 @@ public slots:
 	void passengersInOut();
 	// Quits the game
 	void exitGame() { QApplication::quit();}
+	// Pauses the game
+	void pause();
 
 	// Savegame functions
 	bool loadGame();

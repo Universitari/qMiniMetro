@@ -58,28 +58,28 @@ void Game::init() {
 		_arrows->setTransformationMode(Qt::TransformationMode::SmoothTransformation);
 		_menuScene->addItem(_arrows);
 
-		QPushButton* newGameButton = new QPushButton("New Game");
-		QPushButton* continueButton = new QPushButton("Continue");
-		QPushButton* exitButton = new QPushButton("Exit");
+		QPushButton* _newGameButton = new QPushButton("New Game");
+		QPushButton* _continueButton = new QPushButton("Continue");
+		QPushButton* _exitButton = new QPushButton("Exit");
 
-		newGameButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+		_newGameButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
 									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
-		continueButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+		_continueButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
 									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
-		exitButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+		_exitButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
 									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
 		
-		newGameButton->setGeometry(840, 400, 300, 90);
-		continueButton->setGeometry(840, 510, 300, 90);
-		exitButton->setGeometry(840, 620, 300, 90);
+		_newGameButton->setGeometry(840, 400, 300, 90);
+		_continueButton->setGeometry(840, 510, 300, 90);
+		_exitButton->setGeometry(840, 620, 300, 90);
 
-		_menuScene->addWidget(newGameButton);
-		_menuScene->addWidget(continueButton);
-		_menuScene->addWidget(exitButton);
+		_menuScene->addWidget(_newGameButton);
+		_menuScene->addWidget(_continueButton);
+		_menuScene->addWidget(_exitButton);
 
-		QObject::connect(newGameButton, SIGNAL(clicked()), this, SLOT(start()));
-		QObject::connect(continueButton, SIGNAL(clicked()), this, SLOT(loadGame()));
-		QObject::connect(exitButton, SIGNAL(clicked()), this, SLOT(exitGame()));
+		QObject::connect(_newGameButton, SIGNAL(clicked()), this, SLOT(start()));
+		QObject::connect(_continueButton, SIGNAL(clicked()), this, SLOT(loadGame()));
+		QObject::connect(_exitButton, SIGNAL(clicked()), this, SLOT(exitGame()));
 
 	}
 }
@@ -231,6 +231,25 @@ void Game::start() {
 		_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
 		_scoreText->setScale(3);
 		_scene->addItem(_scoreText);
+
+		_saveButton = new QPushButton;
+		_saveButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+									   "QPushButton:hover{}" });
+		_saveButton->setIcon(QPixmap(":/Graphics/saveIcon.png"));
+		_saveButton->setIconSize(QSize(45, 45));
+		_saveButton->setGeometry(1860, 15, 45, 45);
+		_scene->addWidget(_saveButton);
+
+		_pauseButton = new QPushButton;
+		_pauseButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+									   "QPushButton:hover{}" });
+		_pauseButton->setIcon(QPixmap(":/Graphics/pauseButton.png"));
+		_pauseButton->setIconSize(QSize(45, 45));
+		_pauseButton->setGeometry(1860, 75, 45, 45);
+		_scene->addWidget(_pauseButton);
+
+		QObject::connect(_saveButton, SIGNAL(clicked()), this, SLOT(saveGame()));
+		QObject::connect(_pauseButton, SIGNAL(clicked()), this, SLOT(pause()));
 
 		for (int i = -1; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
@@ -622,6 +641,28 @@ bool Game::acceptableStation(Train* t, Passenger* p){
 
 }
 
+void Game::pause(){
+
+	if (_state == RUNNING) {
+		_state = PAUSED;
+		_engine.stop();
+		_passengerTimer.stop();
+		_stationsTimer.stop();
+		_passengersInOutTimer.stop();
+		_pauseButton->setIcon(QPixmap(":/Graphics/playButton.png"));
+	}
+	else {
+		_state = RUNNING;
+		_engine.start();
+		_passengerTimer.start();
+		if (!(_stationsNumber >= MAX_STATIONS))
+			_stationsTimer.start();
+		_passengersInOutTimer.start();
+		_pauseButton->setIcon(QPixmap(":/Graphics/pauseButton.png"));
+	}
+
+}
+
 bool Game::loadGame() {
 
 	start();
@@ -776,21 +817,8 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	if (e->key() == Qt::Key_P) {
 
-		if (_state == RUNNING) {
-			_state = PAUSED;
-			_engine.stop();
-			_passengerTimer.stop();
-			_stationsTimer.stop();
-			_passengersInOutTimer.stop();
-		}
-		else {
-			_state = RUNNING;
-			_engine.start();
-			_passengerTimer.start();
-			if(!(_stationsNumber >= MAX_STATIONS))
-				_stationsTimer.start();
-			_passengersInOutTimer.start();
-		}
+		pause();
+
 	}
 
 	if (e->key() == Qt::Key_G && _debug) {
@@ -1016,7 +1044,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 		}
 	}
 
-	if(_state == RUNNING)
+	if (_state == RUNNING || _state == PAUSED)
 		_scene->update();
 
 	QGraphicsView::mouseMoveEvent(e);
@@ -1075,7 +1103,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 
 	_activeLine = -1;
 
-	if (_state == RUNNING)
+	if (_state == RUNNING || _state == PAUSED)
 		_scene->update();
 
 	QGraphicsView::mouseReleaseEvent(e);

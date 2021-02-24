@@ -5,5 +5,8 @@
 	<file>Graphics/MainMenu.png</file>
 	<file>Graphics/icon.png</file>
 	<file>Graphics/arrows.png</file>
+	<file>Graphics/saveIcon.png</file>
+	<file>Graphics/pauseButton.png</file>
+	<file>Graphics/playButton.png</file>
 </qresource>
 </RCC>
