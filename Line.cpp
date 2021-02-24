@@ -17,7 +17,7 @@ Line::Line(QPoint startP, int index) {
 Line::~Line(){
 
     printf("cancellata linea %d\n", int(_name));
-    delete _TcapHitbox;
+
 }
 
 void Line::paint(QPainter* painter,

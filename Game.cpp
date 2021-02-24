@@ -156,22 +156,26 @@ void Game::advance() {
 
 				// Train stops under normal circumstances
 				if (passengersGetOn(t->index(), t->currentStation()) || passengersArrived(t->index(), t->currentStation()))
+				{
 					t->setState(0);
-
+					printf("train stopped\n");
+				}
 				// Train stops because the line will be deleted
 				if (_linesVec.at(t->lineIndex())->deleting())
 					t->setState(0);
 			}
 
-			if(t->state() == 0)
-				if ( (t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation())) ||
+			if (t->state() == 0)
+				if ((t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation()) && !_linesVec.at(t->lineIndex())->deleting()) ||
 					(!passengersArrived(t->index(), t->currentStation()) &&
-					!passengersGetOn(t->index(), t->currentStation())) &&
+						!passengersGetOn(t->index(), t->currentStation())) &&
 					!_linesVec.at(t->lineIndex())->deleting()) {
 
 					t->setState(1);
-					//printf("train moving!\n");
+					printf("train moving!\n");
 				}
+
+			
 		}
 	}
 
@@ -250,19 +254,17 @@ void Game::start() {
 
 void Game::spawnStation() {
 
-	QPoint spawnPoint;
-	spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
-	spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
+	QPoint spawnPoint = spawnPos();
+
 	bool found = false;
 
 	do {
 
 		if (spawnAreaAvailable(spawnPoint, _stationsNumber))
 			for (auto& s : _stationsVec)
-				if (distance(spawnPoint, s->position()) < STATION_SIZE * 4) {
+				if (distance(spawnPoint, s->position()) < STATION_SIZE * 6) {
 
-					spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
-					spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
+					spawnPoint = spawnPos();
 					// printf("cambiate coordinate\n");
 					found = true;
 					break;
@@ -271,8 +273,7 @@ void Game::spawnStation() {
 					found = false;
 			
 		else {
-			spawnPoint.setX(2 * STATION_SIZE + rand() % (WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)));
-			spawnPoint.setY(2 * STATION_SIZE + rand() % (WINDOW_HEIGHT - 8 * STATION_SIZE));
+			spawnPoint = spawnPos();
 			found = true;
 		}
 		} while (found);
@@ -285,7 +286,7 @@ void Game::spawnStation() {
 	AI::instance()->addStation();
 	AI::instance()->update();
 
-	if (_stationsNumber == MAX_STATIONS)
+	if (_stationsNumber >= MAX_STATIONS)
 		_stationsTimer.stop();
 }
 
@@ -370,7 +371,7 @@ void Game::spawnPassenger(){
 
 			_stationsVec.at(s->index())->addPassenger();
 
-			printf("Station: %d, shape: %d\n", s->index(), shape);
+			//printf("Station: %d, shape: %d\n", s->index(), shape);
 
 			Passenger* passenger = new Passenger(s->index(), position, shape);
 			_passengersVec.push_back(passenger);
@@ -659,12 +660,16 @@ void Game::read(const QJsonObject& json){
 	// Load stations
 	if (json.contains("Stations") && json["Stations"].isArray()) {
 		QJsonArray stationsArray = json["Stations"].toArray();
+		
+		for (auto& s : _stationsVec)
+			delete s;
 		_stationsVec.clear();
 
 		for (int i = 0; i < stationsArray.size(); i++) {
 			QJsonObject stationObj = stationsArray[i].toObject();
 			Station *s = new Station(QPoint(0, 0), -1);
 			s->read(stationObj);
+			s->setVisible(true);
 			_stationsVec.push_back(s);
 			_scene->addItem(s);
 		}
@@ -683,8 +688,13 @@ void Game::read(const QJsonObject& json){
 	if (json.contains("Stations number") && json["Stations number"].isDouble())
 		_stationsNumber = json["Stations number"].toInt();
 
+	printf("stn number%d\n", _stationsNumber);
+	if (_stationsNumber >= MAX_STATIONS)
+		_stationsTimer.stop();
+
 	// Load the graph
 	AI::instance()->read(json);
+	AI::instance()->update();
 
 	// Load the lines and add trains
 	if (json.contains("Lines") && json["Lines"].isArray()) {
@@ -753,7 +763,7 @@ void Game::write(QJsonObject& json) const{
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
-	if (e->key() == Qt::Key_R) {
+	if (e->key() == Qt::Key_R && _state == RUNNING) {
 
 		reset();
 		init();
@@ -778,7 +788,8 @@ void Game::keyPressEvent(QKeyEvent* e){
 			_state = RUNNING;
 			_engine.start();
 			_passengerTimer.start();
-			_stationsTimer.start();
+			if(!(_stationsNumber >= MAX_STATIONS))
+				_stationsTimer.start();
 			_passengersInOutTimer.start();
 		}
 	}
@@ -987,7 +998,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 								}
 							}
 
-						if (!forwardTrain || !backwardTrain)
+						if (forwardTrain && backwardTrain)
 							AI::instance()->setOrientation(true, _activeStation, _trainsVec.at(id));
 
 						id = 0;

@@ -14,6 +14,7 @@ const int MAX_PASS_STATION = 10;
 
 const int LINE_WIDTH = 10;
 const int STATION_SIZE = 30;
+const int STATION_GRID = 45;
 const int PASSENGER_SIZE = 12;
 const int TRAIN_WIDTH = 30;
 const int TRAIN_HEIGHT = 50;
@@ -30,6 +31,6 @@ const float TRAIN_SPEED = 0.8;
 const float PI = 3.14159;
 
 // Starting stations coordinates
-const int ST_1[2] = {800, 450};
-const int ST_2[2] = {1000, 450};
-const int ST_3[2] = {1000, 650};
+const int ST_1[2] = { STATION_SIZE*2 + STATION_GRID*3*5, STATION_SIZE*2 + STATION_GRID*3*3 };
+const int ST_2[2] = { STATION_SIZE*2 + STATION_GRID*3*7, STATION_SIZE*2 + STATION_GRID*3*3 };
+const int ST_3[2] = { STATION_SIZE*2 + STATION_GRID*3*7, STATION_SIZE*2 + STATION_GRID*3*5 };

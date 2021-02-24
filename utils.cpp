@@ -57,7 +57,7 @@ void rotate(QPainter* p, const QRect& r, qreal angle) {
 
 bool spawnAreaAvailable(QPoint spawnPoint, int stationsNum){
 
-    if (distance(spawnPoint, QPoint(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)) < (300 + stationsNum * 20))
+    if (distance(spawnPoint, QPoint(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)) < (300 + stationsNum * 30))
         return true;
     else
         return false;
@@ -74,4 +74,17 @@ QPoint nextPointOnLine(QPoint p1, QPoint p2, int length) {
         x = -x;
 
     return QPoint(p1.x() - x, p1.y() - y);
+}
+
+QPoint spawnPos(){
+
+    QPoint spawnPoint;
+    int xRand = rand() % ((WINDOW_WIDTH - 4 * STATION_SIZE - PASSENGER_SIZE * (MAX_PASS_STATION / 2)) / STATION_GRID);
+    xRand *= STATION_GRID;
+    int yRand = rand() % ((WINDOW_HEIGHT - 8 * STATION_SIZE) / STATION_GRID);
+    yRand *= STATION_GRID;
+    spawnPoint.setX(2 * STATION_SIZE + xRand);
+    spawnPoint.setY(2 * STATION_SIZE + yRand);
+
+    return spawnPoint;
 }
