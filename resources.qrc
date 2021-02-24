@@ -7,5 +7,6 @@
 	<file>Graphics/Button_Continue.png</file>
 	<file>Graphics/Button_Exit.png</file>
 	<file>Graphics/icon.png</file>
+	<file>Graphics/arrows.png</file>
 </qresource>
 </RCC>

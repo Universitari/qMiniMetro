@@ -14,8 +14,8 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	srand(time(NULL));
 
 	_scene = new QGraphicsScene;
-	setScene(_scene);
 	_scene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
 	setInteractive(true);
 	setRenderHints(QPainter::Antialiasing
 				 | QPainter::SmoothPixmapTransform);
@@ -39,24 +39,48 @@ void Game::init() {
 
 	if (_state == READY)
 	{
+		_menuScene = new QGraphicsScene;
+		_menuScene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+		_menuScene->clear();
 		_scene->clear();
+		setScene(_menuScene);
 
 		// set window dimensions
-		setFixedWidth(GAME_SCALE * _scene->width());
-		setFixedHeight(GAME_SCALE * _scene->height() + 2);
-		QGraphicsPixmapItem *_mainMenu = new QGraphicsPixmapItem(QPixmap(":/Graphics/MainMenu.png"));
-		QGraphicsPixmapItem *_newGame = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_New_Game.png"));
-		QGraphicsPixmapItem *_continue = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Continue.png"));
-		QGraphicsPixmapItem* _exit = new QGraphicsPixmapItem(QPixmap(":/Graphics/Button_Exit.png"));
+		setFixedWidth(GAME_SCALE * _menuScene->width());
+		setFixedHeight(GAME_SCALE * _menuScene->height() + 2);
 
-		_newGame->setPos(WINDOW_WIDTH/2 - 250, WINDOW_HEIGHT/2 - 45 - 90 - 5);
-		_continue->setPos(WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT/2 - 45);
-		_exit->setPos(WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT/2 - 45 + 90 + 5);
-		_scene->addItem(_mainMenu); 
-		_scene->addItem(_newGame);
-		_scene->addItem(_continue);
-		_scene->addItem(_exit);
+		QGraphicsPixmapItem* _mainMenu = new QGraphicsPixmapItem(QPixmap(":/Graphics/MainMenu.png"));
+		_mainMenu->setTransformationMode(Qt::TransformationMode::SmoothTransformation);
+		_menuScene->addItem(_mainMenu);
+		QGraphicsPixmapItem* _arrows = new QGraphicsPixmapItem(QPixmap(":/Graphics/arrows.png"));
+		_arrows->setPos(740, 400);
+		_arrows->setTransformationMode(Qt::TransformationMode::SmoothTransformation);
+		_menuScene->addItem(_arrows);
+
+		QPushButton* newGameButton = new QPushButton("New Game");
+		QPushButton* continueButton = new QPushButton("Continue");
+		QPushButton* exitButton = new QPushButton("Exit");
+
+		newGameButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
+		continueButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
+		exitButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
 		
+		newGameButton->setGeometry(840, 400, 300, 90);
+		continueButton->setGeometry(840, 510, 300, 90);
+		exitButton->setGeometry(840, 620, 300, 90);
+
+		_menuScene->addWidget(newGameButton);
+		_menuScene->addWidget(continueButton);
+		_menuScene->addWidget(exitButton);
+
+		QObject::connect(newGameButton, SIGNAL(clicked()), this, SLOT(start()));
+		QObject::connect(continueButton, SIGNAL(clicked()), this, SLOT(loadGame()));
+		QObject::connect(exitButton, SIGNAL(clicked()), this, SLOT(exitGame()));
+
 	}
 }
 
@@ -197,8 +221,10 @@ void Game::start() {
 
 		AI::instance();
 
-		_scene->clear();
+		setScene(_scene);
+
 		QGraphicsPixmapItem* Map = new QGraphicsPixmapItem(QPixmap(":/Graphics/LondonMap.png"));
+		Map->setTransformationMode(Qt::TransformationMode::SmoothTransformation);
 		_scene->addItem(Map);
 		
 		_scoreText = new QGraphicsTextItem;
@@ -233,16 +259,8 @@ void Game::start() {
 			_trainsVec.shrink_to_fit();
 		}
 
-		/* EVENT FILTER
-		button = new QPushButton();
-		button->setIcon(QIcon(QPixmap(":/Graphics/Button_Exit.png")));
-		button->setFlat(true);
-		button->setBaseSize(500, 90);
-		button->setIconSize(QSize(500, 90));
-		button->installEventFilter(this);
-		_scene->addWidget(button);
-		*/
-		
+		_menuScene->deleteLater();
+
 		_engine.start();
 		_passengerTimer.start();
 		_stationsTimer.start();
@@ -604,28 +622,9 @@ bool Game::acceptableStation(Train* t, Passenger* p){
 
 }
 
-/*
-bool Game::eventFilter(QObject* watched, QEvent* event){
-
-	if (watched == button) {
-		if (event->type() == QEvent::HoverEnter) {
-			button->resize(500 * 0.5, 90 * 0.5);
-			button->setIconSize(QSize(500 * 0.5, 90 * 0.5));
-			button->setGeometry(125, 22, 250, 45);
-			return true;
-		}
-		if (event->type() == QEvent::HoverLeave) {
-			button->resize(500 , 90);
-			button->setIconSize(QSize(500, 90));
-			button->setGeometry(0, 0, 500, 22);
-			return true;
-		}
-	}
-	return false;
-}
-*/
-
 bool Game::loadGame() {
+
+	start();
 
 	QFile loadFile(QStringLiteral("save.json"));
 
@@ -880,18 +879,6 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 void Game::mousePressEvent(QMouseEvent* e){
 
-	if (_state == READY) {
-
-		if (QRect(QPoint(WINDOW_WIDTH / 2 - 250 + 92, WINDOW_HEIGHT / 2 - 45 - 90 - 5),
-			QPoint(WINDOW_WIDTH / 2 - 250 + 500 - 48, WINDOW_HEIGHT / 2 - 45 - 90 - 5 + 90)).contains(e->pos() / GAME_SCALE))
-			start();
-		else if (false)
-			;
-		else if (QRect(QPoint(WINDOW_WIDTH / 2 - 250 + 92, WINDOW_HEIGHT / 2 - 45 + 90 + 5),
-				 QPoint(WINDOW_WIDTH / 2 - 250 + 229, WINDOW_HEIGHT / 2 - 45 + 90 + 5 + 90)).contains(e->pos() / GAME_SCALE))
-			QApplication::quit();
-	}
-
 	// Add new line
 	if (!_mousePressed) {
 
@@ -1029,7 +1016,9 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 		}
 	}
 
-	_scene->update();
+	if(_state == RUNNING)
+		_scene->update();
+
 	QGraphicsView::mouseMoveEvent(e);
 }
 
@@ -1085,7 +1074,9 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	}
 
 	_activeLine = -1;
-	_scene->update();
+
+	if (_state == RUNNING)
+		_scene->update();
 
 	QGraphicsView::mouseReleaseEvent(e);
 }

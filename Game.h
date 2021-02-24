@@ -33,6 +33,7 @@ private:
 	void init();
 
 	QGraphicsScene* _scene;
+	QGraphicsScene* _menuScene;
 	QTimer _engine;
 	QTimer _passengerTimer;
 	QTimer _stationsTimer;
@@ -58,8 +59,6 @@ private:
 	std::vector<Train*> _trainsVec;
 	std::vector<Passenger*> _passengersVec;
 
-	//QPushButton *button;
-
 public:
 
 	static Game* instance();
@@ -82,12 +81,6 @@ public:
 	// Getters
 	Station* station(int index) { return _stationsVec.at(index); }
 	int stationsNumber() { return _stationsNumber; }
-
-	//bool eventFilter(QObject* watched, QEvent* event);
-
-	// Savegame functions
-	bool loadGame();
-	bool saveGame() const;
 
 	void read(const QJsonObject& json);
 	void write(QJsonObject& json) const;
@@ -112,6 +105,11 @@ public slots:
 	void spawnStation();
 	// Passengers move from and to the stations
 	void passengersInOut();
+	// Quits the game
+	void exitGame() { QApplication::quit();}
 
+	// Savegame functions
+	bool loadGame();
+	bool saveGame() const;
 
 };
