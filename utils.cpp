@@ -85,7 +85,7 @@ QPoint spawnPos(){
     int yRand = rand() % ((WINDOW_HEIGHT - 8 * STATION_SIZE) / STATION_GRID);
     yRand *= STATION_GRID;
     spawnPoint.setX(2 * STATION_SIZE + xRand);
-    spawnPoint.setY(2 * STATION_SIZE + yRand);
+    spawnPoint.setY(2 * STATION_SIZE + 5 + yRand);
 
     return spawnPoint;
 }

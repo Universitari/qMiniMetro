@@ -600,7 +600,7 @@ void Game::addTrain(QRect rect){
 	if (lineIndex != -1) {
 		for (auto& t : _trainsVec) {
 			if (!t) {
-				t = new Train(lineIndex, i, 
+				t = new Train(lineIndex, i,
 					_linesVec.at(lineIndex)->firstPoint(),
 					_linesVec.at(lineIndex)->path(),
 					nearestStation(_linesVec.at(lineIndex)->firstPoint()));
@@ -614,14 +614,12 @@ void Game::addTrain(QRect rect){
 		if (_linesVec.at(lineIndex)->circularLine())
 			for (auto& t : _trainsVec) {
 				if (t)
-					if (t->direction() == 1) { // BACKWARD
+					if (t->direction() == 1 && t->lineIndex() == _trainsVec.at(i)->lineIndex()) { // BACKWARD
 						AI::instance()->setOrientation(false, nearestStation(_linesVec.at(lineIndex)->firstPoint()), t);
 						break;
 					}
 			}
-
 	}
-
 }
 
 bool Game::availableTrains(){
