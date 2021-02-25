@@ -4,11 +4,12 @@
 #include <QPainter>
 #include <QJsonObject>
 #include <time.h>
+#include "config.h"
 #include "Object.h"
 
 class Station : public Object {
 
-	enum Shape { SQUARE, TRIANGLE, CIRCLE };
+	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR };
 
 private:
 
@@ -19,7 +20,7 @@ private:
 
 public:
 
-	Station(QPoint pos, int index);
+	Station(QPoint pos, int index, int shape = -1);
 	Station(const Station& s);
 
 	// Metodi virtuali reimplementati

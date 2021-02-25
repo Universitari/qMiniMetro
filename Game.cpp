@@ -128,7 +128,7 @@ void Game::reset() {
 
 	_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
 
-	_stationsTimer.setInterval(10000);
+	_stationsTimer.setInterval(1000);
 	_passengerTimer.setInterval(2000);
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
@@ -279,7 +279,7 @@ void Game::start() {
 
 		for (int i = 0; i < 3; i++) {
 			_stationsNumber++;
-			Station* station = new Station(startPos[i], _stationsNumber);
+			Station* station = new Station(startPos[i], _stationsNumber, i);
 			_stationsVec.push_back(station);
 			_scene->addItem(_stationsVec.back());
 

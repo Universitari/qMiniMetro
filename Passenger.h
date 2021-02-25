@@ -2,13 +2,14 @@
 
 #include "Object.h"
 #include "Utils.h"
+#include <cmath>
 #include <vector>
 #include <QPoint>
 #include <QPainter>
 
 class Passenger : public Object {
 
-	enum Shape { SQUARE, TRIANGLE, CIRCLE };
+	enum Shape { SQUARE, TRIANGLE, CIRCLE, STAR };
 
 private:
 

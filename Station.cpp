@@ -1,30 +1,24 @@
 #include "Station.h"
 #include "Game.h"
 
-Station::Station(QPoint pos, int index) {
+Station::Station(QPoint pos, int index, int shape) {
 
 	_position = pos;
 
-	switch (index) {
-	case(0): {
-		_shape = Shape(0);
-		break;
+	if (shape == -1) {
+		int randomShape = 1 + rand() % 100;
+		if (randomShape <= 40)
+			_shape = Shape(0);
+		else if (randomShape <= 70)
+			_shape = Shape(1);
+		else if (randomShape <= 90)
+			_shape = Shape(2);
+		else if (randomShape <= 100)
+			_shape = Shape(3);
 	}
-	case(1): {
-		_shape = Shape(1);
-		break;
-	}
-	case(2): {
-		_shape = Shape(2);
-		break;
-	}
-	default: {
-		_shape = Shape(rand() % GAME_PROGRESSION);
-		break;
-	}
-	}
-	
-	
+	else
+		_shape = Shape(shape);
+
 	_index = index;
 	_currentPass = 0;
 	setZValue(4);
@@ -65,6 +59,24 @@ void Station::paint(QPainter* painter,
 	else if (_shape == CIRCLE) {
 
 		painter->drawEllipse(_position.x(), _position.y(), STATION_SIZE, STATION_SIZE);
+	}
+	else if (_shape == STAR) {
+
+		QPolygonF starPolygon;
+		float r = STATION_SIZE / 3.55;
+		float R = STATION_SIZE / 1.55;
+
+		for (int i = 0; i < 5; i++) {
+			starPolygon << QPointF(_position.x() + STATION_SIZE/2 + R * std::cos(PI/2 + 2*PI/5 * i),
+								   _position.y() + STATION_SIZE / 2 - R * std::sin(PI/2 + 2*PI/5 * i));
+			
+			starPolygon << QPointF(_position.x() + STATION_SIZE / 2 + r * std::cos(PI/2+(2*PI)/10 + 2*PI/5 * i),
+								   _position.y() + STATION_SIZE / 2 - r * std::sin(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i));
+		}
+
+		pen.setWidth(4);
+		painter->setPen(pen);
+		painter->drawPolygon(starPolygon);
 	}
 }
 

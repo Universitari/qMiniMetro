@@ -4,7 +4,7 @@
 class Train;
 Passenger::Passenger(int stationIndex, QPoint pos, int shape) {
 
-	_shape = Shape(shape); 
+	_shape = Shape(shape);
 	_trainIndex = -1;
 	_ticket = -1;
 	_stationIndex = stationIndex;
@@ -57,6 +57,22 @@ void Passenger::paint(QPainter* painter,
 		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
 		//rotate(painter, rect, _rotationAngle);
 		painter->drawEllipse(rect);
+	}
+	else if (_shape == STAR) {
+
+		QPolygonF starPolygon;
+		float r = PASSENGER_SIZE / 3.55;
+		float R = PASSENGER_SIZE / 1.55;
+
+		for (int i = 0; i < 5; i++) {
+			starPolygon << QPointF(_position.x() + PASSENGER_SIZE / 2 + R * std::cos(PI / 2 + 2 * PI / 5 * i),
+								   _position.y() + PASSENGER_SIZE / 2 - R * std::sin(PI / 2 + 2 * PI / 5 * i));
+
+			starPolygon << QPointF(_position.x() + PASSENGER_SIZE / 2 + r * std::cos(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i),
+								   _position.y() + PASSENGER_SIZE / 2 - r * std::sin(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i));
+		}
+
+		painter->drawPolygon(starPolygon);
 	}
 
 }
