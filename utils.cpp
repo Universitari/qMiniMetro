@@ -1,4 +1,5 @@
-#include "utils.h"
+#include "Utils.h"
+#include "Game.h"
 
 float angularCoeff(QPoint p1, QPoint p2) {
 

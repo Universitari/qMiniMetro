@@ -14,6 +14,7 @@ Train::Train(int lineIndex, int index, QPoint centerPoint, QPainterPath linePath
 	_rotationAngle = 90;
 	_increment = 0;
 	_circular = false;
+	_deleting = false;
 	_speedMultiplier = 1;
 	_length = _path.length();
 	_direction = FORWARD;
@@ -38,6 +39,11 @@ void Train::paint(QPainter* painter,
 	pen.setJoinStyle(Qt::MiterJoin);
 	painter->setBrush(QBrush(_color));
 	painter->setPen(pen);
+
+	if (_deleting)
+		painter->setOpacity(0.5);
+	else
+		painter->setOpacity(1);
 	
 	rotate(painter, *_trainRect, _rotationAngle);
 	painter->drawRect(*_trainRect);
@@ -87,6 +93,13 @@ void Train::advance(){
 		_increment -= TRAIN_SPEED * _speedMultiplier;
 	else 
 		_increment += TRAIN_SPEED * _speedMultiplier;
+}
+
+void Train::setTrainPosition(QPoint p){
+
+	QLineF line = QLineF(_trainRect->center(), p);
+	_trainRect->translate(line.dx(), line.dy());
+
 }
 
 QPoint Train::passengerPos(int ticket){

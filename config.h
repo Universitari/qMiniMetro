@@ -1,5 +1,7 @@
 #pragma once
 
+const bool DEBUG = false;
+
 const int GAME_FPS = 120;
 const float GAME_SCALE = 0.8;
 const int GAME_PROGRESSION = 3;
@@ -22,8 +24,6 @@ const int BUTTON_SIZE = 30;
 const int MENU_HEIGHT = 1020;
 const int BUTTON_SIZE_BIG = 60;
 const int BUTTONS_SPACING = 50;
-
-
 const int MIDPOINT_CURVE = -5;
 const int STATION_CURVE = -5;
 const int TCAP_DISTANCE = 40;

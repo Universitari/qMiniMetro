@@ -5,7 +5,6 @@
 #include <QJsonObject>
 #include <time.h>
 #include "Object.h"
-#include "config.h"
 
 class Station : public Object {
 

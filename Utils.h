@@ -3,7 +3,6 @@
 #include <QPoint>
 #include <QPainter>
 #include <Vector>
-#include "config.h"
 
 float angularCoeff(QPoint p1, QPoint p2);
 float distance(QPoint p1, QPoint p2);

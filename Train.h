@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Object.h"
-#include "utils.h"
+#include "Utils.h"
 #include <QPainter>
 
 class Train : public Object {
@@ -20,18 +20,20 @@ private:
 	float _speedMultiplier;
 	
 	// Logic elements
-	Direction _direction; //
-	State _state; //
-	float _increment; //
+	Direction _direction;
+	State _state;
+	float _increment;
 	float _length;
-	int _passengers; //
-	int _lineIndex; //
-	int _currentStation; //
-	int _nextStation; //
-	bool _circular; //
-	int _index; //
-	float _distanceFromStation; //
+	int _passengers;
+	int _lineIndex;
+	int _currentStation;
+	int _nextStation;
+	bool _circular;
+	bool _deleting;
+	int _index;
+	float _distanceFromStation; 
 	bool _seats[6]; // false = occupied, true = available
+	QPoint _oldPos;
 
 public:
 
@@ -56,6 +58,9 @@ public:
 	void setCurrentStation(int index) { _currentStation = index; }
 	void setNextStation(int index) { _nextStation = index; }
 	void setDistanceFromStation(float distance) { _distanceFromStation = distance; }
+	void setOldPos(QPoint p) { _oldPos = p; }
+	void setTrainPosition(QPoint p);
+	void setDeleting(bool flag) { _deleting = flag; }
 
 	// Getter
 	int lineIndex() { return _lineIndex; }
@@ -69,11 +74,13 @@ public:
 	int direction() { return int(_direction); }
 	float distanceFromStation() { return _distanceFromStation; }
 	bool circular() { return _circular; }
+	bool deleting() { return _deleting; }
 
 	// Utility
 	QPoint passengerPos(int ticket);
 	void incrementPassengers(int passengerTicket);
 	void decrementPassengers(int passengerTicket);
 	int firstSeatAvailable();
+	void resetPos() { setTrainPosition(_oldPos); }
 
 };

@@ -1,12 +1,14 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>Graphics/LondonMap.png</file>
-    <file>Graphics/Train.png</file>
+    <file>Graphics/metroTrain.png</file>
 	<file>Graphics/MainMenu.png</file>
 	<file>Graphics/icon.png</file>
 	<file>Graphics/arrows.png</file>
 	<file>Graphics/saveIcon.png</file>
 	<file>Graphics/pauseButton.png</file>
 	<file>Graphics/playButton.png</file>
+	<file>Graphics/trashBin.png</file>
+	<file>Graphics/backToMenu.png</file>
 </qresource>
 </RCC>

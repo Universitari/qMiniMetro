@@ -10,13 +10,13 @@ Button::Button(int index) {
 	switch (_index) {
 	case(-1):
 		_type = TRAIN;
-		_position = QPoint(WINDOW_WIDTH - 60, MENU_HEIGHT);
 		break;
 	default:
 		_type = LINE;
-		_position = QPoint(WINDOW_WIDTH / 2 + (floor(MAX_LINES / 2) - _index) * (-BUTTONS_SPACING - BUTTON_SIZE), MENU_HEIGHT);
 		break;
 	}
+
+	_position = QPoint(WINDOW_WIDTH / 2 + (floor(MAX_LINES / 2) - _index) * (-BUTTONS_SPACING - BUTTON_SIZE), MENU_HEIGHT);
 
 	_color = setColor(_index);
 	
@@ -52,9 +52,10 @@ void Button::paint(QPainter* painter,
 		painter->setPen(pen);
 		painter->setRenderHint(QPainter::Antialiasing);
 
-		QPixmap train(":/Graphics/Train.png");
+		QPixmap train(":/Graphics/metroTrain.png");
+		train = train.scaledToHeight(60, Qt::TransformationMode::SmoothTransformation);
 
-		painter->drawEllipse(_position, BUTTON_SIZE_BIG / 2, BUTTON_SIZE_BIG / 2);
+		//painter->drawEllipse(_position, BUTTON_SIZE_BIG / 2, BUTTON_SIZE_BIG / 2);
 		painter->drawPixmap(QPoint(_position.x() - BUTTON_SIZE_BIG / 2, _position.y() - BUTTON_SIZE_BIG / 2), train);
 
 		if (_addingTrain) {

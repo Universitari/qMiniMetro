@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.h"
+#include "Utils.h"
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QPixmap>

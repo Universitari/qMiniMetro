@@ -1,5 +1,4 @@
 #include "Object.h"
-#include "Game.h"
 
 Object::Object() : QGraphicsItem(0){
 

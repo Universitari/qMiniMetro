@@ -17,6 +17,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	_scene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	setInteractive(true);
+	setMouseTracking(true);
 	setRenderHints(QPainter::Antialiasing
 				 | QPainter::SmoothPixmapTransform);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -43,7 +44,6 @@ void Game::init() {
 		_menuScene->setSceneRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		_menuScene->clear();
-		_scene->clear();
 		setScene(_menuScene);
 
 		// set window dimensions
@@ -132,7 +132,6 @@ void Game::reset() {
 	_passengerTimer.setInterval(2000);
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
-	_debug = false;
 	_fpsMultiplier = 1;
 
 	this->init();
@@ -147,7 +146,7 @@ void Game::advance() {
 		if (l)
 			if (l->deleting()) {
 				for (auto& t : _trainsVec)
-					if(t)
+					if (t)
 						if (t->passengers() != 0 && _linesVec.at(t->lineIndex()) == l) {
 							deleteLine = false;
 							break;
@@ -169,8 +168,14 @@ void Game::advance() {
 
 	// Trains movement
 	for (auto& t : _trainsVec)
-		if (t != 0)
-			t->advance();
+		if (t != 0) {
+			if (t->deleting() && t->passengers() == 0) {
+				t->setVisible(false);
+				t = 0;
+			}
+			else
+				t->advance();
+		}
 
 
 	// Passengers get on trains
@@ -180,23 +185,20 @@ void Game::advance() {
 
 				// Train stops under normal circumstances
 				if (passengersGetOn(t->index(), t->currentStation()) || passengersArrived(t->index(), t->currentStation()))
-				{
 					t->setState(0);
-					printf("train stopped\n");
-				}
+
 				// Train stops because the line will be deleted
-				if (_linesVec.at(t->lineIndex())->deleting())
+				if (_linesVec.at(t->lineIndex())->deleting() || t->deleting())
 					t->setState(0);
 			}
 
 			if (t->state() == 0)
-				if ((t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation()) && !_linesVec.at(t->lineIndex())->deleting()) ||
+				if ((t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation()) && (!_linesVec.at(t->lineIndex())->deleting()) && !t->deleting()) ||
 					(!passengersArrived(t->index(), t->currentStation()) &&
 						!passengersGetOn(t->index(), t->currentStation())) &&
-					!_linesVec.at(t->lineIndex())->deleting()) {
+					(!_linesVec.at(t->lineIndex())->deleting() && !t->deleting())) {
 
 					t->setState(1);
-					printf("train moving!\n");
 				}
 
 			
@@ -221,6 +223,7 @@ void Game::start() {
 
 		AI::instance();
 
+		_scene->clear();
 		setScene(_scene);
 
 		QGraphicsPixmapItem* Map = new QGraphicsPixmapItem(QPixmap(":/Graphics/LondonMap.png"));
@@ -228,16 +231,27 @@ void Game::start() {
 		_scene->addItem(Map);
 		
 		_scoreText = new QGraphicsTextItem;
+		QFont font("Comfortaa");
+		font.setPointSizeF(24);
+		_scoreText->setFont(font);
 		_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
-		_scoreText->setScale(3);
+		_scoreText->setPos(15, 0);
 		_scene->addItem(_scoreText);
+
+		_backToMenuButton = new QPushButton;
+		_backToMenuButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
+									   "QPushButton:hover{}" });
+		_backToMenuButton->setIcon(QPixmap(":/Graphics/backToMenu.png"));
+		_backToMenuButton->setIconSize(QSize(45, 45));
+		_backToMenuButton->setGeometry(1853, 15, 45, 45);
+		_scene->addWidget(_backToMenuButton);
 
 		_saveButton = new QPushButton;
 		_saveButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
 									   "QPushButton:hover{}" });
 		_saveButton->setIcon(QPixmap(":/Graphics/saveIcon.png"));
 		_saveButton->setIconSize(QSize(45, 45));
-		_saveButton->setGeometry(1860, 15, 45, 45);
+		_saveButton->setGeometry(1860, 75, 45, 45);
 		_scene->addWidget(_saveButton);
 
 		_pauseButton = new QPushButton;
@@ -245,11 +259,18 @@ void Game::start() {
 									   "QPushButton:hover{}" });
 		_pauseButton->setIcon(QPixmap(":/Graphics/pauseButton.png"));
 		_pauseButton->setIconSize(QSize(45, 45));
-		_pauseButton->setGeometry(1860, 75, 45, 45);
+		_pauseButton->setGeometry(1860, 135, 45, 45);
 		_scene->addWidget(_pauseButton);
 
+		QObject::connect(_backToMenuButton, SIGNAL(clicked()), this, SLOT(reset()));
 		QObject::connect(_saveButton, SIGNAL(clicked()), this, SLOT(saveGame()));
-		QObject::connect(_pauseButton, SIGNAL(clicked()), this, SLOT(pause()));
+		QObject::connect(_pauseButton, SIGNAL(clicked()), this, SLOT(togglePause()));
+
+		QPixmap trashBinPixmap(":/Graphics/trashBin.png");
+		trashBinPixmap = trashBinPixmap.scaledToHeight(60, Qt::TransformationMode::SmoothTransformation);
+		_trashBin = new QGraphicsPixmapItem(trashBinPixmap);
+		_trashBin->setPos(QPoint(1250, 990));
+		_scene->addItem(_trashBin);
 
 		for (int i = -1; i < MAX_LINES; i++){
 			_deleteButtons.push_back(new Button(i));
@@ -356,8 +377,8 @@ void Game::passengersInOut(){
 							break;
 						}
 
-						// if the line is being deleted
-						if (_linesVec.at(t->lineIndex())->deleting() || 
+						// if the line or the train are being deleted
+						if ((_linesVec.at(t->lineIndex())->deleting() || t->deleting()) || 
 							!acceptableStation(t, *iter)) {
 
 							t->decrementPassengers((*iter)->ticket());
@@ -374,7 +395,7 @@ void Game::passengersInOut(){
 					// One passenger gets on the train
 					if ((*iter)->stationIndex() == t->currentStation())
 						if(t->passengers() < 6 && 
-							!_linesVec.at(t->lineIndex())->deleting() &&
+							(!_linesVec.at(t->lineIndex())->deleting() && !t->deleting()) &&
 							acceptableStation(t, *iter)){
 
 							//printf("Next passenger station: %d\n", AI::instance()->nextStationInShortestPath(t->currentStation(), (*iter)->finalStation()));
@@ -430,18 +451,6 @@ void Game::deleteLine(int lineIndex){
 
 	if (lineExists(lineIndex))
 		_linesVec.at(lineIndex)->setDeleting(true);
-
-		/*
-		for (auto& t : _trainsVec) 
-			if (t != 0) 
-				if (t->lineIndex() == lineIndex) {
-					t->setVisible(false);
-					t = 0;
-				}
-		
-		_scene->removeItem(_linesVec.at(lineIndex));
-		_linesVec.at(lineIndex) = 0;
-		*/
 }
 
 QPoint Game::passPosStation(int stationIndex)
@@ -641,7 +650,7 @@ bool Game::acceptableStation(Train* t, Passenger* p){
 
 }
 
-void Game::pause(){
+void Game::togglePause(){
 
 	if (_state == RUNNING) {
 		_state = PAUSED;
@@ -722,13 +731,9 @@ void Game::read(const QJsonObject& json){
 	if (json.contains("Active Station") && json["Active Station"].isDouble())
 		_activeStation = json["Active Station"].toInt();
 
-	if (json.contains("Score") && json["Score"].isDouble())
-		_score = json["Score"].toInt();
-
 	if (json.contains("Stations number") && json["Stations number"].isDouble())
 		_stationsNumber = json["Stations number"].toInt();
 
-	printf("stn number%d\n", _stationsNumber);
 	if (_stationsNumber >= MAX_STATIONS)
 		_stationsTimer.stop();
 
@@ -772,7 +777,6 @@ void Game::write(QJsonObject& json) const{
 	// Save Game variables
 	json["Active line"] = _activeLine;
 	json["Active Station"] = _activeStation;
-	json["Score"] = int(_score);
 	json["Stations number"] = _stationsNumber;
 
 	// Save stations array
@@ -817,11 +821,10 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	if (e->key() == Qt::Key_P) {
 
-		pause();
-
+		togglePause();
 	}
 
-	if (e->key() == Qt::Key_G && _debug) {
+	if (e->key() == Qt::Key_G && DEBUG) {
 
 		AI::instance()->printGraph();
 
@@ -832,23 +835,17 @@ void Game::keyPressEvent(QKeyEvent* e){
 					<< t->lineIndex() << "\n";
 
 	}
-	if (e->key() == Qt::Key_D) {
+	if (e->key() == Qt::Key_D && DEBUG) {
 
-		if (_debug)
-			_debug = false;
-		else {
-			_debug = true;
 			printf("------------ Debug Commands ------------\n");
 			printf("  V KEY - Toggle stations visibility\n");
 			printf("  G KEY - Print game graph\n");
 			printf("  UP ARROW - increase game speed\n");
 			printf("  DOWN ARROW - decrease game speed\n");
 			printf("  RIGHT ARROW - reset game speed\n");
-		}
-
 	}
 
-	if (e->key() == Qt::Key_V && _debug) {
+	if (e->key() == Qt::Key_V && DEBUG) {
 
 		bool visible = true;
 		if (_stationsVec.at(0)->isVisible())
@@ -872,7 +869,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 		AI::instance()->printBigGraph();
 	}
 
-	if (e->key() == Qt::Key_Down && _debug) {
+	if (e->key() == Qt::Key_Down && DEBUG) {
 
 		if (1000 / (GAME_FPS * _fpsMultiplier - 0.1) >= 0) {
 			_fpsMultiplier -= 0.1;
@@ -884,7 +881,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 		}
 	}
 
-	if (e->key() == Qt::Key_Up && _debug) {
+	if (e->key() == Qt::Key_Up && DEBUG) {
 
 		_fpsMultiplier += 0.1;
 		_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
@@ -894,7 +891,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 	}
 
-	if (e->key() == Qt::Key_Right && _debug) {
+	if (e->key() == Qt::Key_Right && DEBUG) {
 
 		_fpsMultiplier = 1;
 		_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
@@ -907,9 +904,31 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 void Game::mousePressEvent(QMouseEvent* e){
 
-	// Add new line
 	if (!_mousePressed) {
 
+		// Delete train
+		for (auto& t : _trainsVec) {
+			if (t)
+				if (t->boundingRect().contains(QPoint(e->pos().x()/ GAME_SCALE, e->pos().y()/ GAME_SCALE))) {
+					for(auto& t2 : _trainsVec)
+						if(t2)
+							if (t2->lineIndex() == t->lineIndex() && t != t2) {
+
+								_activeTrain = t->index();
+								t->setOldPos(QPoint(t->pos().x(), t->pos().y()));
+								if(_state != PAUSED)
+									togglePause();
+								for (auto& p : _passengersVec)
+									if (p->trainIndex() == _activeTrain)
+										p->setVisible(false);
+
+								break;
+							}
+					break;
+				}
+		}
+
+		// Add new line
 		int i = 0;
 		for (auto& l : _linesVec) {
 			if (!l) {
@@ -969,7 +988,12 @@ void Game::mousePressEvent(QMouseEvent* e){
 
 void Game::mouseMoveEvent(QMouseEvent* e){
 	
+	// Train moves with the cursor
+	if (_activeTrain != -1)
+		_trainsVec.at(_activeTrain)->setTrainPosition(QPoint(e->pos().x()/ GAME_SCALE, e->pos().y()/ GAME_SCALE));
+
 	if (_mousePressed) {
+
 		QPoint currentPoint(e->pos().x() / GAME_SCALE,
 							e->pos().y() / GAME_SCALE);
 		_linesVec.at(_activeLine)->setCurrentPoint(currentPoint);
@@ -1052,6 +1076,18 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
 
+	if (_activeTrain != -1) {
+		if(_trainsVec.at(_activeTrain)->collidesWithItem(_trashBin))
+			_trainsVec.at(_activeTrain)->setDeleting(true);
+		_trainsVec.at(_activeTrain)->resetPos();
+
+		for (auto& p : _passengersVec)
+			if (p->trainIndex() == _activeTrain)
+				p->setVisible(true);
+
+		togglePause();
+	}
+
 	if (_mousePressed) {
 
 		// printf("Cursor released in pos = %d, %d\n", e->pos().x(), e->pos().y());
@@ -1093,8 +1129,6 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 					id++;
 				}
 			}
-
-
 		}
 
 		_mousePressed = false;
@@ -1102,6 +1136,7 @@ void Game::mouseReleaseEvent(QMouseEvent* e){
 	}
 
 	_activeLine = -1;
+	_activeTrain = -1;
 
 	if (_state == RUNNING || _state == PAUSED)
 		_scene->update();

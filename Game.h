@@ -10,11 +10,9 @@
 #include <iostream>
 #include <QApplication>
 #include <QFont>
-#include "utils.h"
 #include "Station.h"
 #include "Line.h"
 #include "Button.h"
-#include "Train.h"
 #include "Passenger.h"
 #include "AI.h"
 
@@ -29,7 +27,6 @@ private:
 
 	static Game* uniqueInstance;		// Singleton
 	Game(QGraphicsView* parent = 0);	// Singleton
-
 	void init();
 
 	QGraphicsScene* _scene;
@@ -39,17 +36,20 @@ private:
 	QTimer _stationsTimer;
 	QTimer _passengersInOutTimer;
 	game_state _state;
-	bool _debug;
+	//bool _debug;
 	float _fpsMultiplier;
 
 	bool _mousePressed = false;
 	int _stationsNumber = -1;
 	int _activeLine = -1;
 	int _activeStation = -1;
+	int _activeTrain = -1;
 	unsigned int _score = 0;
 	QGraphicsTextItem *_scoreText = 0;
 	QPushButton* _pauseButton;
 	QPushButton* _saveButton;
+	QPushButton* _backToMenuButton;
+	QGraphicsPixmapItem* _trashBin;
 
 	QPoint startPos[3] = { QPoint(ST_1[0], ST_1[1]),
 						   QPoint(ST_2[0], ST_2[1]), 
@@ -109,8 +109,8 @@ public slots:
 	void passengersInOut();
 	// Quits the game
 	void exitGame() { QApplication::quit();}
-	// Pauses the game
-	void pause();
+	// Pauses and resumes gameplay
+	void togglePause();
 
 	// Savegame functions
 	bool loadGame();
