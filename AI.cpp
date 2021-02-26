@@ -139,7 +139,7 @@ void AI::printGraph(){
 	}
 }
 
-void AI::setOrientation(bool oriented, int firstStation, Train* train){
+void AI::setOriented(bool oriented, int firstStation, Train* train){
 
 	printf("set orientation\n");
 	if (oriented) {

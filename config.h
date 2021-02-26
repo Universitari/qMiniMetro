@@ -1,6 +1,6 @@
 #pragma once
 
-const bool DEBUG = false;
+const bool DEBUG = true;
 
 const int GAME_FPS = 120;
 const float GAME_SCALE = 0.8;

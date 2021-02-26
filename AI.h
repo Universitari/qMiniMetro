@@ -27,6 +27,7 @@ public:
 
 	// AI functions
 	int nextStationInShortestPath(int x, int y);
+	int distance(int x, int y) { return D[x][y]; }
 	void findFinalStations(int startStation, int shape, std::vector<int> &v);
 	void update();
 
@@ -36,7 +37,7 @@ public:
 	void addStation();
 	void addLink(int x, int y, int lineIndex);
 	void printGraph();
-	void setOrientation(bool oriented, int firstStation, Train* train);
+	void setOriented(bool oriented, int firstStation, Train* train);
 
 	// Big Graph functions	
 	void clearBigGraph() { _bigGraph.clear(); }

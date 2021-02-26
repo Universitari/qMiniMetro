@@ -70,7 +70,7 @@ public:
 	bool lineExists(int index) { return _linesVec.at(index); }
 	QPoint passPosStation(int stationIndex);
 	void reorgPassengers(int stationIndex);
-	bool passengersArrived(int TrainIndex, int StationIndex);
+	bool passengersArrived(int TrainIndex);
 	bool passengersGetOn(int TrainIndex, int StationIndex);
 	int nearestStation(QPoint trainPos);
 	int nextStation(int lineIndex, int stationIndex, int trainIndex);
@@ -79,6 +79,7 @@ public:
 	bool availableTrains();
 	void updatePassengersDestinations();
 	bool acceptableStation(Train* t, Passenger* p);
+	bool directLineOnTrainDeletion(int lineIndex, int trainIndex);
 
 	// Getters
 	Station* station(int index) { return _stationsVec.at(index); }

@@ -129,7 +129,7 @@ void Game::reset() {
 	_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
 
 	_stationsTimer.setInterval(1000);
-	_passengerTimer.setInterval(2000);
+	_passengerTimer.setInterval(500);
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
 	_fpsMultiplier = 1;
@@ -170,6 +170,8 @@ void Game::advance() {
 	for (auto& t : _trainsVec)
 		if (t != 0) {
 			if (t->deleting() && t->passengers() == 0) {
+
+				directLineOnTrainDeletion(t->lineIndex(), t->index());
 				t->setVisible(false);
 				t = 0;
 			}
@@ -184,24 +186,28 @@ void Game::advance() {
 			if (trainArrived(t->index())) {
 
 				// Train stops under normal circumstances
-				if (passengersGetOn(t->index(), t->currentStation()) || passengersArrived(t->index(), t->currentStation()))
+				if (passengersGetOn(t->index(), t->currentStation()) || passengersArrived(t->index()))
 					t->setState(0);
+
 
 				// Train stops because the line will be deleted
 				if (_linesVec.at(t->lineIndex())->deleting() || t->deleting())
 					t->setState(0);
 			}
 
-			if (t->state() == 0)
-				if ((t->passengers() == 6 && !passengersArrived(t->index(), t->currentStation()) && (!_linesVec.at(t->lineIndex())->deleting()) && !t->deleting()) ||
-					(!passengersArrived(t->index(), t->currentStation()) &&
-						!passengersGetOn(t->index(), t->currentStation())) &&
-					(!_linesVec.at(t->lineIndex())->deleting() && !t->deleting())) {
+			if (t->state() == 0) {
 
-					t->setState(1);
-				}
+				if (!_linesVec.at(t->lineIndex())->deleting() && !t->deleting()) {
 
-			
+					if (t->passengers() == 6) 
+						if (!passengersArrived(t->index()))
+							t->setState(1);
+
+					if (!passengersArrived(t->index()) && !passengersGetOn(t->index(), t->currentStation()))
+						t->setState(1);
+
+				}				
+			}			
 		}
 	}
 
@@ -479,12 +485,15 @@ void Game::reorgPassengers(int stationIndex){
 	}
 }
 
-bool Game::passengersArrived(int TrainIndex, int StationIndex){
+bool Game::passengersArrived(int TrainIndex){
 
 	for (auto& p : _passengersVec) {
-		if (p->trainIndex() == TrainIndex)
+		if (p->trainIndex() == TrainIndex) {
+			if (p->passengerShape() == _stationsVec.at(_trainsVec.at(TrainIndex)->currentStation())->stationShape())
+				return true;
 			if (!acceptableStation(_trainsVec.at(TrainIndex), p))
 				return true;
+		}
 	}
 
 	return false;
@@ -615,7 +624,7 @@ void Game::addTrain(QRect rect){
 			for (auto& t : _trainsVec) {
 				if (t)
 					if (t->direction() == 1 && t->lineIndex() == _trainsVec.at(i)->lineIndex()) { // BACKWARD
-						AI::instance()->setOrientation(false, nearestStation(_linesVec.at(lineIndex)->firstPoint()), t);
+						AI::instance()->setOriented(false, nearestStation(_linesVec.at(lineIndex)->firstPoint()), t);
 						break;
 					}
 			}
@@ -646,6 +655,37 @@ bool Game::acceptableStation(Train* t, Passenger* p){
 
 	return false;
 
+}
+
+bool Game::directLineOnTrainDeletion(int lineIndex, int trainIndex){
+
+
+	if (!_linesVec.at(lineIndex)->circularLine())
+		return false;
+
+	bool forwardTrain = false;
+	bool backwardTrain = false;
+	int i = -1;
+
+	for (auto& t : _trainsVec)
+		if (t != 0) {
+			if (t->lineIndex() == lineIndex && t->index() != trainIndex) {
+
+				i = t->index();
+
+				if (t->direction() == 0)
+					forwardTrain = true;
+				else if (t->direction() == 1)
+					backwardTrain = true;
+			}
+		}
+
+	if (forwardTrain != backwardTrain) {
+		AI::instance()->setOriented(true, _trainsVec.at(i)->currentStation(), _trainsVec.at(i));
+		return true;
+	}
+
+	return false;
 }
 
 void Game::togglePause(){
@@ -812,7 +852,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 	}
 
 	// starts new game
-	if (e->key() == Qt::Key_S) {
+	if (e->key() == Qt::Key_S && _state == READY) {
 
 		start();
 	}
@@ -862,7 +902,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 		loadGame();
 	}
 
-	if (e->key() == Qt::Key_O) {
+	if (e->key() == Qt::Key_O && DEBUG) {
 
 		AI::instance()->printBigGraph();
 	}
@@ -1035,8 +1075,8 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 								}
 							}
 
-						if (forwardTrain && backwardTrain)
-							AI::instance()->setOrientation(true, _activeStation, _trainsVec.at(id));
+						if (forwardTrain != backwardTrain)
+							AI::instance()->setOriented(true, _activeStation, _trainsVec.at(id));
 
 						id = 0;
 
@@ -1049,7 +1089,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 												  _linesVec.at(_activeLine)->path(), 
 												  nearestStation(_linesVec.at(_activeLine)->firstPoint()));
 									t->setCircular(true);
-									AI::instance()->setOrientation(true, _activeStation, t);
+									AI::instance()->setOriented(true, _activeStation, t);
 									//t->setNextStation(nextStation(_activeLine, t->currentStation(), t->index()));
 
 									_scene->addItem(t);
