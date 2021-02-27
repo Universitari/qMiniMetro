@@ -6,12 +6,15 @@
 #include <time.h>
 #include "config.h"
 #include "Object.h"
+#include "Utils.h"
 
 class Station : public Object {
 
-	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR };
+	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR, PENTAGON, RHOMBUS, CROSS, DIAMOND};
 
 private:
+
+	static bool _uniqueStations[5];
 
 	QPoint _position;
 	unsigned int _currentPass;
@@ -50,4 +53,6 @@ public:
 	bool pointerOnStation(QPoint pointerPos);
 	void addPassenger() { _currentPass++; }
 	void removePassengers() { _currentPass = 0; }
+	int uniqueShape();
+	void resetUniqueStations();
 };

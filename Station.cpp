@@ -1,6 +1,8 @@
 #include "Station.h"
 #include "Game.h"
 
+bool Station::_uniqueStations[5] = { 0, 0, 0, 0, 0 };
+
 Station::Station(QPoint pos, int index, int shape) {
 
 	_position = pos;
@@ -14,7 +16,7 @@ Station::Station(QPoint pos, int index, int shape) {
 		else if (randomShape <= 90)
 			_shape = Shape(2);
 		else if (randomShape <= 100)
-			_shape = Shape(3);
+			_shape = Shape(uniqueShape());
 	}
 	else
 		_shape = Shape(shape);
@@ -50,11 +52,8 @@ void Station::paint(QPainter* painter,
 	}
 	else if (_shape == TRIANGLE) {
 
-		QPolygon triangle;
-		triangle	<< QPoint(_position.x() + STATION_SIZE/2, _position.y())
-					<< QPoint(_position.x(), _position.y() + STATION_SIZE)
-					<< QPoint(_position.x() + STATION_SIZE, _position.y() + STATION_SIZE);
-		painter->drawPolygon(triangle);
+		QPolygonF _triangle = triangle(_position, STATION_SIZE);
+		painter->drawPolygon(_triangle);
 	}
 	else if (_shape == CIRCLE) {
 
@@ -62,21 +61,34 @@ void Station::paint(QPainter* painter,
 	}
 	else if (_shape == STAR) {
 
-		QPolygonF starPolygon;
-		float r = STATION_SIZE / 3.55;
-		float R = STATION_SIZE / 1.55;
-
-		for (int i = 0; i < 5; i++) {
-			starPolygon << QPointF(_position.x() + STATION_SIZE/2 + R * std::cos(PI/2 + 2*PI/5 * i),
-								   _position.y() + STATION_SIZE / 2 - R * std::sin(PI/2 + 2*PI/5 * i));
-			
-			starPolygon << QPointF(_position.x() + STATION_SIZE / 2 + r * std::cos(PI/2+(2*PI)/10 + 2*PI/5 * i),
-								   _position.y() + STATION_SIZE / 2 - r * std::sin(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i));
-		}
+		QPolygonF _star = star(_position, STATION_SIZE);
 
 		pen.setWidth(4);
 		painter->setPen(pen);
-		painter->drawPolygon(starPolygon);
+		painter->drawPolygon(_star);
+	}
+	else if (_shape == PENTAGON) {
+
+		QPolygonF _pentagon = pentagon(_position, STATION_SIZE);
+		painter->drawPolygon(_pentagon);
+	}
+	else if (_shape == RHOMBUS) {
+
+		QPolygonF _rhombus = rhombus(_position, STATION_SIZE);
+		painter->drawPolygon(_rhombus);
+	}
+	else if (_shape == CROSS) {
+
+		QPolygonF _cross = cross(_position, STATION_SIZE);
+
+		pen.setWidth(4);
+		painter->setPen(pen);
+		painter->drawPolygon(_cross);
+	}
+	else if (_shape == DIAMOND) {
+
+		QPolygonF _diamond = diamond(_position, STATION_SIZE);
+		painter->drawPolygon(_diamond);
 	}
 }
 
@@ -100,6 +112,12 @@ void Station::read(const QJsonObject& json){
 	if (json.contains("Position (y)") && json["Position (y)"].isDouble())
 		_position.setY(json["Position (y)"].toInt());
 
+	if (json.contains("Unique Stations") && json["Unique Stations"].isArray()) {
+		QJsonArray uniqueStationsArray = json["Unique Stations"].toArray();
+
+		for (int i = 0; i < 5; i++)
+			_uniqueStations[i] = uniqueStationsArray[i].toBool();
+	}
 }
 
 void Station::write(QJsonObject& json) const{
@@ -108,6 +126,12 @@ void Station::write(QJsonObject& json) const{
 	json["Index"] = _index;
 	json["Position (x)"] = _position.x();
 	json["Position (y)"] = _position.y();
+
+	QJsonArray uniqueStationsArray;
+	for (int i = 0; i < 5; i++)
+		uniqueStationsArray.append(_uniqueStations[i]);
+
+	json["Unique Stations"] = uniqueStationsArray;
 
 }
 
@@ -120,4 +144,23 @@ bool Station::pointerOnStation(QPoint pointerPos) {
 		return true;
 	else
 		return false;
+}
+
+int Station::uniqueShape(){
+
+	int x;
+
+	do {
+		x = rand() % 5;
+	} while (_uniqueStations[x]);
+
+	_uniqueStations[x] = true;
+
+	return(x+3);
+}
+
+void Station::resetUniqueStations(){
+
+	for (int i = 0; i < 5; i++)
+		_uniqueStations[i] = false;
 }

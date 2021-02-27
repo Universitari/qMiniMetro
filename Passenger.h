@@ -9,7 +9,7 @@
 
 class Passenger : public Object {
 
-	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR };
+	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR, PENTAGON, RHOMBUS, CROSS, DIAMOND };
 
 private:
 

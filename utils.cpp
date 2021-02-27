@@ -89,3 +89,94 @@ QPoint spawnPos(){
 
     return spawnPoint;
 }
+
+QPolygonF triangle(QPoint pos, int size){
+
+    QPolygonF triangle;
+
+    triangle << QPointF(pos.x() + size / 2, pos.y())
+             << QPointF(pos.x(), pos.y() + size)
+             << QPointF(pos.x() + size, pos.y() + size);
+
+    return triangle;
+}
+
+QPolygonF star(QPoint pos, int size){
+
+    QPolygonF star;
+    float r = size / 3.55;
+    float R = size / 1.55;
+
+    for (int i = 0; i < 5; i++) {
+        star << QPointF(pos.x() + size / 2 + R * std::cos(PI / 2 + 2 * PI / 5 * i),
+                        pos.y() + size / 2 - R * std::sin(PI / 2 + 2 * PI / 5 * i))
+            
+             << QPointF(pos.x() + size / 2 + r * std::cos(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i),
+                        pos.y() + size / 2 - r * std::sin(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i));
+    }
+
+    return star;
+}
+
+QPolygonF pentagon(QPoint pos, int size){
+
+    QPolygonF pentagon;
+    float R = size / 1.7;
+
+    for (int i = 0; i < 5; i++) {
+        pentagon << QPointF(pos.x() + size / 2 + R * std::cos(PI / 2 + 2 * PI / 5 * i),
+                            pos.y() + size / 2 - R * std::sin(PI / 2 + 2 * PI / 5 * i));
+    }
+
+    return pentagon;
+}
+
+QPolygonF rhombus(QPoint pos, int size){
+
+    QPolygonF rhombus;
+    float R = size / 1.7;
+
+    for (int i = 0; i < 4; i++) {
+        rhombus << QPointF(pos.x() + size / 2 + R * std::cos(PI / 2 + 2 * PI / 4 * i),
+                           pos.y() + size / 2 - R * std::sin(PI / 2 + 2 * PI / 4 * i));
+    }
+
+    return rhombus;
+}
+
+QPolygonF cross(QPoint pos, int size){
+
+    QPolygonF cross;
+    float n = size * 2 / 3;
+
+    cross << QPointF(pos.x() + n / 2, pos.y())
+          << QPointF(pos.x() + n, pos.y())
+          << QPointF(pos.x() + n, pos.y() + n / 2)
+          << QPointF(pos.x() + n + n / 2, pos.y() + n / 2)
+          << QPointF(pos.x() + n + n / 2, pos.y() + n)
+          << QPointF(pos.x() + n, pos.y() + n)
+          << QPointF(pos.x() + n, pos.y() + n + n / 2)
+          << QPointF(pos.x() + n / 2, pos.y() + n + n / 2)
+          << QPointF(pos.x() + n / 2, pos.y() + n)
+          << QPointF(pos.x(), pos.y() + n)
+          << QPointF(pos.x(), pos.y() + n / 2)
+          << QPointF(pos.x() + n / 2, pos.y() + n / 2);
+
+    return cross;
+}
+
+QPolygonF diamond(QPoint pos, int size){
+
+    QPolygonF diamond;
+
+    float n = size / 3;
+    float offset = size * 0.1;
+
+    diamond << QPointF(pos.x() + n / 2, pos.y() + offset)
+            << QPointF(pos.x() + size - n / 2, pos.y() + offset)
+            << QPointF(pos.x() + size, pos.y() + n / 2 + offset)
+            << QPointF(pos.x() + size/ 2, pos.y() + size* 0.9)
+            << QPointF(pos.x(), pos.y() + n / 2 + offset);
+
+    return diamond;
+}

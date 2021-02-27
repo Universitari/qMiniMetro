@@ -38,41 +38,41 @@ void Passenger::paint(QPainter* painter,
 
 	if (_shape == SQUARE) {
 
-		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
-		//rotate(painter, rect, _rotationAngle);
-		painter->drawRect(rect);
+		painter->drawRect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
 	}
 	else if (_shape == TRIANGLE) {
 
-		QPolygon triangle;
-		triangle << QPoint(_position.x() + PASSENGER_SIZE / 2, _position.y())
-				 << QPoint(_position.x(), _position.y() + PASSENGER_SIZE)
-				 << QPoint(_position.x() + PASSENGER_SIZE, _position.y() + PASSENGER_SIZE);
-		
-		//rotate(painter, triangle.boundingRect(), _rotationAngle);
-		painter->drawPolygon(triangle);
+		QPolygonF _triangle = triangle(_position, PASSENGER_SIZE);
+		painter->drawPolygon(_triangle);
 	}
 	else if (_shape == CIRCLE) {
 
-		QRect rect(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
-		//rotate(painter, rect, _rotationAngle);
-		painter->drawEllipse(rect);
+		painter->drawEllipse(_position.x(), _position.y(), PASSENGER_SIZE, PASSENGER_SIZE);
 	}
 	else if (_shape == STAR) {
 
-		QPolygonF starPolygon;
-		float r = PASSENGER_SIZE / 3.55;
-		float R = PASSENGER_SIZE / 1.55;
+		QPolygonF _star = star(_position, PASSENGER_SIZE);
+		painter->drawPolygon(_star);
+	}
+	else if (_shape == PENTAGON) {
 
-		for (int i = 0; i < 5; i++) {
-			starPolygon << QPointF(_position.x() + PASSENGER_SIZE / 2 + R * std::cos(PI / 2 + 2 * PI / 5 * i),
-								   _position.y() + PASSENGER_SIZE / 2 - R * std::sin(PI / 2 + 2 * PI / 5 * i));
+		QPolygonF _pentagon = pentagon(_position, PASSENGER_SIZE);
+		painter->drawPolygon(_pentagon);
+	}
+	else if (_shape == RHOMBUS) {
 
-			starPolygon << QPointF(_position.x() + PASSENGER_SIZE / 2 + r * std::cos(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i),
-								   _position.y() + PASSENGER_SIZE / 2 - r * std::sin(PI / 2 + (2 * PI) / 10 + 2 * PI / 5 * i));
-		}
+		QPolygonF _rhombus = rhombus(_position, PASSENGER_SIZE);
+		painter->drawPolygon(_rhombus);
+	}
+	else if (_shape == CROSS) {
 
-		painter->drawPolygon(starPolygon);
+		QPolygonF _cross = cross(_position, PASSENGER_SIZE);
+		painter->drawPolygon(_cross);
+	}
+	else if (_shape == DIAMOND) {
+
+		QPolygonF _diamond = diamond(_position, PASSENGER_SIZE);
+		painter->drawPolygon(_diamond);
 	}
 
 }

@@ -90,7 +90,6 @@ void Game::reset() {
 	_passengerTimer.stop();
 	_passengersInOutTimer.stop();
 
-
 	for (auto& s : _stationsVec)
 		delete s;
 	_stationsVec.clear();
@@ -292,6 +291,8 @@ void Game::start() {
 			AI::instance()->addStation();
 			AI::instance()->update();
 		}
+
+		_stationsVec.front()->resetUniqueStations();
 
 		for (int i = 0; i < MAX_LINES; i++) {
 			Line* tmp = 0;
@@ -845,7 +846,7 @@ void Game::write(QJsonObject& json) const{
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
-	if (e->key() == Qt::Key_R && _state == RUNNING) {
+	if (e->key() == Qt::Key_R && _state == RUNNING || _state == PAUSED) {
 
 		reset();
 		init();
@@ -857,7 +858,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 		start();
 	}
 
-	if (e->key() == Qt::Key_P) {
+	if (e->key() == Qt::Key_P && _state == RUNNING || _state == PAUSED) {
 
 		togglePause();
 	}
