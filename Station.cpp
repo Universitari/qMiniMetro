@@ -6,6 +6,7 @@ bool Station::_uniqueStations[5] = { 0, 0, 0, 0, 0 };
 Station::Station(QPoint pos, int index, int shape) {
 
 	_position = pos;
+	_deathTimer = 0;
 
 	if (shape == -1) {
 		int randomShape = 1 + rand() % 100;
@@ -90,6 +91,22 @@ void Station::paint(QPainter* painter,
 		QPolygonF _diamond = diamond(_position, STATION_SIZE);
 		painter->drawPolygon(_diamond);
 	}
+
+	// Progress bar for death
+	if (_deathTimer) {
+
+		pen.setColor(QColor(0, 0, 0));
+		pen.setWidth(8);
+		painter->setBrush(QBrush(QColor(0, 0, 0)));
+		painter->setPen(pen);
+
+		float increment = STATION_SIZE * (_deathTimer->interval() - _deathTimer->remainingTime()) / _deathTimer->interval();
+
+		painter->drawLine(QPointF(_position.x(), _position.y() + STATION_SIZE + 10),
+						  QPointF(_position.x() + increment, _position.y() + STATION_SIZE + 10));
+
+	}
+
 }
 
 QRectF Station::boundingRect() const{
@@ -144,6 +161,26 @@ bool Station::pointerOnStation(QPoint pointerPos) {
 		return true;
 	else
 		return false;
+}
+
+void Station::addPassenger(){
+
+	_currentPass++;
+
+	if (_currentPass == MAX_PASS_STATION && _deathTimer == 0) {
+
+		_deathTimer = new QTimer;
+		_deathTimer->setInterval(DEATH_TIME * 1000);
+		_deathTimer->setTimerType(Qt::PreciseTimer);
+		_deathTimer->setSingleShot(true);
+		_deathTimer->start();
+		QObject::connect(_deathTimer, SIGNAL(timeout()), Game::instance(), SLOT(death()));
+	} else
+		if (_currentPass < MAX_PASS_STATION && _deathTimer != 0) {
+			//_deathTimer->stop();
+			delete _deathTimer;
+			_deathTimer = 0;
+		}
 }
 
 int Station::uniqueShape(){

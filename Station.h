@@ -20,6 +20,7 @@ private:
 	unsigned int _currentPass;
 	Shape _shape;
 	int _index;
+	QTimer* _deathTimer;
 
 public:
 
@@ -51,7 +52,7 @@ public:
 
 	// Utility
 	bool pointerOnStation(QPoint pointerPos);
-	void addPassenger() { _currentPass++; }
+	void addPassenger();
 	void removePassengers() { _currentPass = 0; }
 	int uniqueShape();
 	void resetUniqueStations();

@@ -5,7 +5,7 @@ Button::Button(int index) {
 
 	_index = index;
 	_addingTrain = false;
-	_mousePos = QPoint(WINDOW_WIDTH - 60, MENU_HEIGHT);
+	_mousePos = QPoint(WINDOW_WIDTH / 2 + (floor(MAX_LINES / 2) - _index) * (-BUTTONS_SPACING - BUTTON_SIZE), MENU_HEIGHT);;
 
 	switch (_index) {
 	case(-1):
@@ -107,5 +107,5 @@ void Button::mouseReleaseEvent(QGraphicsSceneMouseEvent* e){
 	Game::instance()->addTrain(QRect(_mousePos.x() - TRAIN_HEIGHT / 2, _mousePos.y() - TRAIN_WIDTH / 2, TRAIN_HEIGHT, TRAIN_WIDTH));
 
 	_addingTrain = false;
-	_mousePos = QPoint(WINDOW_WIDTH - 60, MENU_HEIGHT);
+	_mousePos = QPoint(WINDOW_WIDTH / 2 + (floor(MAX_LINES / 2) - _index) * (-BUTTONS_SPACING - BUTTON_SIZE), MENU_HEIGHT);;
 }

@@ -127,8 +127,8 @@ void Game::reset() {
 
 	_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
 
-	_stationsTimer.setInterval(1000);
-	_passengerTimer.setInterval(500);
+	_stationsTimer.setInterval(STATIONSPAWNTIME*1000);
+	_passengerTimer.setInterval(PASSENGERSSPAWNTIME*1000);
 	_passengersInOutTimer.setInterval(500);
 	_state = READY;
 	_fpsMultiplier = 1;
@@ -177,7 +177,6 @@ void Game::advance() {
 			else
 				t->advance();
 		}
-
 
 	// Passengers get on trains
 	for (auto& t : _trainsVec) {
@@ -711,6 +710,25 @@ void Game::togglePause(){
 
 }
 
+void Game::death(){
+
+	_engine.stop();
+	_passengerTimer.stop();
+	_stationsTimer.stop();
+	_passengersInOutTimer.stop();
+
+	QGraphicsTextItem* uDead = new QGraphicsTextItem("YOU DIED");
+	QFont font;
+	font.setFamily("Comfortaa");
+	font.setPointSizeF(64);
+	uDead->setFont(font);
+	uDead->setPos(200, 200);
+
+	_scene->addItem(uDead);
+	
+
+}
+
 bool Game::loadGame() {
 
 	start();
@@ -846,7 +864,7 @@ void Game::write(QJsonObject& json) const{
 void Game::keyPressEvent(QKeyEvent* e){
 
 	// resets game
-	if (e->key() == Qt::Key_R && _state == RUNNING || _state == PAUSED) {
+	if (e->key() == Qt::Key_R && (_state == RUNNING || _state == PAUSED)) {
 
 		reset();
 		init();
@@ -858,7 +876,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 		start();
 	}
 
-	if (e->key() == Qt::Key_P && _state == RUNNING || _state == PAUSED) {
+	if (e->key() == Qt::Key_P && (_state == RUNNING || _state == PAUSED)) {
 
 		togglePause();
 	}
@@ -874,6 +892,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 					<< t->lineIndex() << "\n";
 
 	}
+
 	if (e->key() == Qt::Key_D && DEBUG) {
 
 			printf("------------ Debug Commands ------------\n");
@@ -913,9 +932,9 @@ void Game::keyPressEvent(QKeyEvent* e){
 		if (1000 / (GAME_FPS * _fpsMultiplier - 0.1) >= 0) {
 			_fpsMultiplier -= 0.1;
 			_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
-			_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
+			_passengerTimer.setInterval((PASSENGERSSPAWNTIME*1000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
 			_passengersInOutTimer.setInterval(500 / _fpsMultiplier);
-			_stationsTimer.setInterval(10000 / _fpsMultiplier);
+			_stationsTimer.setInterval(STATIONSPAWNTIME*1000 / _fpsMultiplier);
 
 		}
 	}
@@ -924,9 +943,9 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 		_fpsMultiplier += 0.1;
 		_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
-		_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
+		_passengerTimer.setInterval((PASSENGERSSPAWNTIME * 1000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
 		_passengersInOutTimer.setInterval(500 / _fpsMultiplier);
-		_stationsTimer.setInterval(10000 / _fpsMultiplier);
+		_stationsTimer.setInterval(STATIONSPAWNTIME * 1000 / _fpsMultiplier);
 
 	}
 
@@ -934,9 +953,9 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 		_fpsMultiplier = 1;
 		_engine.setInterval(1000 / (GAME_FPS * _fpsMultiplier));
-		_passengerTimer.setInterval((2000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
+		_passengerTimer.setInterval((PASSENGERSSPAWNTIME * 1000 / (sqrt(_stationsNumber) * _fpsMultiplier)) + ((rand() % 3) - 1) * (rand() % 100));
 		_passengersInOutTimer.setInterval(500 / _fpsMultiplier);
-		_stationsTimer.setInterval(10000 / _fpsMultiplier);
+		_stationsTimer.setInterval(STATIONSPAWNTIME * 1000 / _fpsMultiplier);
 
 	}
 }

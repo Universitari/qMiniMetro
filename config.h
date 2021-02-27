@@ -14,6 +14,10 @@ const int MAX_LINES = 7;
 const int MAX_TRAINS = 20;
 const int MAX_PASS_STATION = 10;
 
+const float PASSENGERSSPAWNTIME = 2;
+const int STATIONSPAWNTIME = 5;
+const int DEATH_TIME = 20;
+
 const int LINE_WIDTH = 10;
 const int STATION_SIZE = 30;
 const int STATION_GRID = 45;

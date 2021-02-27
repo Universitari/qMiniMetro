@@ -36,7 +36,6 @@ private:
 	QTimer _stationsTimer;
 	QTimer _passengersInOutTimer;
 	game_state _state;
-	//bool _debug;
 	float _fpsMultiplier;
 
 	bool _mousePressed = false;
@@ -112,6 +111,8 @@ public slots:
 	void exitGame() { QApplication::quit();}
 	// Pauses and resumes gameplay
 	void togglePause();
+	// YOU DIED
+	void death();
 
 	// Savegame functions
 	bool loadGame();
