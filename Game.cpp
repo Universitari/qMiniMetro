@@ -265,7 +265,7 @@ void Game::start() {
 
 		_saveButton = new QPushButton;
 		_saveButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
-									   "QPushButton:hover{}" });
+									 "QPushButton:pressed{border-image: url(:/Graphics/backToMenu.png);}"});
 		_saveButton->setIcon(QPixmap(":/Graphics/saveIcon.png"));
 		_saveButton->setIconSize(QSize(45, 45));
 		_saveButton->setGeometry(1860, 75, 45, 45);
@@ -644,10 +644,11 @@ void Game::addTrain(QRect rect){
 
 bool Game::availableTrains(){
 
-	if (_trainsVec.at(MAX_TRAINS - 1) == 0)
-		return true;
-	else 
-		return false;
+	for(auto& t : _trainsVec)
+		if(t == 0)
+			return true;
+
+	return false;
 }
 
 void Game::updatePassengersDestinations(){
