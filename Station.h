@@ -10,7 +10,7 @@
 
 class Station : public Object {
 
-	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR, PENTAGON, RHOMBUS, CROSS, DIAMOND};
+	enum Shape { CIRCLE, TRIANGLE, SQUARE, STAR, PENTAGON, RHOMBUS, CROSS, DIAMOND };
 
 private:
 
@@ -27,6 +27,7 @@ public:
 
 	Station(QPoint pos, int index, int shape = -1);
 	Station(const Station& s);
+	~Station();
 
 	// Metodi virtuali reimplementati
 	void paint(QPainter* painter,

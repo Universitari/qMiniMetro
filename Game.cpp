@@ -833,6 +833,7 @@ void Game::death(){
 	dialog.exec();
 
 	QString playerName = dialog.textValue();
+	playerName.truncate(20);
 	_scoreboard.insert(std::pair<int, QString>(_score, playerName));
 	saveScoreboard();
 
@@ -843,19 +844,21 @@ void Game::death(){
 
 void Game::showScoreboard(){
 
-	QString a;
+	QString list;
+	std::map<int, QString>::reverse_iterator iter = _scoreboard.rbegin();
 
-	for (auto& s : _scoreboard) {
-		a.append(s.second);
-		a.append(QString(" "));
-		a.append(QString("%5").arg(s.first));
-		a.append(QString("\n"));
+	for (iter; iter != _scoreboard.rend(); iter++) {
+
+		list.append((*iter).second);
+		list.append(QString("   "));
+		list.append(QString("%5").arg((*iter).first));
+		list.append(QString("\n"));
 	}
 
 	QMessageBox msgBox;
-	//msgBox.setStyleSheet({ "min-width: 50px; min-height: 100px;" });
+	msgBox.setStyleSheet("QLabel{ min-width: 200px; min-height: 30px; font-size: 14px; }");
 	msgBox.setText("Scoreboard");
-	msgBox.setInformativeText(a);
+	msgBox.setInformativeText(list);
 	msgBox.exec();
 
 }

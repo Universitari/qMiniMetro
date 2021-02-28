@@ -35,6 +35,13 @@ Station::Station(const Station& s) {
 	_shape = s._shape;
 }
 
+Station::~Station(){
+
+	if(_deathTimer)
+		delete _deathTimer;
+
+}
+
 void Station::paint(QPainter* painter,
 	const QStyleOptionGraphicsItem* option,
 	QWidget* widget) {

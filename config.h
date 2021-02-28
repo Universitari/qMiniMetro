@@ -1,6 +1,6 @@
 #pragma once
 
-const bool DEBUG = true;
+const bool DEBUG = false;
 
 const int GAME_FPS = 120;
 const float GAME_SCALE = 0.8;
@@ -11,13 +11,13 @@ const int WINDOW_HEIGHT = 1080;
 
 const int MAX_STATIONS = 30;
 const int MAX_LINES = 7;
-const int MAX_TRAINS = 20;
+const int MAX_TRAINS = 12;
 const int MAX_PASS_STATION = 10;
 const int MAX_UNIQUE_STATIONS = 4;
 
-const float PASSENGERSSPAWNTIME = 0.1;
-const float STATIONSPAWNTIME = 20;
-const int DEATH_TIME = 5;
+const float PASSENGERSSPAWNTIME = 3;
+const float STATIONSPAWNTIME = 30;
+const int DEATH_TIME = 20;
 
 const int LINE_WIDTH = 10;
 const int STATION_SIZE = 30;
