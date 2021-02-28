@@ -24,6 +24,8 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	//showFullScreen();
 
+	loadScoreboard();
+
 	_state = RUNNING;
 	this->reset();
 	
@@ -62,6 +64,7 @@ void Game::init() {
 		QPushButton* _newGameButton = new QPushButton("New Game");
 		QPushButton* _continueButton = new QPushButton("Continue");
 		QPushButton* _exitButton = new QPushButton("Exit");
+		QPushButton* _scoreboardButton = new QPushButton;
 
 		_newGameButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
 									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
@@ -69,18 +72,25 @@ void Game::init() {
 									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
 		_exitButton->setStyleSheet({ "QPushButton{height: 90px; width: 300px; text-align: center; background: #538cbd; color:#f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
 									   "QPushButton:hover{color: #f0f0f0; background: #336fa2;}" });
-		
+		_scoreboardButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; border: 0px;}"
+									   "QPushButton:hover{}" });
+		_scoreboardButton->setIcon(QPixmap(":/Graphics/scoreboardIcon.png"));
+		_scoreboardButton->setIconSize(QSize(60, 60));
+
 		_newGameButton->setGeometry(840, 400, 300, 90);
 		_continueButton->setGeometry(840, 510, 300, 90);
 		_exitButton->setGeometry(840, 620, 300, 90);
+		_scoreboardButton->setGeometry(1845, 15, 60, 60);
 
 		_menuScene->addWidget(_newGameButton);
 		_menuScene->addWidget(_continueButton);
 		_menuScene->addWidget(_exitButton);
-
+		_menuScene->addWidget(_scoreboardButton);
+		
 		QObject::connect(_newGameButton, SIGNAL(clicked()), this, SLOT(start()));
 		QObject::connect(_continueButton, SIGNAL(clicked()), this, SLOT(loadGame()));
 		QObject::connect(_exitButton, SIGNAL(clicked()), this, SLOT(exitGame()));
+		QObject::connect(_scoreboardButton, SIGNAL(clicked()), this, SLOT(showScoreboard()));
 
 	}
 }
@@ -113,7 +123,6 @@ void Game::reset() {
 		_passengersVec.clear();
 
 		AI::instance()->clearGraph();
-
 		AI::instance()->clearBigGraph();
 
 		if (_scoreText)
@@ -690,6 +699,71 @@ bool Game::directLineOnTrainDeletion(int lineIndex, int trainIndex){
 	return false;
 }
 
+bool Game::loadScoreboard(){
+
+	QFile loadFile(QStringLiteral("scoreboard.json"));
+
+	if (!loadFile.open(QIODevice::ReadOnly)) {
+		qWarning("Couldn't open save file.");
+		return false;
+	}
+
+	QByteArray scoreboardData = loadFile.readAll();
+	QJsonDocument loadDoc(QJsonDocument::fromJson(scoreboardData));
+	QJsonObject scoreboardObj = loadDoc.object();
+
+	if (scoreboardObj.contains("Scoreboard") && scoreboardObj["Scoreboard"].isArray()) {
+		QJsonArray scoreboardArray = scoreboardObj["Scoreboard"].toArray();
+
+		for (int i = 0; i < scoreboardArray.size(); i++) {
+			if (scoreboardArray[i].isObject()) {
+				
+				QJsonObject scoreObj = scoreboardArray[i].toObject();
+
+				QString playerName;
+				int playerScore;
+
+				if (scoreObj.contains("Player name") && scoreObj["Player name"].isString())
+					playerName = scoreObj["Player name"].toString();
+				if (scoreObj.contains("Score") && scoreObj["Score"].isDouble())
+					playerScore = scoreObj["Score"].toInt();
+
+				_scoreboard.insert(std::pair<int, QString>(playerScore, playerName));
+			}
+
+		}
+			
+	}
+
+}
+
+bool Game::saveScoreboard(){
+
+	QFile saveFile(QStringLiteral("scoreboard.json"));
+
+	if (!saveFile.open(QIODevice::WriteOnly)) {
+		qWarning("Couldn't open save file.");
+		return false;
+	}
+
+	QJsonObject gameObject;
+	QJsonArray scoreboardArray;
+
+	for (auto& s : _scoreboard) {
+
+		QJsonObject scoreObj;
+		scoreObj["Player name"] = s.second;
+		scoreObj["Score"] = s.first;
+
+		scoreboardArray.append(scoreObj);
+	}
+	gameObject["Scoreboard"] = scoreboardArray;
+
+	saveFile.write(QJsonDocument(gameObject).toJson());
+	return true;
+
+}
+
 void Game::togglePause(){
 
 	if (_state == RUNNING) {
@@ -751,13 +825,38 @@ void Game::death(){
 	uDead->setZValue(10);
 
 	_scene->addItem(uDead);
-	
-	QString playerName = QInputDialog::getText(this, "Insert player name", "Name: ");
 
-	
+	QInputDialog dialog;
+	dialog.setFixedSize(300, 200);
+	dialog.setWindowTitle("Insert player name");
+	dialog.setLabelText("Name: ");
+	dialog.exec();
+
+	QString playerName = dialog.textValue();
+	_scoreboard.insert(std::pair<int, QString>(_score, playerName));
+	saveScoreboard();
+
 	_state = RUNNING;
 	reset();
 
+}
+
+void Game::showScoreboard(){
+
+	QString a;
+
+	for (auto& s : _scoreboard) {
+		a.append(s.second);
+		a.append(QString(" "));
+		a.append(QString("%5").arg(s.first));
+		a.append(QString("\n"));
+	}
+
+	QMessageBox msgBox;
+	//msgBox.setStyleSheet({ "min-width: 50px; min-height: 100px;" });
+	msgBox.setText("Scoreboard");
+	msgBox.setInformativeText(a);
+	msgBox.exec();
 
 }
 

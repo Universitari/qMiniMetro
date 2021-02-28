@@ -96,17 +96,20 @@ void Station::paint(QPainter* painter,
 	// Progress bar for death
 	if (_deathTimer) {
 
-		pen.setColor(QColor(0, 0, 0));
-		pen.setWidth(8);
-		painter->setBrush(QBrush(QColor(0, 0, 0)));
-		painter->setPen(pen);
-
-		float increment;
+		int increment;
 		if (_deathTimerRemainingTime == 0)
 			increment = STATION_SIZE * (DEATH_TIME*1000 - _deathTimer->remainingTime()) / (DEATH_TIME * 1000);
 		else
 			increment = STATION_SIZE * (DEATH_TIME*1000 - _deathTimerRemainingTime) / (DEATH_TIME * 1000);
 
+		pen.setWidth(2);
+		pen.setColor(QColor(0, 0, 0));
+		painter->setPen(pen);
+		painter->drawRect(_position.x() - 4, _position.y() + STATION_SIZE + 6, STATION_SIZE + 8, 8);
+
+		pen.setColor(QColor(150, 0, 0));
+		pen.setWidth(6);
+		painter->setPen(pen);
 
 		painter->drawLine(QPointF(_position.x(), _position.y() + STATION_SIZE + 10),
 						  QPointF(_position.x() + increment, _position.y() + STATION_SIZE + 10));

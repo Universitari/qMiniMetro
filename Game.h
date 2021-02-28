@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QFont>
 #include <QInputDialog>
+#include <QMessageBox>
 #include "Station.h"
 #include "Line.h"
 #include "Button.h"
@@ -38,6 +39,7 @@ private:
 	QTimer _passengersInOutTimer;
 	game_state _state;
 	float _fpsMultiplier;
+	std::map<int, QString> _scoreboard;
 
 	bool _mousePressed = false;
 	int _stationsNumber = -1;
@@ -80,6 +82,8 @@ public:
 	void updatePassengersDestinations();
 	bool acceptableStation(Train* t, Passenger* p);
 	bool directLineOnTrainDeletion(int lineIndex, int trainIndex);
+	bool loadScoreboard();
+	bool saveScoreboard();
 
 	// Getters
 	Station* station(int index) { return _stationsVec.at(index); }
@@ -109,11 +113,13 @@ public slots:
 	// Passengers move from and to the stations
 	void passengersInOut();
 	// Quits the game
-	void exitGame() { QApplication::quit();}
+	void exitGame() { QApplication::quit(); }
 	// Pauses and resumes gameplay
 	void togglePause();
 	// YOU DIED
 	void death();
+	// Shows the scoreboard
+	void showScoreboard();
 
 	// Savegame functions
 	bool loadGame();

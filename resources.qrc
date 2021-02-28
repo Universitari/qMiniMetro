@@ -10,5 +10,6 @@
 	<file>Graphics/playButton.png</file>
 	<file>Graphics/trashBin.png</file>
 	<file>Graphics/backToMenu.png</file>
+	<file>Graphics/scoreboardIcon.png</file>
 </qresource>
 </RCC>
