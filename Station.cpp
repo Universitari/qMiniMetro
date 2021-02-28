@@ -22,6 +22,7 @@ Station::Station(QPoint pos, int index, int shape) {
 	else
 		_shape = Shape(shape);
 
+	_deathTimerRemainingTime = 0;
 	_index = index;
 	_currentPass = 0;
 	setZValue(4);
@@ -100,7 +101,12 @@ void Station::paint(QPainter* painter,
 		painter->setBrush(QBrush(QColor(0, 0, 0)));
 		painter->setPen(pen);
 
-		float increment = STATION_SIZE * (_deathTimer->interval() - _deathTimer->remainingTime()) / _deathTimer->interval();
+		float increment;
+		if (_deathTimerRemainingTime == 0)
+			increment = STATION_SIZE * (DEATH_TIME*1000 - _deathTimer->remainingTime()) / (DEATH_TIME * 1000);
+		else
+			increment = STATION_SIZE * (DEATH_TIME*1000 - _deathTimerRemainingTime) / (DEATH_TIME * 1000);
+
 
 		painter->drawLine(QPointF(_position.x(), _position.y() + STATION_SIZE + 10),
 						  QPointF(_position.x() + increment, _position.y() + STATION_SIZE + 10));
@@ -187,6 +193,13 @@ int Station::uniqueShape(){
 
 	int x;
 
+	for (auto& s : _uniqueStations)
+		if (s)
+			x++;
+
+	if (x >= MAX_UNIQUE_STATIONS)
+		return(rand() % 3);
+
 	do {
 		x = rand() % 5;
 	} while (_uniqueStations[x]);
@@ -200,4 +213,24 @@ void Station::resetUniqueStations(){
 
 	for (int i = 0; i < 5; i++)
 		_uniqueStations[i] = false;
+}
+
+void Station::pauseDeathTimer(){
+
+	if (_deathTimer) {
+		_deathTimerRemainingTime = _deathTimer->remainingTime();
+		_deathTimer->stop();
+	}
+
+}
+
+void Station::resumeDeathTimer(){
+
+	if (_deathTimer) {
+		_deathTimer->setInterval(_deathTimerRemainingTime);
+		_deathTimer->start();
+	}
+
+	_deathTimerRemainingTime = 0;
+
 }

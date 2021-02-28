@@ -10,6 +10,7 @@
 #include <iostream>
 #include <QApplication>
 #include <QFont>
+#include <QInputDialog>
 #include "Station.h"
 #include "Line.h"
 #include "Button.h"

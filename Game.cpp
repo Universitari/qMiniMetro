@@ -24,6 +24,7 @@ Game::Game(QGraphicsView* parent) : QGraphicsView(parent) {
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	//showFullScreen();
 
+	_state = RUNNING;
 	this->reset();
 	
 	scale(GAME_SCALE, GAME_SCALE);
@@ -86,54 +87,56 @@ void Game::init() {
 
 void Game::reset() {
 
-	_stationsTimer.stop();
-	_passengerTimer.stop();
-	_passengersInOutTimer.stop();
+	if (_state == RUNNING || _state == PAUSED) {
+		_stationsTimer.stop();
+		_passengerTimer.stop();
+		_passengersInOutTimer.stop();
 
-	for (auto& s : _stationsVec)
-		delete s;
-	_stationsVec.clear();
+		for (auto& s : _stationsVec)
+			delete s;
+		_stationsVec.clear();
 
-	for (auto& l : _linesVec)
-		delete l;
-	_linesVec.clear();
+		for (auto& l : _linesVec)
+			delete l;
+		_linesVec.clear();
 
-	for (auto& b : _deleteButtons)
-		delete b;
-	_deleteButtons.clear();
+		for (auto& b : _deleteButtons)
+			delete b;
+		_deleteButtons.clear();
 
-	for (auto& t : _trainsVec)
-		delete t;
-	_trainsVec.clear();
+		for (auto& t : _trainsVec)
+			delete t;
+		_trainsVec.clear();
 
-	for (auto& p : _passengersVec)
-		delete p;
-	_passengersVec.clear();
+		for (auto& p : _passengersVec)
+			delete p;
+		_passengersVec.clear();
 
-	AI::instance()->clearGraph();
+		AI::instance()->clearGraph();
 
-	AI::instance()->clearBigGraph();
+		AI::instance()->clearBigGraph();
 
-	if(_scoreText)
-		delete _scoreText;
+		if (_scoreText)
+			delete _scoreText;
 
-	_stationsNumber = -1;
-	_activeStation = -1;
-	_activeLine = -1;
-	_score = 0;
+		_stationsNumber = -1;
+		_activeStation = -1;
+		_activeLine = -1;
+		_score = 0;
 
-	_engine.setInterval(1000 / GAME_FPS);
-	_engine.setTimerType(Qt::PreciseTimer);
+		_engine.setInterval(1000 / GAME_FPS);
+		_engine.setTimerType(Qt::PreciseTimer);
 
-	_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
+		_passengersInOutTimer.setTimerType(Qt::PreciseTimer);
 
-	_stationsTimer.setInterval(STATIONSPAWNTIME*1000);
-	_passengerTimer.setInterval(PASSENGERSSPAWNTIME*1000);
-	_passengersInOutTimer.setInterval(500);
-	_state = READY;
-	_fpsMultiplier = 1;
+		_stationsTimer.setInterval(STATIONSPAWNTIME * 1000);
+		_passengerTimer.setInterval(PASSENGERSSPAWNTIME * 1000);
+		_passengersInOutTimer.setInterval(500);
+		_state = READY;
+		_fpsMultiplier = 1;
 
-	this->init();
+		this->init();
+	}
 }
 
 void Game::advance() {
@@ -240,6 +243,7 @@ void Game::start() {
 		_scoreText->setFont(font);
 		_scoreText->setPlainText(QString("Score: ") + QString::number(_score));
 		_scoreText->setPos(15, 0);
+		_scoreText->setZValue(11);
 		_scene->addItem(_scoreText);
 
 		_backToMenuButton = new QPushButton;
@@ -419,8 +423,6 @@ void Game::passengersInOut(){
 }
 
 void Game::spawnPassenger(){
-
-	srand(time(NULL));
 
 	for (auto& s : _stationsVec) {
 		
@@ -691,20 +693,30 @@ bool Game::directLineOnTrainDeletion(int lineIndex, int trainIndex){
 void Game::togglePause(){
 
 	if (_state == RUNNING) {
+
 		_state = PAUSED;
 		_engine.stop();
 		_passengerTimer.stop();
 		_stationsTimer.stop();
 		_passengersInOutTimer.stop();
+
+		for (auto& s : _stationsVec)
+			s->pauseDeathTimer();
+
 		_pauseButton->setIcon(QPixmap(":/Graphics/playButton.png"));
 	}
-	else {
+	else if(_state == PAUSED) {
+
 		_state = RUNNING;
 		_engine.start();
 		_passengerTimer.start();
 		if (!(_stationsNumber >= MAX_STATIONS))
 			_stationsTimer.start();
 		_passengersInOutTimer.start();
+
+		for (auto& s : _stationsVec)
+			s->resumeDeathTimer();
+
 		_pauseButton->setIcon(QPixmap(":/Graphics/pauseButton.png"));
 	}
 
@@ -717,15 +729,35 @@ void Game::death(){
 	_stationsTimer.stop();
 	_passengersInOutTimer.stop();
 
-	QGraphicsTextItem* uDead = new QGraphicsTextItem("YOU DIED");
+	for (auto& s : _stationsVec)
+		s->pauseDeathTimer();
+
+	_state = GAME_OVER;
+
+	QGraphicsRectItem* idk = new QGraphicsRectItem(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	idk->setBrush(QBrush(QColor(255, 255, 255)));
+	idk->setOpacity(0.7);
+	idk->setZValue(9);
+	_scene->addItem(idk);
+
+	QGraphicsTextItem* uDead = new QGraphicsTextItem("YOU LOST");
 	QFont font;
 	font.setFamily("Comfortaa");
-	font.setPointSizeF(64);
+	font.setPointSizeF(100);
 	uDead->setFont(font);
-	uDead->setPos(200, 200);
+
+	QPointF pos(WINDOW_WIDTH / 2 - uDead->boundingRect().width() / 2, WINDOW_HEIGHT / 2 - uDead->boundingRect().height() / 2);
+	uDead->setPos(pos);
+	uDead->setZValue(10);
 
 	_scene->addItem(uDead);
 	
+	QString playerName = QInputDialog::getText(this, "Insert player name", "Name: ");
+
+	
+	_state = RUNNING;
+	reset();
+
 
 }
 
@@ -748,17 +780,21 @@ bool Game::loadGame() {
 
 bool Game::saveGame() const {
 
-	QFile saveFile(QStringLiteral("save.json"));
+	if (_state == RUNNING || _state == PAUSED) {
+		QFile saveFile(QStringLiteral("save.json"));
 
-	if (!saveFile.open(QIODevice::WriteOnly)) {
-		qWarning("Couldn't open save file.");
-		return false;
+		if (!saveFile.open(QIODevice::WriteOnly)) {
+			qWarning("Couldn't open save file.");
+			return false;
+		}
+
+		QJsonObject gameObject;
+		write(gameObject);
+		saveFile.write(QJsonDocument(gameObject).toJson());
+		return true;
 	}
-
-	QJsonObject gameObject;
-	write(gameObject);
-	saveFile.write(QJsonDocument(gameObject).toJson());
-	return true;
+	else
+		return false;
 }
 
 void Game::read(const QJsonObject& json){
@@ -962,7 +998,7 @@ void Game::keyPressEvent(QKeyEvent* e){
 
 void Game::mousePressEvent(QMouseEvent* e){
 
-	if (!_mousePressed) {
+	if (!_mousePressed && _state != GAME_OVER) {
 
 		// Delete train
 		for (auto& t : _trainsVec) {
@@ -1047,10 +1083,10 @@ void Game::mousePressEvent(QMouseEvent* e){
 void Game::mouseMoveEvent(QMouseEvent* e){
 	
 	// Train moves with the cursor
-	if (_activeTrain != -1)
+	if (_activeTrain != -1 && _state != GAME_OVER)
 		_trainsVec.at(_activeTrain)->setTrainPosition(QPoint(e->pos().x()/ GAME_SCALE, e->pos().y()/ GAME_SCALE));
 
-	if (_mousePressed) {
+	if (_mousePressed && _state != GAME_OVER) {
 
 		QPoint currentPoint(e->pos().x() / GAME_SCALE,
 							e->pos().y() / GAME_SCALE);
@@ -1134,7 +1170,7 @@ void Game::mouseMoveEvent(QMouseEvent* e){
 
 void Game::mouseReleaseEvent(QMouseEvent* e){ 
 
-	if (_activeTrain != -1) {
+	if (_activeTrain != -1 && _state != GAME_OVER) {
 		if(_trainsVec.at(_activeTrain)->collidesWithItem(_trashBin))
 			_trainsVec.at(_activeTrain)->setDeleting(true);
 		_trainsVec.at(_activeTrain)->resetPos();

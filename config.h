@@ -13,9 +13,10 @@ const int MAX_STATIONS = 30;
 const int MAX_LINES = 7;
 const int MAX_TRAINS = 20;
 const int MAX_PASS_STATION = 10;
+const int MAX_UNIQUE_STATIONS = 4;
 
-const float PASSENGERSSPAWNTIME = 2;
-const int STATIONSPAWNTIME = 5;
+const float PASSENGERSSPAWNTIME = 3;
+const float STATIONSPAWNTIME = 20;
 const int DEATH_TIME = 20;
 
 const int LINE_WIDTH = 10;

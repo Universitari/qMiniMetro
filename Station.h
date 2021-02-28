@@ -21,6 +21,7 @@ private:
 	Shape _shape;
 	int _index;
 	QTimer* _deathTimer;
+	int _deathTimerRemainingTime;
 
 public:
 
@@ -56,4 +57,6 @@ public:
 	void removePassengers() { _currentPass = 0; }
 	int uniqueShape();
 	void resetUniqueStations();
+	void pauseDeathTimer();
+	void resumeDeathTimer();
 };
