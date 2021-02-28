@@ -28,11 +28,7 @@ public:
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 	QRectF boundingRect() const;
-	std::string name() { return("button"); };
-	void animate() { }
 	void advance() { }
-	void solveCollisions() { }
-	void hit(Object* what) { }
 
 	// Event Handling
 	void mousePressEvent(QGraphicsSceneMouseEvent* e);

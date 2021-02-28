@@ -34,11 +34,7 @@ public:
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 	QRectF boundingRect() const;
-	std::string name() { return("stazione"); };
-	void animate() { }
 	void advance() { }
-	void solveCollisions() { }
-	void hit(Object* what) { }
 
 	// Savegame functions
 	void read(const QJsonObject& json);

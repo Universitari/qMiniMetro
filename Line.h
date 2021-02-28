@@ -41,12 +41,8 @@ public:
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 	QRectF boundingRect() const;
-	std::string name() { return "Linea"; }
-	int nome() { return int(_name); }
-	void animate() {}
+	int name() { return int(_name); }
 	void advance() {}
-	void solveCollisions() {}
-	void hit(Object* what) {}
 
 	// Savegame functions
 	void read(const QJsonObject& json);

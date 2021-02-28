@@ -12,10 +12,25 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # aggiungo eseguibile
-add_executable(qMiniMetro ${my_sources})
+add_executable(qMiniMetro WIN32 main.cpp ${my_sources})
 
 # verifico l'esistenza delle librerie Qt necessarie
 find_package(Qt5Widgets REQUIRED)
 
 # collego le librerie Qt con l'eseguibile
 target_link_libraries(qMiniMetro Qt5::Widgets)
+
+# installo l'eseguibile in "bin"
+
+install (TARGETS qMiniMetro DESTINATION bin)
+
+# creo un pacchetto di installazione v0.1.0
+
+set (CPACK GENERATOR "TGZ")
+
+set (CPACK PACKAGE VERSION MAJOR 0 )
+set (CPACK PACKAGE VERSION MINOR 1 )
+set (CPACK PACKAGE VERSION PATCH 2 )
+
+include (CPack )
+

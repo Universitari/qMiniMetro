@@ -16,7 +16,7 @@ Line::Line(QPoint startP, int index) {
 
 Line::~Line(){
 
-    printf("cancellata linea %d\n", int(_name));
+   // printf("cancellata linea %d\n", int(_name));
 
 }
 

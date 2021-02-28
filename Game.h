@@ -39,7 +39,7 @@ private:
 	QTimer _passengersInOutTimer;
 	game_state _state;
 	float _fpsMultiplier;
-	std::map<int, QString> _scoreboard;
+	std::vector<std::pair<int, QString>> _scoreboard;
 
 	bool _mousePressed = false;
 	int _stationsNumber = -1;

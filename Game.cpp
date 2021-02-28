@@ -170,7 +170,7 @@ void Game::advance() {
 								t = 0;
 							}
 
-					AI::instance()->deleteGraphLine(l->nome());
+					AI::instance()->deleteGraphLine(l->name());
 					_scene->removeItem(l);
 					l = 0;
 				}
@@ -265,7 +265,7 @@ void Game::start() {
 
 		_saveButton = new QPushButton;
 		_saveButton->setStyleSheet({ "QPushButton{height: 60px; width: 60px; text-align: center; background: #f0f0f0; color: #f0f0f0; font-family:'Comfortaa'; font-size:40px; font-weight: bold; border: 0px;}"
-									 "QPushButton:pressed{border-image: url(:/Graphics/backToMenu.png);}"});
+									 "QPushButton:pressed{border-image: url(:/Graphics/checkIcon.png)}"});
 		_saveButton->setIcon(QPixmap(":/Graphics/saveIcon.png"));
 		_saveButton->setIconSize(QSize(45, 45));
 		_saveButton->setGeometry(1860, 75, 45, 45);
@@ -325,7 +325,7 @@ void Game::start() {
 		_stationsTimer.start();
 		_passengersInOutTimer.start();
 		_state = RUNNING;
-		printf("Game started\n");
+		//printf("Game started\n");
 	}
 }
 
@@ -702,10 +702,13 @@ bool Game::directLineOnTrainDeletion(int lineIndex, int trainIndex){
 
 bool Game::loadScoreboard(){
 
-	QFile loadFile(QStringLiteral("scoreboard.json"));
+	QString path = qApp->applicationDirPath();
+	path.append("/scoreboard.json");
+
+	QFile loadFile(path);
 
 	if (!loadFile.open(QIODevice::ReadOnly)) {
-		qWarning("Couldn't open save file.");
+		qWarning("Couldn't open scoreboard file.");
 		return false;
 	}
 
@@ -729,7 +732,7 @@ bool Game::loadScoreboard(){
 				if (scoreObj.contains("Score") && scoreObj["Score"].isDouble())
 					playerScore = scoreObj["Score"].toInt();
 
-				_scoreboard.insert(std::pair<int, QString>(playerScore, playerName));
+				_scoreboard.push_back(std::pair<int, QString>(playerScore, playerName));
 			}
 
 		}
@@ -740,23 +743,31 @@ bool Game::loadScoreboard(){
 
 bool Game::saveScoreboard(){
 
-	QFile saveFile(QStringLiteral("scoreboard.json"));
+	QString path = qApp->applicationDirPath();
+	path.append("/scoreboard.json");
+
+	QFile saveFile(path);
 
 	if (!saveFile.open(QIODevice::WriteOnly)) {
-		qWarning("Couldn't open save file.");
+		qWarning("Couldn't open scoreboard file.");
 		return false;
 	}
 
 	QJsonObject gameObject;
 	QJsonArray scoreboardArray;
 
-	for (auto& s : _scoreboard) {
+	std::vector<std::pair<int, QString>>::reverse_iterator iter = _scoreboard.rbegin();
+
+	for (iter; iter != _scoreboard.rend(); iter++) {
 
 		QJsonObject scoreObj;
-		scoreObj["Player name"] = s.second;
-		scoreObj["Score"] = s.first;
+		scoreObj["Player name"] = (*iter).second;
+		scoreObj["Score"] = (*iter).first;
 
 		scoreboardArray.append(scoreObj);
+
+		if (scoreboardArray.size() >= 10)
+			break;
 	}
 	gameObject["Scoreboard"] = scoreboardArray;
 
@@ -835,7 +846,11 @@ void Game::death(){
 
 	QString playerName = dialog.textValue();
 	playerName.truncate(20);
-	_scoreboard.insert(std::pair<int, QString>(_score, playerName));
+	_scoreboard.push_back(std::pair<int, QString>(_score, playerName));
+
+	std::sort(_scoreboard.begin(), _scoreboard.end(), [](auto& left, auto& right) {
+		return left.first < right.first; });
+
 	saveScoreboard();
 
 	_state = RUNNING;
@@ -845,14 +860,18 @@ void Game::death(){
 
 void Game::showScoreboard(){
 
+	std::sort(_scoreboard.begin(), _scoreboard.end(), [](auto& left, auto& right) {
+		return left.first < right.first; });
+
 	QString list;
-	std::map<int, QString>::reverse_iterator iter = _scoreboard.rbegin();
+
+	std::vector<std::pair<int, QString>>::reverse_iterator iter = _scoreboard.rbegin();
 
 	for (iter; iter != _scoreboard.rend(); iter++) {
 
-		list.append((*iter).second);
-		list.append(QString("   "));
 		list.append(QString("%5").arg((*iter).first));
+		list.append(QString("   "));
+		list.append((*iter).second);
 		list.append(QString("\n"));
 	}
 
@@ -868,7 +887,10 @@ bool Game::loadGame() {
 
 	start();
 
-	QFile loadFile(QStringLiteral("save.json"));
+	QString path = qApp->applicationDirPath();
+	path.append("/save.json");
+
+	QFile loadFile(path);
 
 	if (!loadFile.open(QIODevice::ReadOnly)) {
 		qWarning("Couldn't open save file.");
@@ -884,7 +906,11 @@ bool Game::loadGame() {
 bool Game::saveGame() const {
 
 	if (_state == RUNNING || _state == PAUSED) {
-		QFile saveFile(QStringLiteral("save.json"));
+
+		QString path = qApp->applicationDirPath();
+		path.append("/save.json");
+
+		QFile saveFile(path);
 
 		if (!saveFile.open(QIODevice::WriteOnly)) {
 			qWarning("Couldn't open save file.");

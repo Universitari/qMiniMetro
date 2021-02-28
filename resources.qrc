@@ -11,5 +11,6 @@
 	<file>Graphics/trashBin.png</file>
 	<file>Graphics/backToMenu.png</file>
 	<file>Graphics/scoreboardIcon.png</file>
+	<file>Graphics/checkIcon.png</file>
 </qresource>
 </RCC>

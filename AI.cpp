@@ -141,10 +141,7 @@ void AI::printGraph(){
 
 void AI::setOriented(bool oriented, int firstStation, Train* train){
 
-	printf("set orientation\n");
 	if (oriented) {
-
-		printf("if oriented\n");
 
 		for (auto& l : _graph[train->lineIndex()])
 			l.clear();

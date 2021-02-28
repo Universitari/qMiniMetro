@@ -29,11 +29,7 @@ public:
 		const QStyleOptionGraphicsItem* option,
 		QWidget* widget);
 	QRectF boundingRect() const;
-	std::string name() { return "Passenger"; }
-	void animate() {}
 	void advance();
-	void solveCollisions() {}
-	void hit(Object* what) {}
 
 	// Setters
 	void setPos(QPoint pos) { _position = pos; }
